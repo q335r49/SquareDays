@@ -10,4 +10,4 @@
 /keystore
 libs/
 src/main/res/drawable/
-*.apk
+!/apk/app-release.apk
