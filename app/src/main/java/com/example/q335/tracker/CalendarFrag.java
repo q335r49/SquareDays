@@ -310,13 +310,13 @@ class CalendarRect {
             return;
         long noon = end-(end-cv.getOrig() +4611686018427360000L)%86400L+43200L;
         rectC1 = cv.conv_ts_screen(end);
-        rectC2 = cv.conv_ts_screen(end);
+        rectC2 = rectC1.clone();
         rectC2[0] += cv.getUnitWidth();
         center=cv.conv_ts_screen(noon);
         center[0] += cv.getUnitWidth()/2;
         Paint linePaint = new Paint();
-        linePaint.setStrokeWidth(width);
-        linePaint.setColor(color);
+            linePaint.setStrokeWidth(width);
+            linePaint.setColor(color);
         drawLine(rectC1,rectC2,center,linePaint,canvas);
     }
     void draw(CalendarWin cv, Canvas canvas) {

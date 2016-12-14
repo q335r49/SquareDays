@@ -32,6 +32,7 @@ import com.google.gson.reflect.TypeToken;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.lang.reflect.Type;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -49,7 +50,7 @@ public class CommandsFrag extends Fragment {
     private final static int COLOR_IX = 1;
     private final static int PALETTE_LEN = 24;
     Context context;
-    //TODO: add start and end time
+    //TODO: normalize drag for dp
     //TODO: Ruler
 
     class PaletteRing {
@@ -360,14 +361,19 @@ public class CommandsFrag extends Fragment {
                                         action_cancelled = false;
                                         ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
                                         abString = "..";
+                                        long now = System.currentTimeMillis()/1000L;
                                         if (delay > 0)
-                                            abString += " since  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60);
+                                            abString += " since  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
+                                                    + " (since " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now - delay))) + ")";
                                         else if (delay < 0)
-                                            abString += " since " + Integer.toString(-delay / 60) + ":" + String.format("%02d", -delay % 60);
+                                            abString += " since " + Integer.toString(-delay / 60) + ":" + String.format("%02d", -delay % 60)
+                                                    + " (since " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now + delay))) + ")";
                                         if (duration > 0)
-                                            abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60);
+                                            abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60)
+                                                    + " (until " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now - (long) Math.abs(delay) + duration))) + ")";
                                         else if (duration < 0)
-                                            abString += " for " + Integer.toString(-duration / 60) + ":" + String.format("%02d", -duration % 60);
+                                            abString += " for " + Integer.toString(-duration / 60) + ":" + String.format("%02d", -duration % 60)
+                                                    + " (until " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now - (long) Math.abs(delay) - duration))) + ")";
                                         ab.setTitle(abString.isEmpty()? sFinal[COMMENT_IX] : abString);
                                     }
                                 }
@@ -391,14 +397,19 @@ public class CommandsFrag extends Fragment {
                                 int duration = (int) (event.getY() - offset_0y);
                                 delay = delay > 100 ? delay - 100 : delay < -100 ? delay + 100 : 0;
                                 duration = duration > 100 ? duration - 100 : duration < -100 ? duration + 100 : 0;
+                                long now = System.currentTimeMillis()/1000L;
                                 if (delay > 0)
-                                    abString += " already " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60);
+                                    abString += " already " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
+                                            + " since " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now - delay)));
                                 else if (delay < 0)
-                                    abString += " already " + Integer.toString(-delay / 60) + ":" + String.format("%02d", -delay % 60);
+                                    abString += " already " + Integer.toString(-delay / 60) + ":" + String.format("%02d", -delay % 60)
+                                            + " since " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now + delay)));
                                 if (duration > 0)
-                                    abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60);
+                                    abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60)
+                                            + " (until " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now - (long) Math.abs(delay) + duration))) + ")";
                                 else if (duration < 0)
-                                    abString += " for " + Integer.toString(-duration / 60) + ":" + String.format("%02d", -duration % 60);
+                                    abString += " for " + Integer.toString(-duration / 60) + ":" + String.format("%02d", -duration % 60)
+                                            + " (until " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now - (long) Math.abs(delay) - duration))) + ")";
                                 start = Integer.toString((delay > 0 ? -delay : delay < 0 ? delay : 0) * 60);
                                 end = duration == 0 ? "" : Integer.toString(duration > 0 ? 60 * (delay + duration) : 60 * (delay - duration));
                             }
