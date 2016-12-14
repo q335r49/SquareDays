@@ -405,8 +405,8 @@ public class CommandsFrag extends Fragment {
                                     abString += " for " + Integer.toString(Math.abs(duration) / 60) + ":" + String.format("%02d", Math.abs(duration) % 60)
                                             + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - (long) Math.abs(delay) + 60 * Math.abs(duration)))) + ")";
                                 start = Integer.toString(-Math.abs(delay));
-                                int endNum = -Math.abs(delay) + Math.abs(duration);
-                                end = endNum == 0 ? "" : Integer.toString(endNum);
+                                int endNum = -Math.abs(delay * 60) + Math.abs(duration * 60);
+                                end = endNum == 0 ? "" : Integer.toString(endNum * 60);
                             }
                             if (ab != null)
                                 ab.setTitle(abString);
