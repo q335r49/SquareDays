@@ -1,4 +1,4 @@
-package com.example.q335.tracker;
+package com.q335.r49.squaredays;
 
 import org.junit.Test;
 

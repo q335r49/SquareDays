@@ -1,4 +1,4 @@
-package com.example.q335.tracker;
+package com.q335.r49.squaredays;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

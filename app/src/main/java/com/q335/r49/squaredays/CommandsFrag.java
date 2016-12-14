@@ -1,4 +1,4 @@
-package com.example.q335.tracker;
+package com.q335.r49.squaredays;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -351,8 +351,8 @@ public class CommandsFrag extends Fragment {
                                 } else {
                                     int delay = (int) Math.abs((event.getX() - offset_0x)*ratio_dp_px);
                                     int duration = (int) Math.abs((event.getY() - offset_0y)*ratio_dp_px);
-                                    delay = delay > 50 ? delay : 0;
-                                    duration = duration > 50 ? duration : 0;
+                                    delay = delay > 50 ? delay - 50 : 0;
+                                    duration = duration > 50 ? duration - 50 : 0;
                                     String abString = "";
                                     if (duration == 0 && delay  == 0) { //Canceled
                                         action_cancelled = true;
@@ -395,8 +395,8 @@ public class CommandsFrag extends Fragment {
                             if (offset_mode) {
                                 int delay = (int) Math.abs((event.getX() - offset_0x)*ratio_dp_px);
                                 int duration = (int) Math.abs((event.getY() - offset_0y)*ratio_dp_px);
-                                delay = delay > 50 ? delay : 0;
-                                duration = duration > 50 ? duration : 0;
+                                delay = delay > 50 ? delay - 50 : 0;
+                                duration = duration > 50 ? duration - 50 : 0;
                                 long now = System.currentTimeMillis()/1000L;
                                 if (delay != 0)
                                     abString += " since  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)

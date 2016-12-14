@@ -2,11 +2,11 @@
 xmlns:tools="http://schemas.android.com/tools"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
-tools:context="com.example.q335.tracker.CalendarFrag">
-    <com.example.q335.tracker.ScaleView
+tools:context="com.q335.r49.squaredays.CalendarFrag">
+    <com.q335.r49.squaredays.ScaleView
         android:id="@+id/drawing"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@color/background" >
-    </com.example.q335.tracker.ScaleView>
+    </com.q335.r49.squaredays.ScaleView>
 </FrameLayout>

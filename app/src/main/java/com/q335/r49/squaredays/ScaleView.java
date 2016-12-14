@@ -1,9 +1,7 @@
-package com.example.q335.tracker;
+package com.q335.r49.squaredays;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
