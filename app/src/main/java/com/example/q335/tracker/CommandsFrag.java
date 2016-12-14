@@ -50,7 +50,6 @@ public class CommandsFrag extends Fragment {
     private final static int COLOR_IX = 1;
     private final static int PALETTE_LEN = 24;
     Context context;
-    //TODO: normalize drag for dp
     //TODO: Ruler
 
     class PaletteRing {
@@ -223,11 +222,13 @@ public class CommandsFrag extends Fragment {
                 boolean action_cancelled = false;
                 int prevBGColor;
                 CharSequence prevBarString;
+                float ratio_dp_px;
 
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     switch (event.getActionMasked()) {
                         case MotionEvent.ACTION_DOWN:
+                            ratio_dp_px = 1000f /(float) dpToPx(1000);
                             prevBGColor = mListener.getCurBG();
                             prevBarString = ab.getTitle();
                             v.getParent().requestDisallowInterceptTouchEvent(true);
@@ -348,10 +349,10 @@ public class CommandsFrag extends Fragment {
                                     offset_0x = event.getX();
                                     offset_0y = event.getY();
                                 } else {
-                                    int delay = (int) (event.getX()-offset_0x);
-                                    int duration = (int) (event.getY()-offset_0y);
-                                    delay = delay > 100 ? delay - 100 : delay < -100 ? delay + 100 : 0;
-                                    duration = duration > 100 ? duration - 100 : duration < -100 ? duration + 100 : 0;
+                                    int delay = (int) ((event.getX()-offset_0x)*ratio_dp_px);
+                                    int duration = (int) ((event.getY()-offset_0y)*ratio_dp_px);
+                                    delay = delay > 50 ? delay - 50 : delay < -50 ? delay + 50 : 0;
+                                    duration = duration > 50 ? duration - 50 : duration < -50 ? duration + 50 : 0;
                                     String abString = "";
                                     if (duration == 0 && delay  == 0) { //Canceled
                                         action_cancelled = true;
@@ -369,7 +370,7 @@ public class CommandsFrag extends Fragment {
                                             abString += " since  " + Integer.toString(Math.abs(delay) / 60) + ":" + String.format("%02d", Math.abs(delay) % 60)
                                                     + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * Math.abs(delay)))) + ")";
                                         if (duration != 0)
-                                            abString += " until " + Integer.toString(Math.abs(duration) / 60) + ":" + String.format("%02d", Math.abs(duration) % 60)
+                                            abString += " for " + Integer.toString(Math.abs(duration) / 60) + ":" + String.format("%02d", Math.abs(duration) % 60)
                                                     + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - (long) Math.abs(delay) + 60 * Math.abs(duration)))) + ")";
                                         if (ab != null)
                                             ab.setTitle(abString.isEmpty()? sFinal[COMMENT_IX] : abString);
@@ -392,16 +393,16 @@ public class CommandsFrag extends Fragment {
                             String end = "";
                             String abString = sFinal[COMMENT_IX] + ":";
                             if (offset_mode) {
-                                int delay = (int) (event.getX() - offset_0x);
-                                int duration = (int) (event.getY() - offset_0y);
-                                delay = delay > 100 ? delay - 100 : delay < -100 ? delay + 100 : 0;
-                                duration = duration > 100 ? duration - 100 : duration < -100 ? duration + 100 : 0;
+                                int delay = (int) ((event.getX() - offset_0x)*ratio_dp_px);
+                                int duration = (int) ((event.getY() - offset_0y)*ratio_dp_px);
+                                delay = delay > 50 ? delay - 50 : delay < -50 ? delay + 50 : 0;
+                                duration = duration > 50 ? duration - 50 : duration < -50 ? duration + 50 : 0;
                                 long now = System.currentTimeMillis()/1000L;
                                 if (delay != 0)
                                     abString += " since  " + Integer.toString(Math.abs(delay) / 60) + ":" + String.format("%02d", Math.abs(delay) % 60)
                                             + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * Math.abs(delay)))) + ")";
                                 if (duration != 0)
-                                    abString += " until " + Integer.toString(Math.abs(duration) / 60) + ":" + String.format("%02d", Math.abs(duration) % 60)
+                                    abString += " for " + Integer.toString(Math.abs(duration) / 60) + ":" + String.format("%02d", Math.abs(duration) % 60)
                                             + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - (long) Math.abs(delay) + 60 * Math.abs(duration)))) + ")";
                                 start = Integer.toString(-Math.abs(delay));
                                 int endNum = -Math.abs(delay) + Math.abs(duration);
