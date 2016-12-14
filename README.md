@@ -8,9 +8,9 @@ At present, it is currently in beta, but is being updated daily, as I do some fi
 <a href="url"><img src="http://image.prntscr.com/image/6d1227a9a72e4316a7ecd147e4c4a6df.png" width="300"></a>
 
 ## Installation
- [APK Download](/apk)
+ **[APK Download](/apk)**
  
- [Google Play](https://play.google.com/store/apps/details?id=com.q335.r49.tracker&hl=en)
+ **[Google Play](https://play.google.com/store/apps/details?id=com.q335.r49.tracker&hl=en)**
  
 ## Directions
 __Long press__ an entry to modify it.
