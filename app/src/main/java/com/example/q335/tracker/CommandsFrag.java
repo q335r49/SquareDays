@@ -355,26 +355,24 @@ public class CommandsFrag extends Fragment {
                                     String abString = "";
                                     if (duration == 0 && delay  == 0) { //Canceled
                                         action_cancelled = true;
-                                        ab.setBackgroundDrawable(new ColorDrawable(prevBGColor));
-                                        ab.setTitle(prevBarString);
+                                        if (ab != null) {
+                                            ab.setBackgroundDrawable(new ColorDrawable(prevBGColor));
+                                            ab.setTitle(prevBarString);
+                                        }
                                     } else {
                                         action_cancelled = false;
-                                        ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
+                                        if (ab != null)
+                                            ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
                                         abString = "..";
                                         long now = System.currentTimeMillis()/1000L;
-                                        if (delay > 0)
-                                            abString += " since  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
-                                                    + " (since " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now - delay))) + ")";
-                                        else if (delay < 0)
-                                            abString += " since " + Integer.toString(-delay / 60) + ":" + String.format("%02d", -delay % 60)
-                                                    + " (since " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now + delay))) + ")";
-                                        if (duration > 0)
-                                            abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60)
-                                                    + " (until " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now - (long) Math.abs(delay) + duration))) + ")";
-                                        else if (duration < 0)
-                                            abString += " for " + Integer.toString(-duration / 60) + ":" + String.format("%02d", -duration % 60)
-                                                    + " (until " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now - (long) Math.abs(delay) - duration))) + ")";
-                                        ab.setTitle(abString.isEmpty()? sFinal[COMMENT_IX] : abString);
+                                        if (delay != 0)
+                                            abString += " since  " + Integer.toString(Math.abs(delay) / 60) + ":" + String.format("%02d", Math.abs(delay) % 60)
+                                                    + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * Math.abs(delay)))) + ")";
+                                        if (duration != 0)
+                                            abString += " until " + Integer.toString(Math.abs(duration) / 60) + ":" + String.format("%02d", Math.abs(duration) % 60)
+                                                    + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - (long) Math.abs(delay) + 60 * Math.abs(duration)))) + ")";
+                                        if (ab != null)
+                                            ab.setTitle(abString.isEmpty()? sFinal[COMMENT_IX] : abString);
                                     }
                                 }
                             }
@@ -388,7 +386,8 @@ public class CommandsFrag extends Fragment {
                             }
                             handler.removeCallbacks(mLongPressed);
                             v.setBackground(getRoundRect(bg_Norm));
-                            ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
+                            if (ab != null)
+                                ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
                             String start = "0";
                             String end = "";
                             String abString = sFinal[COMMENT_IX] + ":";
@@ -398,22 +397,18 @@ public class CommandsFrag extends Fragment {
                                 delay = delay > 100 ? delay - 100 : delay < -100 ? delay + 100 : 0;
                                 duration = duration > 100 ? duration - 100 : duration < -100 ? duration + 100 : 0;
                                 long now = System.currentTimeMillis()/1000L;
-                                if (delay > 0)
-                                    abString += " already " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
-                                            + " since " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now - delay)));
-                                else if (delay < 0)
-                                    abString += " already " + Integer.toString(-delay / 60) + ":" + String.format("%02d", -delay % 60)
-                                            + " since " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now + delay)));
-                                if (duration > 0)
-                                    abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60)
-                                            + " (until " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now - (long) Math.abs(delay) + duration))) + ")";
-                                else if (duration < 0)
-                                    abString += " for " + Integer.toString(-duration / 60) + ":" + String.format("%02d", -duration % 60)
-                                            + " (until " + new SimpleDateFormat("h:mm").format(new Date(1000L*(now - (long) Math.abs(delay) - duration))) + ")";
-                                start = Integer.toString((delay > 0 ? -delay : delay < 0 ? delay : 0) * 60);
-                                end = duration == 0 ? "" : Integer.toString(duration > 0 ? 60 * (delay + duration) : 60 * (delay - duration));
+                                if (delay != 0)
+                                    abString += " since  " + Integer.toString(Math.abs(delay) / 60) + ":" + String.format("%02d", Math.abs(delay) % 60)
+                                            + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * Math.abs(delay)))) + ")";
+                                if (duration != 0)
+                                    abString += " until " + Integer.toString(Math.abs(duration) / 60) + ":" + String.format("%02d", Math.abs(duration) % 60)
+                                            + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - (long) Math.abs(delay) + 60 * Math.abs(duration)))) + ")";
+                                start = Integer.toString(-Math.abs(delay));
+                                int endNum = -Math.abs(delay) + Math.abs(duration);
+                                end = endNum == 0 ? "" : Integer.toString(endNum);
                             }
-                            ab.setTitle(abString);
+                            if (ab != null)
+                                ab.setTitle(abString);
                             String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">" + sFinal[COLOR_IX] + ">" + start + ">" + end + ">" + sFinal[COMMENT_IX];
                             File internalFile = new File(context.getFilesDir(), LOG_FILE);
                             try {
