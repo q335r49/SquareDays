@@ -244,8 +244,11 @@ class CalendarWin {
         BG.end = end;
         BG.setColor("darkgrey");
         BG.draw(this,canvas);
-        for (CalendarRect s : shapes)
-            s.draw(this,canvas);
+//        for (CalendarRect s : shapes)
+//            s.draw(this,canvas);
+        int num_shapes = shapes.size();
+        for (int i = 0; i < num_shapes; i++)
+            shapes.get(i).draw(this,canvas);
         for (int i = 0; i< gridH +1; i++ ) {
             float[] lblXY = conv_grid_screen((float) -0.5,(float) (startDate+i+0.5));
             canvas.drawText((new SimpleDateFormat("MMM d").format(new Date(conv_grid_ts(-1,startDate+i)*1000))), 25, lblXY[1], textStyle);
