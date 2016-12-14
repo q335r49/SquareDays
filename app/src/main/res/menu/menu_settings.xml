@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.example.q335.tracker.Settings">
+    <item android:title="Export ..."
+        android:id="@+id/menuItemExport" />
+    <item android:title="Import ..."
+        android:id="@+id/menuItemImport" />
+</menu>
