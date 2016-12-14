@@ -13,6 +13,9 @@ At present, it is currently in beta, but is being updated daily, as I do some fi
  **[Google Play](https://play.google.com/store/apps/details?id=com.q335.r49.tracker&hl=en)**
  
 ## Directions
+
+**Tap** a task to start logging.
+
 __Long press__ an entry to modify it.
 
 **Long press** the lower right box to add a new entry.
