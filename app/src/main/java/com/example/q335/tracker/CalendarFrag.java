@@ -258,8 +258,11 @@ class CalendarWin {
 
         if (curTask.end == -1) {
             curTask.end = System.currentTimeMillis() / 1000L;
+            Paint temp = new Paint(curTask.paint);
+            curTask.paint.setStyle(Paint.Style.STROKE);
+            curTask.paint.setStrokeWidth(LINE_WIDTH/2);
             curTask.draw(this,canvas);
-            curTask.drawEndLine(this,canvas,LINE_WIDTH/4,0xFFFFFFFF);
+            curTask.paint = temp;
             curTask.end = -1;
         }
     }
@@ -287,7 +290,7 @@ class CalendarRect {
     long start=-1;
     long end=-1;
     String comment=null;
-    private Paint paint;
+    public Paint paint;
         public int getColor() { return paint.getColor();}
 
     CalendarRect() {
@@ -301,23 +304,6 @@ class CalendarRect {
         } catch (IllegalArgumentException e) {
             Log.e("tracker:","Bad color format: "+color);
         }
-    }
-    void drawEndLine(CalendarWin cv, Canvas canvas, float width, int color) {
-        float[] rectC1;
-        float[] rectC2;
-        float[] center;
-        if (end == -1)
-            return;
-        long noon = end-(end-cv.getOrig() +4611686018427360000L)%86400L+43200L;
-        rectC1 = cv.conv_ts_screen(end);
-        rectC2 = rectC1.clone();
-        rectC2[0] += cv.getUnitWidth();
-        center=cv.conv_ts_screen(noon);
-        center[0] += cv.getUnitWidth()/2;
-        Paint linePaint = new Paint();
-            linePaint.setStrokeWidth(width);
-            linePaint.setColor(color);
-        drawLine(rectC1,rectC2,center,linePaint,canvas);
     }
     void draw(CalendarWin cv, Canvas canvas) {
         float[] rectC1;
@@ -334,7 +320,7 @@ class CalendarRect {
             center=cv.conv_ts_screen(nextMidnight-43199L);
             center[0] += cv.getUnitWidth()/2;
 
-            drawRect(rectC1,rectC2,center,paint,canvas);
+            drawRect(rectC1,rectC2,center,canvas);
             //canvas.drawRect(rectC1[0], rectC1[1], rectC2[0] + cv.getUnitWidth(), rectC2[1], paint);
             rect0 = nextMidnight+1;
         }
@@ -344,21 +330,14 @@ class CalendarRect {
         center = cv.conv_ts_screen(nextMidnight-43199L);
         center[0] += cv.getUnitWidth()/2;
 
-        drawRect(rectC1,rectC2,center,paint,canvas);
+        drawRect(rectC1,rectC2,center,canvas);
         //canvas.drawRect(rectC1[0], rectC1[1], rectC2[0] + cv.getUnitWidth(), rectC2[1], paint);
     }
-    private void drawRect(float[] r0, float[] r1,float[] rC, Paint paint, Canvas canvas) {
+    private void drawRect(float[] r0, float[] r1,float[] rC, Canvas canvas) {
         float n0x=(r0[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0];
         float n0y=(r0[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1];
         float n1x=(r1[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0];
         float n1y=(r1[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1];
         canvas.drawRect(n0x,n0y,n1x,n1y,paint);
-    }
-    private void drawLine(float[] r0, float[] r1,float[] rC, Paint paint, Canvas canvas) {
-        float n0x=(r0[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0];
-        float n0y=(r0[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1];
-        float n1x=(r1[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0];
-        float n1y=(r1[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1];
-        canvas.drawLine(n0x,n0y,n1x,n1y,paint);
     }
 }
