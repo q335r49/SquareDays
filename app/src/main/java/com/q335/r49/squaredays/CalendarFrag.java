@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -25,14 +26,22 @@ public class CalendarFrag extends Fragment {
     private ScaleView mView;
     private View fragView;
     private Queue<String> EntryBuffer = new LinkedList<>();
-    public void procMess(String E) { //TODO: isn't procMessage only processing on NEW entries?!
+    public void procMess(String E) {
         if (mView == null) {
             EntryBuffer.add(E);
-            Log.e("tracker:","Empty mView: buffer size: " + Integer.toString(EntryBuffer.size()) + " / Entry: " + E);
+            // Log.e("tracker:","Empty mView: buffer size: " + Integer.toString(EntryBuffer.size()) + " / Entry: " + E);
         } else {
             for (String s = EntryBuffer.poll(); s != null; EntryBuffer.poll())
                 mView.procMess(s);
             mView.procMess(E);
+        }
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        //Log.e("tracker:", "visible: " + isVisibleToUser);
+        if (isVisibleToUser) {
+            procMess(ScaleView.MESS_REDRAW);
         }
     }
 

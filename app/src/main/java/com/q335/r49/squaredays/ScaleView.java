@@ -32,10 +32,13 @@ public class ScaleView extends View {
     private int curTaskColor;
         public int getCurTaskColor() { return curTaskColor; }
 
-    public static String MESS_RELOAD_LOG = "IM#RELOAD LOG";
+    public static String MESS_RELOAD_LOG = "##MESS RELOAD LOG";
+    public static String MESS_REDRAW = "##MESS REDRAW";
     public void procMess(String s) {
         if (s == MESS_RELOAD_LOG) {
             loadCalendarView(appContext);
+        } else if (s == MESS_REDRAW) {
+            invalidate();
         } else {
             CV.loadEntry(s);
             invalidate();
