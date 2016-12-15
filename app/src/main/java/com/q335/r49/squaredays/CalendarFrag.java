@@ -23,13 +23,14 @@ import java.util.Queue;
 
 public class CalendarFrag extends Fragment {
     private ScaleView mView;
+    private View fragView;
     private Queue<String> EntryBuffer = new LinkedList<>();
-    public void procMess(String E) {
-        //XTODO: isn't procMessage only processing on NEW entries?!
-        if (mView == null)
+    public void procMess(String E) { //TODO: isn't procMessage only processing on NEW entries?!
+        if (mView == null) {
             EntryBuffer.add(E);
-        else {
-            for (String s = EntryBuffer.poll(); s!=null; EntryBuffer.poll())
+            Log.e("tracker:","Empty mView: buffer size: " + Integer.toString(EntryBuffer.size()) + " / Entry: " + E);
+        } else {
+            for (String s = EntryBuffer.poll(); s != null; EntryBuffer.poll())
                 mView.procMess(s);
             mView.procMess(E);
         }
@@ -37,8 +38,8 @@ public class CalendarFrag extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_calendar,container,false);
-        mView = (ScaleView) (view.findViewById(R.id.drawing));
+        fragView = inflater.inflate(R.layout.fragment_calendar,container,false);
+        mView = (ScaleView) (fragView.findViewById(R.id.drawing));
         ActionBar bar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         String Task = mView.getCurTask();
         if (Task != null && bar != null) {
@@ -47,7 +48,7 @@ public class CalendarFrag extends Fragment {
             mListener.receiveCurBG(color);
             bar.setBackgroundDrawable(new ColorDrawable(color));
         }
-        return view;
+        return fragView;
     }
 
     public CalendarFrag() { } // Required empty public constructor
@@ -200,9 +201,8 @@ class CalendarWin {
                     curTask.start = ts + Long.parseLong(args[START_POS]);
                     curTask.setColor(args[COLOR_POS]);
                     curTask.comment = args[COMMENT_POS];
-                } else {
+                } else
                     Log.e("tracker:","Empty start and end: "+line);
-                }
             } else if (args[START_POS].isEmpty()) {
                 curTask.end = ts + Long.parseLong(args[END_POS]);
             } else {
@@ -307,7 +307,7 @@ class CalendarRect {
         float[] rectC1;
         float[] rectC2;
         float[] center;
-        if (start==-1 || end==-1 || end <= start)
+        if (start == -1 || end == -1 || end <= start)
             return;
         long rect0 = start;
         long nextMidnight = start-(start-cv.getOrig() +4611686018427360000L)%86400L+86399L;
