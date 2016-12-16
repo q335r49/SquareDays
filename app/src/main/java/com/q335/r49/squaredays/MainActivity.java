@@ -36,6 +36,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     Context context;
     SharedPreferences sprefs;
     //TODO: Think of a better label for the "swipe" area
+    //TODO: Bring back "labels" and sliders, such as a "status bar" for on-click?
 
 
     public void processNewLogEntry(String E) {
