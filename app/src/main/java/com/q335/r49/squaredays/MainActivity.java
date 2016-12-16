@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import java.io.File;
@@ -41,6 +42,13 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     private int bgColor = Color.parseColor("darkgrey");
         public void receiveCurBG(int c) { bgColor = c; }
         public int getCurBG() { return bgColor; }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+
+    }
+
 
     CalendarFrag GF;
     CommandsFrag BF;

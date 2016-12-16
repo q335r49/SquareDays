@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -30,6 +31,8 @@ public class CalendarFrag extends Fragment {
         if (mView == null) {
             EntryBuffer.add(E);
             // Log.e("tracker:","Empty mView: buffer size: " + Integer.toString(EntryBuffer.size()) + " / Entry: " + E);
+            //Toast.makeText(getApplicationContext(), "Communications Error!!", Toast.LENGTH_SHORT).show();
+            //mListener.getActi
         } else {
             for (String s = EntryBuffer.poll(); s != null; EntryBuffer.poll())
                 mView.procMess(s);
@@ -44,6 +47,7 @@ public class CalendarFrag extends Fragment {
             procMess(ScaleView.MESS_REDRAW);
         }
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -89,6 +93,12 @@ public class CalendarFrag extends Fragment {
             mListener = (OnFragmentInteractionListener) context;
         else
             throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
+
+        if (fragView != null) {
+            ScaleView tempV = (ScaleView) fragView.findViewById(R.id.drawing);
+            if (tempV != null)
+                mView = (ScaleView) fragView.findViewById(R.id.drawing);
+        }
     }
 //    public void onButtonPressed(Uri uri) {
 //        if (mListener != null) {
@@ -158,8 +168,9 @@ class CalendarWin {
         this.gridH = gridH;
         textStyle = new Paint();
             textStyle.setStyle(Paint.Style.FILL);
-            textStyle.setColor(0xFFFFFFFF);
-            textStyle.setTextSize(24f);
+            textStyle.setColor(0xFF2E3E45);
+            textStyle.setTypeface(Typeface.DEFAULT_BOLD);
+            textStyle.setTextSize(LINE_WIDTH);
         statusText = "";
     }
     void shiftWindow(float x, float y) {
@@ -190,7 +201,7 @@ class CalendarWin {
     private static float LINE_WIDTH = 10;
         public void setLineWidth(float f) {
             LINE_WIDTH = f;
-            textStyle.setTextSize(LINE_WIDTH*2);
+            textStyle.setTextSize(LINE_WIDTH*2.4f);
         }
     void loadEntry(String line) {
         long ts;
@@ -243,7 +254,6 @@ class CalendarWin {
         float scaleX = 1f - LINE_WIDTH*ratio_grid_screen_W;
         float scaleY = 1f - LINE_WIDTH*ratio_grid_screen_H;
         CalendarRect.setRectScalingFactors(scaleX,scaleY);
-        float startDate = (float) Math.floor(g0y);
         long start = conv_grid_ts(0f,(float) (Math.floor(g0y)-1));
         long end = conv_grid_ts(7f,(float) (Math.ceil(g0y+gridH)+1));
         CalendarRect BG = new CalendarRect();
@@ -251,15 +261,54 @@ class CalendarWin {
         BG.end = end;
         BG.setColor("darkgrey");
         BG.draw(this,canvas);
-//        for (CalendarRect s : shapes)
-//            s.draw(this,canvas);
         int num_shapes = shapes.size();
         for (int i = 0; i < num_shapes; i++)
             shapes.get(i).draw(this,canvas);
-        for (int i = 0; i< gridH +1; i++ ) {
-            float[] lblXY = conv_grid_screen((float) -0.5,(float) (startDate+i+0.5));
-            canvas.drawText((new SimpleDateFormat("MMM d").format(new Date(conv_grid_ts(-1,startDate+i)*1000))), 25, lblXY[1], textStyle);
+
+        if (gridH >= 3f) {
+            float startDate = (float) Math.floor(g0y);
+            for (int i = 0; i < gridH + 1; i++) {
+                float[] lblXY = conv_grid_screen(-0.5f, startDate + i + 0.5f);
+                canvas.drawText((new SimpleDateFormat("M-d").format(new Date(conv_grid_ts(-1, startDate + i) * 1000))), 25, lblXY[1], textStyle);
+            }
+        } else if (gridH >= 1f) {
+            final float GRID = 4f;
+            float startHour = (float) Math.floor(g0y * GRID) / GRID;
+            for (float i = 0; i < gridH + 1f/GRID; i += 1/GRID) {
+                float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
+                canvas.drawText((new SimpleDateFormat("H:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 25, lblXY[1], textStyle);
+            }
+        } else if (gridH >= 1f/6f) {
+            final float GRID = 24f;
+            float startHour = (float) Math.floor(g0y * GRID) / GRID;
+            for (float i = 0; i < gridH + 1f/GRID; i += 1/GRID) {
+                float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
+                canvas.drawText((new SimpleDateFormat("H:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 25, lblXY[1], textStyle);
+            }
+        } else if (gridH >= 1f/24f) {
+            final float GRID = 144f;
+            float startHour = (float) Math.floor(g0y * GRID) / GRID;
+            for (float i = 0; i < gridH + 1f/GRID; i += 1/GRID) {
+                float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
+                canvas.drawText((new SimpleDateFormat("H:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 25, lblXY[1], textStyle);
+            }
+        } else if (gridH >= 1f/144f) {
+            final float GRID = 720f;
+            float startHour = (float) Math.floor(g0y * GRID) / GRID;
+            for (float i = 0; i < gridH + 1f/GRID; i += 1/GRID) {
+                float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
+                canvas.drawText((new SimpleDateFormat("H:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 25, lblXY[1], textStyle);
+            }
+        } else {
+            final float GRID = 2880f;
+            float startHour = (float) Math.floor(g0y * GRID) / GRID;
+            for (float i = 0; i < gridH + 1f/GRID; i += 1/GRID) {
+                float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
+                canvas.drawText((new SimpleDateFormat("H:mm:ss").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 25, lblXY[1], textStyle);
+            }
         }
+
+
         if (!statusText.isEmpty())
             canvas.drawText(statusText,20,screenH-150,textStyle);
 

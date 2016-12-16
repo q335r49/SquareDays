@@ -50,7 +50,6 @@ public class CommandsFrag extends Fragment {
     private final static int COLOR_IX = 1;
     private final static int PALETTE_LEN = 24;
     Context context;
-    //TODO: Ruler
 
     class PaletteRing {
         private int length;
