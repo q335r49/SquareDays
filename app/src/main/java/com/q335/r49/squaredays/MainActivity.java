@@ -35,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     private static final String EXT_STORAGE_DIR = "tracker";
     Context context;
     SharedPreferences sprefs;
+    //TODO: Think of a better label for the "swipe" area
+
 
     public void processNewLogEntry(String E) {
         GF.procMess(E);
