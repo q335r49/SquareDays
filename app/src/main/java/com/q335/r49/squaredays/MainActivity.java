@@ -47,7 +47,10 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         public int getCurBG() { return bgColor; }
 
     CalendarFrag GF;
+        public void setGF(CalendarFrag GF) { this.GF = GF; }
     CommandsFrag BF;
+        public void setBF(CommandsFrag BF) { this.BF = BF; }
+
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     @Override

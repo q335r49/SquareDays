@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -29,9 +30,7 @@ public class CalendarFrag extends Fragment {
     public void procMess(String E) {
         if (mView == null) {
             EntryBuffer.add(E);
-            // Log.e("tracker:","Empty mView: buffer size: " + Integer.toString(EntryBuffer.size()) + " / Entry: " + E);
-            //Toast.makeText(getApplicationContext(), "Communications Error!!", Toast.LENGTH_SHORT).show();
-            //mListener.getActi
+            Log.e("tracker:","Empty mView: buffer size: " + Integer.toString(EntryBuffer.size()) + " / Entry: " + E);
         } else {
             for (String s = EntryBuffer.poll(); s != null; EntryBuffer.poll())
                 mView.procMess(s);
@@ -47,9 +46,9 @@ public class CalendarFrag extends Fragment {
         }
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.e("tracker:", "OnCreateViewCalled");
         fragView = inflater.inflate(R.layout.fragment_calendar,container,false);
         mView = (ScaleView) (fragView.findViewById(R.id.drawing));
         ActionBar bar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -60,6 +59,7 @@ public class CalendarFrag extends Fragment {
             mListener.receiveCurBG(color);
             bar.setBackgroundDrawable(new ColorDrawable(color));
         }
+        mListener.setGF(this);
         return fragView;
     }
 
@@ -92,18 +92,8 @@ public class CalendarFrag extends Fragment {
             mListener = (OnFragmentInteractionListener) context;
         else
             throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-
-        if (fragView != null) {
-            ScaleView tempV = (ScaleView) fragView.findViewById(R.id.drawing);
-            if (tempV != null)
-                mView = (ScaleView) fragView.findViewById(R.id.drawing);
-        }
     }
-//    public void onButtonPressed(Uri uri) {
-//        if (mListener != null) {
-//            mListener.onFragmentInteraction(uri);
-//        }
-//    }
+
     @Override
     public void onDetach() {
         super.onDetach();
@@ -111,6 +101,7 @@ public class CalendarFrag extends Fragment {
     }
     public interface OnFragmentInteractionListener {
         void receiveCurBG(int i);
+        void setGF(CalendarFrag cf);
     }
 }
 class CalendarWin {

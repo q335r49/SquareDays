@@ -108,6 +108,7 @@ public class CommandsFrag extends Fragment {
         sprefs = context.getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
         String jsonText = sprefs.getString("commands", "");
         loadCommands(jsonText);
+        mListener.setBF(this);
         return view;
     }
     public void loadCommands(String s) {
@@ -532,6 +533,7 @@ public class CommandsFrag extends Fragment {
         void processNewLogEntry(String E);
         int getCurBG();
         void receiveCurBG(int c);
+        void setBF(CommandsFrag bf);
     }
     public CommandsFrag() { } // Required empty public constructor
     private static final String ARG_PARAM1 = "param1";
