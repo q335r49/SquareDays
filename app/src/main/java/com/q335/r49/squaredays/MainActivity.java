@@ -43,13 +43,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         public void receiveCurBG(int c) { bgColor = c; }
         public int getCurBG() { return bgColor; }
 
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-
-    }
-
-
     CalendarFrag GF;
     CommandsFrag BF;
     private SectionsPagerAdapter mSectionsPagerAdapter;

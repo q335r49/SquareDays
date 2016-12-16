@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -169,8 +168,9 @@ class CalendarWin {
         textStyle = new Paint();
             textStyle.setStyle(Paint.Style.FILL);
             textStyle.setColor(0xFF2E3E45);
-            textStyle.setTypeface(Typeface.DEFAULT_BOLD);
+            textStyle.setTypeface(Typeface.DEFAULT);
             textStyle.setTextSize(LINE_WIDTH);
+            textStyle.setTextAlign(Paint.Align.LEFT);
         statusText = "";
     }
     void shiftWindow(float x, float y) {
@@ -201,7 +201,8 @@ class CalendarWin {
     private static float LINE_WIDTH = 10;
         public void setLineWidth(float f) {
             LINE_WIDTH = f;
-            textStyle.setTextSize(LINE_WIDTH*2.4f);
+            textStyle.setTextSize(LINE_WIDTH*2f);
+            textStyle.setStrokeWidth(LINE_WIDTH/5f);
         }
     void loadEntry(String line) {
         long ts;
@@ -266,48 +267,54 @@ class CalendarWin {
             shapes.get(i).draw(this,canvas);
 
         if (gridH >= 3f) {
-            float startDate = (float) Math.floor(g0y);
+            final float GRID = 1f;
+            float startDate = (float) Math.floor(g0y * GRID) / GRID;
             for (int i = 0; i < gridH + 1; i++) {
-                float[] lblXY = conv_grid_screen(-0.5f, startDate + i + 0.5f);
-                canvas.drawText((new SimpleDateFormat("M-d").format(new Date(conv_grid_ts(-1, startDate + i) * 1000))), 25, lblXY[1], textStyle);
+                float[] lblXY = conv_grid_screen(-0.5f, startDate + i);
+                canvas.drawLine(0f,lblXY[1],LINE_WIDTH * 6f,lblXY[1],textStyle);
+                canvas.drawText((new SimpleDateFormat(" M.d").format(new Date(conv_grid_ts(-1, startDate + i) * 1000))), 0, lblXY[1] + LINE_WIDTH * 2.1f, textStyle);
             }
         } else if (gridH >= 1f) {
             final float GRID = 4f;
             float startHour = (float) Math.floor(g0y * GRID) / GRID;
             for (float i = 0; i < gridH + 1f/GRID; i += 1/GRID) {
                 float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
-                canvas.drawText((new SimpleDateFormat("H:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 25, lblXY[1], textStyle);
+                canvas.drawLine(0f,lblXY[1],LINE_WIDTH * 6f,lblXY[1],textStyle);
+                canvas.drawText((new SimpleDateFormat(" H:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 0, lblXY[1] + LINE_WIDTH * 2.1f, textStyle);
             }
         } else if (gridH >= 1f/6f) {
             final float GRID = 24f;
             float startHour = (float) Math.floor(g0y * GRID) / GRID;
             for (float i = 0; i < gridH + 1f/GRID; i += 1/GRID) {
                 float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
-                canvas.drawText((new SimpleDateFormat("H:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 25, lblXY[1], textStyle);
+                canvas.drawLine(0f,lblXY[1],LINE_WIDTH * 6f,lblXY[1],textStyle);
+                canvas.drawText((new SimpleDateFormat(" H:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 0, lblXY[1] + LINE_WIDTH * 2.1f, textStyle);
             }
         } else if (gridH >= 1f/24f) {
             final float GRID = 144f;
             float startHour = (float) Math.floor(g0y * GRID) / GRID;
             for (float i = 0; i < gridH + 1f/GRID; i += 1/GRID) {
                 float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
-                canvas.drawText((new SimpleDateFormat("H:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 25, lblXY[1], textStyle);
+                canvas.drawLine(0f,lblXY[1],LINE_WIDTH * 6f,lblXY[1],textStyle);
+                canvas.drawText((new SimpleDateFormat(" H:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 0, lblXY[1] + LINE_WIDTH * 2.1f, textStyle);
             }
         } else if (gridH >= 1f/144f) {
             final float GRID = 720f;
             float startHour = (float) Math.floor(g0y * GRID) / GRID;
             for (float i = 0; i < gridH + 1f/GRID; i += 1/GRID) {
                 float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
-                canvas.drawText((new SimpleDateFormat("H:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 25, lblXY[1], textStyle);
+                canvas.drawLine(0f,lblXY[1],LINE_WIDTH * 6f,lblXY[1],textStyle);
+                canvas.drawText((new SimpleDateFormat(" H:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 0, lblXY[1] + LINE_WIDTH * 2.1f, textStyle);
             }
         } else {
             final float GRID = 2880f;
             float startHour = (float) Math.floor(g0y * GRID) / GRID;
             for (float i = 0; i < gridH + 1f/GRID; i += 1/GRID) {
                 float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
-                canvas.drawText((new SimpleDateFormat("H:mm:ss").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 25, lblXY[1], textStyle);
+                canvas.drawLine(0f,lblXY[1],LINE_WIDTH * 6f,lblXY[1],textStyle);
+                canvas.drawText((new SimpleDateFormat(" H:mm:ss").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 0, lblXY[1] + LINE_WIDTH * 2.1f, textStyle);
             }
         }
-
 
         if (!statusText.isEmpty())
             canvas.drawText(statusText,20,screenH-150,textStyle);
