@@ -6,4 +6,6 @@
         android:id="@+id/menuItemExport" />
     <item android:title="Import ..."
         android:id="@+id/menuItemImport" />
+    <item android:title="Clear Log"
+        android:id="@+id/menuItemClear" />
 </menu>

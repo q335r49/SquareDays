@@ -70,13 +70,13 @@ public class ScaleView extends View {
             }
             return sb;
         } catch (FileNotFoundException e) {
-            Log.e("tracker:","Log file not found!");
+            Log.e("SquareDays","Log file not found!");
             return new ArrayList<>();
         } catch (UnsupportedEncodingException e) {
-            Log.e("tracker:","Log file bad encoding!");
+            Log.e("SquareDays","Log file bad encoding!");
             return new ArrayList<>();
         } catch (IOException e) {
-            Log.e("tracker:","Log file IO exception!");
+            Log.e("SquareDays","Log file IO exception!");
             return new ArrayList<>();
         }
     }

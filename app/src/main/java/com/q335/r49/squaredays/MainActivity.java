@@ -7,9 +7,11 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.app.Fragment;
@@ -25,6 +27,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener {
     private static final String LOG_FILE = "log.txt";
@@ -35,7 +39,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     //TODO: Think of a better label for the "swipe" area
     //TODO: Bring back "labels" and sliders, such as a "status bar" for on-click?
     //TODO: Need "clear log"
-    //TODO: Refactor logging
 
     public void processNewLogEntry(String E) {
         GF.procMess(E);
@@ -78,6 +81,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + EXT_STORAGE_DIR + File.separator;
         final File cmdFile = new File(extStorPath, COMMANDS_FILE);
         final File logFile = new File(extStorPath, LOG_FILE);
+        final ActionBar ab = this.getSupportActionBar();
         switch (item.getItemId()) {
             case R.id.menuItemExport: {
                 if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
@@ -95,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                     writeString(cmdFile, sprefs.getString("commands", ""));
                                     Toast.makeText(context, "Commands exported to " + extStorPath + COMMANDS_FILE, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
-                                    Log.e("tracker:",e.toString());
+                                    Log.e("SquareDays",e.toString());
                                     Toast.makeText(context, "Export failed. Does this app have storage permission? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
                                 }
                             }
@@ -107,7 +111,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                     copyFile(new File(getFilesDir(), "log.txt"), logFile);
                                     Toast.makeText(context, "Log entries exported to " + extStorPath + LOG_FILE, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
-                                    Log.e("tracker:",e.toString());
+                                    Log.e("SquareDays",e.toString());
                                     Toast.makeText(context, "Export failed. Does this app have storage permission? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
                                 }
                             }
@@ -121,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                     Toast.makeText(context, "Commands exported to " + extStorPath + COMMANDS_FILE + System.getProperty("line.separator")
                                             + "Log entries exported to " + extStorPath + LOG_FILE, Toast.LENGTH_LONG).show();
                                 } catch (Exception e) {
-                                    Log.e("tracker:",e.toString());
+                                    Log.e("SquareDays",e.toString());
                                     Toast.makeText(context, "Export failed. Does this app have storage permission? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
                                 }
                             }
@@ -152,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                             Toast.makeText(context, COMMANDS_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         }
                                     } catch (Exception e) {
-                                        Log.e("tracker:",e.toString());
+                                        Log.e("SquareDays",e.toString());
                                         Toast.makeText(context, "Import failed. Does this app have storage access? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
                                     }
                                 }
@@ -168,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                             GF.procMess(ScaleView.MESS_RELOAD_LOG);
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
-                                            Log.e("tracker:",e.toString());
+                                            Log.e("SquareDays",e.toString());
                                             Toast.makeText(context, "Import failed. Does this app have storage access? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
                                         }
                                     }
@@ -186,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                             Toast.makeText(context, COMMANDS_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         }
                                     } catch (Exception e) {
-                                        Log.e("tracker:",e.toString());
+                                        Log.e("SquareDays",e.toString());
                                         Toast.makeText(context, "Import failed. Does this app have storage access? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
                                     }
                                     if (!logFile.exists())
@@ -197,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                             GF.procMess(ScaleView.MESS_RELOAD_LOG);
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
-                                            Log.e("tracker:",e.toString());
+                                            Log.e("SquareDays",e.toString());
                                             Toast.makeText(context, "Import failed. Does this app have storage access? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
                                         }
                                     }
@@ -206,6 +210,31 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                             .show();
                 }
                 return true;
+            }
+            case R.id.menuItemClear: {
+                AlertDialog.Builder alertBuilder = new AlertDialog.Builder(MainActivity.this);
+                alertBuilder
+                        .setCancelable(true)
+                        .setMessage("Really clear log?")
+                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        })
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                File logFile = new File(context.getFilesDir(), LOG_FILE);
+                                if (logFile.delete()) {
+                                    GF.procMess(ScaleView.MESS_RELOAD_LOG);
+                                    ab.setBackgroundDrawable(new ColorDrawable(0xFF192125));
+                                    ab.setTitle("Empty Log");
+                                } else
+                                    Log.e("SquareDays","Log clear failed!");
+                            }
+                        })
+                        .show();
             }
             default:
                 return super.onOptionsItemSelected(item);

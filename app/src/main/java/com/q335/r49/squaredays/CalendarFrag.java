@@ -30,7 +30,7 @@ public class CalendarFrag extends Fragment {
     public void procMess(String E) {
         if (mView == null) {
             EntryBuffer.add(E);
-            Log.e("tracker:","Empty mView: buffer size: " + Integer.toString(EntryBuffer.size()) + " / Entry: " + E);
+            Log.e("SquareDays","Empty mView: buffer size: " + Integer.toString(EntryBuffer.size()) + " / Entry: " + E);
         } else {
             for (String s = EntryBuffer.poll(); s != null; EntryBuffer.poll())
                 mView.procMess(s);
@@ -40,14 +40,14 @@ public class CalendarFrag extends Fragment {
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
-        //Log.e("tracker:", "visible: " + isVisibleToUser);
+        //Log.e("SquareDays", "visible: " + isVisibleToUser);
         if (isVisibleToUser)
             procMess(ScaleView.MESS_REDRAW);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //Log.e("tracker:", "OnCreateViewCalled");
+        //Log.e("SquareDays", "OnCreateViewCalled");
         fragView = inflater.inflate(R.layout.fragment_calendar,container,false);
         mView = (ScaleView) (fragView.findViewById(R.id.drawing));
         ActionBar bar = ((AppCompatActivity) getActivity()).getSupportActionBar();
@@ -198,7 +198,7 @@ class CalendarWin {
         long ts;
         String[] args = line.split(">",-1);
         if (args.length < ARG_LEN) {
-            Log.e("tracker:","Insufficient args: "+line);
+            Log.e("SquareDays","Insufficient args: "+line);
             return;
         }
         try {
@@ -213,7 +213,7 @@ class CalendarWin {
                     curTask.setColor(args[COLOR_POS]);
                     curTask.comment = args[COMMENT_POS];
                 } else
-                    Log.e("tracker:","Empty start and end: "+line);
+                    Log.e("SquareDays","Empty start and end: "+line);
             } else if (args[START_POS].isEmpty()) {
                 curTask.end = ts + Long.parseLong(args[END_POS]);
             } else {
@@ -225,7 +225,7 @@ class CalendarWin {
                 shapes.add(markTD);
             }
         } catch (IllegalArgumentException e) {
-            Log.e("tracker:","Bad color or number format: "+line);
+            Log.e("SquareDays","Bad color or number format: "+line);
         }
     }
     void loadAllEntries(List<String> log) {
@@ -355,7 +355,7 @@ class CalendarRect {
         try {
             paint.setColor(Color.parseColor(color));
         } catch (IllegalArgumentException e) {
-            Log.e("tracker:","Bad color format: "+color);
+            Log.e("SquareDays","Bad color format: "+color);
         }
     }
     void draw(CalendarWin cv, Canvas canvas) {
