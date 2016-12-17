@@ -12,7 +12,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -21,9 +20,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -38,9 +35,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     //TODO: Think of a better label for the "swipe" area
     //TODO: Bring back "labels" and sliders, such as a "status bar" for on-click?
     //TODO: Need "clear log"
-    //TODO: Better initial view
-    //TODO: Time spent in action bar
-
+    //TODO: Refactor logging
 
     public void processNewLogEntry(String E) {
         GF.procMess(E);

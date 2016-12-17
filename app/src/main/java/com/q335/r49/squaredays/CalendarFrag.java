@@ -41,14 +41,13 @@ public class CalendarFrag extends Fragment {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         //Log.e("tracker:", "visible: " + isVisibleToUser);
-        if (isVisibleToUser) {
+        if (isVisibleToUser)
             procMess(ScaleView.MESS_REDRAW);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.e("tracker:", "OnCreateViewCalled");
+        //Log.e("tracker:", "OnCreateViewCalled");
         fragView = inflater.inflate(R.layout.fragment_calendar,container,false);
         mView = (ScaleView) (fragView.findViewById(R.id.drawing));
         ActionBar bar = ((AppCompatActivity) getActivity()).getSupportActionBar();

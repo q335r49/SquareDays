@@ -365,7 +365,7 @@ public class CommandsFrag extends Fragment {
                                         abString = "..";
                                         long now = System.currentTimeMillis()/1000L;
                                         if (delay != 0)
-                                            abString += " since  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
+                                            abString += " already  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
                                                     + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + ")";
                                         if (duration != 0)
                                             abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60)
@@ -379,36 +379,36 @@ public class CommandsFrag extends Fragment {
                         case MotionEvent.ACTION_UP:
                             if (has_run)
                                 return false;
-                            if (action_cancelled) {
-                                v.setBackground(getRoundRect(bg_Norm));
-                                return false;
-                            }
-                            handler.removeCallbacks(mLongPressed);
                             v.setBackground(getRoundRect(bg_Norm));
-                            if (ab != null)
-                                ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
-                            String start = "0";
-                            String end = "";
-                            String abString = sFinal[COMMENT_IX] + ":";
+                            if (action_cancelled)
+                                return false;
+                            handler.removeCallbacks(mLongPressed);
+                            int delay = 0;
+                            int duration = 0;
                             if (offset_mode) {
-                                int delay = (int) Math.abs((event.getX() - offset_0x)*ratio_dp_px);
-                                int duration = (int) Math.abs((event.getY() - offset_0y)*ratio_dp_px);
+                                delay = (int) Math.abs((event.getX() - offset_0x) * ratio_dp_px);
+                                duration = (int) Math.abs((event.getY() - offset_0y) * ratio_dp_px);
                                 delay = delay > 50 ? delay - 50 : 0;
                                 duration = duration > 50 ? duration - 50 : 0;
-                                long now = System.currentTimeMillis()/1000L;
-                                if (delay != 0)
-                                    abString += " since  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
-                                            + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + ")";
-                                if (duration != 0)
-                                    abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60)
-                                            + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
-                                start = Integer.toString(-delay * 60);
-                                int endNum = (-delay +  duration) * 60;
-                                end = duration == 0 ? "" : Integer.toString(endNum);
                             }
-                            if (ab != null)
-                                ab.setTitle(abString);
-                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">" + sFinal[COLOR_IX] + ">" + start + ">" + end + ">" + sFinal[COMMENT_IX];
+                            long now = System.currentTimeMillis()/1000L;
+                            if (duration == 0) {
+                                if (ab != null) {
+                                    ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
+                                    ab.setTitle(sFinal[COMMENT_IX] + " @" + new SimpleDateFormat("h:mm a").format(new Date(1000L * now - 60 * delay)));
+                                }
+                                mListener.receiveCurBG(bg_Norm);
+                            } else {
+                                Toast.makeText(context, sFinal[COMMENT_IX]
+                                        + "\n" + new SimpleDateFormat("h:mm a").format(new Date(1000L*now - 60 * delay)) + " > " + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration)))
+                                        + "\n" + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60) + " min", Toast.LENGTH_LONG).show();
+                                if (ab != null) {
+                                    ab.setBackgroundDrawable(new ColorDrawable(prevBGColor));
+                                    ab.setTitle(prevBarString);
+                                }
+                            }
+                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">" + sFinal[COLOR_IX] + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Integer.toString((-delay + duration) * 60)) + ">" + sFinal[COMMENT_IX];
+
                             File internalFile = new File(context.getFilesDir(), LOG_FILE);
                             try {
                                 FileOutputStream out = new FileOutputStream(internalFile, true);
@@ -420,7 +420,6 @@ public class CommandsFrag extends Fragment {
                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                             }
                             mListener.processNewLogEntry(entry);
-                            mListener.receiveCurBG(bg_Norm);
                             return false;
                         case MotionEvent.ACTION_CANCEL:
                             handler.removeCallbacks(mLongPressed);
