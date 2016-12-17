@@ -81,7 +81,6 @@ public class CommandsFrag extends Fragment {
     }
     private PaletteRing palette = new PaletteRing(PALETTE_LEN);
 
-
     private int dpToPx(int dp) {
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
@@ -395,7 +394,7 @@ public class CommandsFrag extends Fragment {
                             if (duration == 0) {
                                 if (ab != null) {
                                     ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
-                                    ab.setTitle(sFinal[COMMENT_IX] + " @" + new SimpleDateFormat("h:mm a").format(new Date(1000L * now - 60 * delay)));
+                                    ab.setTitle(sFinal[COMMENT_IX] + " @" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))));
                                 }
                                 mListener.receiveCurBG(bg_Norm);
                             } else {
@@ -438,8 +437,6 @@ public class CommandsFrag extends Fragment {
         label.setText("Swipe right here for calendar\n\nLong press here for new task");
 
         gridV.addView(child,lp);
-
-        //((TextView) view.findViewById(R.id.text1)).setTextColor(0xFF000000);
         child.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
