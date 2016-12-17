@@ -37,6 +37,9 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     SharedPreferences sprefs;
     //TODO: Think of a better label for the "swipe" area
     //TODO: Bring back "labels" and sliders, such as a "status bar" for on-click?
+    //TODO: Need "clear log"
+    //TODO: Better initial view
+    //TODO: Time spent in action bar
 
 
     public void processNewLogEntry(String E) {
@@ -69,15 +72,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(),BF,GF);
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

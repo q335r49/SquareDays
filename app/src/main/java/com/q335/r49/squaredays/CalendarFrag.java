@@ -152,8 +152,8 @@ class CalendarWin {
         curTask = new CalendarRect();
         shapes.add(curTask);
         this.orig = orig;
-        g0x = (7-gridW)*0.8f;
-        g0y = -1f;
+        g0x = (7f-gridW)*0.8f;
+        g0y = -gridH*0.1f;
         this.gridW = gridW;
         this.gridH = gridH;
         textStyle = new Paint();
