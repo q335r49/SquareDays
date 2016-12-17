@@ -27,8 +27,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener {
     private static final String LOG_FILE = "log.txt";
@@ -36,9 +34,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     private static final String EXT_STORAGE_DIR = "tracker";
     Context context;
     SharedPreferences sprefs;
-    //TODO: Think of a better label for the "swipe" area
     //TODO: Bring back "labels" and sliders, such as a "status bar" for on-click?
-    //TODO: Need "clear log"
+    //TODO: Think of a better label for the "swipe" area
 
     public void processNewLogEntry(String E) {
         GF.procMess(E);

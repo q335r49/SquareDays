@@ -400,7 +400,7 @@ public class CommandsFrag extends Fragment {
                                 mListener.receiveCurBG(bg_Norm);
                             } else {
                                 Toast.makeText(context, sFinal[COMMENT_IX]
-                                        + "\n" + new SimpleDateFormat("h:mm a").format(new Date(1000L*now - 60 * delay)) + " > " + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration)))
+                                        + "\n" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + " > " + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration)))
                                         + "\n" + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60) + " min", Toast.LENGTH_LONG).show();
                                 if (ab != null) {
                                     ab.setBackgroundDrawable(new ColorDrawable(prevBGColor));
