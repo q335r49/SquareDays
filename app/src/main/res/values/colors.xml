@@ -5,4 +5,9 @@
     <color name="colorAccent">#FF4081</color>
     <color name="background">#192125</color>
     <color name="no_task">#192125</color>
+    <color name="scale_text">#2E3E45</color>
+    <color name="grid_background">#263238</color>
+    <color name="now_line">#ffffff</color>
+    <color name="error">#ff0000</color>
+    <color name="end_box">#424242</color>
 </resources>

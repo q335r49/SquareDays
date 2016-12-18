@@ -38,6 +38,9 @@ import java.util.List;
 import static android.content.Context.MODE_PRIVATE;
 
 public class CommandsFrag extends Fragment {
+    static int COLOR_ERROR;
+    static int COLOR_END_BOX;
+    static int COLOR_NO_TASK;
 
     SharedPreferences sprefs;
     private OnFragmentInteractionListener mListener;
@@ -191,7 +194,7 @@ public class CommandsFrag extends Fragment {
 
             gridV.addView(child,lp);
 
-            int testColor=0xFFDDDDDD;
+            int testColor=COLOR_ERROR;
             try {
                 testColor = Color.parseColor(comF[COLOR_IX]);
             } catch (IllegalArgumentException e) {
@@ -234,7 +237,7 @@ public class CommandsFrag extends Fragment {
                                     try {
                                         curColorV.setBackgroundColor(Color.parseColor(comF[COLOR_IX]));
                                     } catch (Exception e) {
-                                        curColorV.setBackgroundColor(Color.parseColor("darkgrey"));
+                                        curColorV.setBackgroundColor(COLOR_ERROR);
                                     }
 
                                     final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
@@ -402,8 +405,8 @@ public class CommandsFrag extends Fragment {
             });
         }
 
-        final int bg_Press = 0xFFDDDDDD;
-        final int bg_Norm = 0xFFAAAAAA;
+        final int bg_Norm = COLOR_END_BOX;
+        final int bg_Press = darkenColor(bg_Norm,0.7f);
         View endButton = inflaterF.inflate(R.layout.gv_list_item, null);
         endButton.setBackgroundColor(bg_Norm);
         TextView label = (TextView) (endButton.findViewById(R.id.text1));
@@ -572,8 +575,6 @@ public class CommandsFrag extends Fragment {
                         long now = System.currentTimeMillis()/1000L;
                         mListener.procMess(mListener.AB_RESTORESTATE,0);
                         if (duration != 0) {
-
-
                             LayoutInflater inflater = LayoutInflater.from(getContext());
                             View commentView = inflater.inflate(R.layout.comment_prompt, null);
                             final EditText commentEntry = (EditText) commentView.findViewById(R.id.edit1);
@@ -596,7 +597,7 @@ public class CommandsFrag extends Fragment {
                                                 Log.d("SquareDays", e.toString());
                                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                                             }
-                                            mListener.procMess(mListener.AB_SETCOLOR,0xFF444444);
+                                            mListener.procMess(mListener.AB_SETCOLOR,COLOR_NO_TASK);
                                             mListener.procMess(mListener.AB_SETTEXT, "No task");
                                             mListener.procMess(mListener.PROC_ENTRY, entry);
                                         }
@@ -619,7 +620,7 @@ public class CommandsFrag extends Fragment {
                                 Log.d("SquareDays", e.toString());
                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                             }
-                            mListener.procMess(mListener.AB_SETCOLOR,0x444444);
+                            mListener.procMess(mListener.AB_SETCOLOR,COLOR_NO_TASK);
                             mListener.procMess(mListener.AB_SETTEXT, "No task");
                             mListener.procMess(mListener.PROC_ENTRY, entry);
                         }

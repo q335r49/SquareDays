@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +19,8 @@ import java.util.List;
 import java.util.Queue;
 
 public class CalendarFrag extends Fragment {
+    static int COLOR_NO_TASK;
+
     private ScaleView calView;
     private View fragView;
     private Queue<String> EntryBuffer = new LinkedList<>();
@@ -50,7 +51,7 @@ public class CalendarFrag extends Fragment {
             mListener.procMess(OnFragmentInteractionListener.AB_SETCOLOR,color);
         } else {
             mListener.procMess(OnFragmentInteractionListener.AB_SETTEXT,"No active task");
-            mListener.procMess(OnFragmentInteractionListener.AB_SETCOLOR, ResourcesCompat.getColor(getResources(), R.color.no_task, null));
+            mListener.procMess(OnFragmentInteractionListener.AB_SETCOLOR, COLOR_NO_TASK);
         }
         mListener.setGF(this);
         return fragView;
@@ -103,6 +104,9 @@ public class CalendarFrag extends Fragment {
     }
 }
 class CalendarWin {
+    static int COLOR_SCALE_TEXT;
+    static int COLOR_GRID_BACKGROUND;
+
     private ArrayList<CalendarRect> shapes;
     private CalendarRect curTask;
         String getCurComment() { return curTask.end == -1 ? curTask.comment  : null; }
@@ -150,7 +154,7 @@ class CalendarWin {
         this.gridH = gridH;
         textStyle = new Paint();
             textStyle.setStyle(Paint.Style.FILL);
-            textStyle.setColor(0xFF2E3E45);
+            textStyle.setColor(COLOR_SCALE_TEXT);
             textStyle.setTypeface(Typeface.DEFAULT);
             textStyle.setTextSize(LINE_WIDTH);
             textStyle.setTextAlign(Paint.Align.LEFT);
@@ -187,7 +191,6 @@ class CalendarWin {
             textStyle.setTextSize(LINE_WIDTH*2f);
             textStyle.setStrokeWidth(LINE_WIDTH/5f);
         }
-        public float getLineWidth() { return LINE_WIDTH;}
     void loadEntry(String line) {
         long ts;
         String[] args = line.split(">",-1);
@@ -234,10 +237,8 @@ class CalendarWin {
     void draw(Canvas canvas) {
         ratio_grid_screen_W = gridW/canvas.getWidth();
         ratio_grid_screen_H = gridH/canvas.getHeight();
-
         float scaleX = 1f - LINE_WIDTH*ratio_grid_screen_W;
         float scaleY = 1f - LINE_WIDTH*ratio_grid_screen_H;
-
         CalendarRect.setRectScalingFactors(scaleX,scaleY);
         CalendarRect.setCanvas(canvas);
         CalendarRect.setCv(this);
@@ -247,7 +248,7 @@ class CalendarWin {
         CalendarRect BG = new CalendarRect();
         BG.start = start;
         BG.end = end;
-        BG.setColor("darkgrey");
+        BG.setColor(COLOR_GRID_BACKGROUND);
 
         CalendarRect.setRectScalingFactors(0.7f, 0.94f);
         BG.draw();
@@ -314,6 +315,9 @@ class CalendarWin {
     }
 }
 class CalendarRect {
+    static int COLOR_NOW_LINE;
+    static int COLOR_ERROR;
+
     private static Canvas canvas;
         static void setCanvas(Canvas canvas) { CalendarRect.canvas = canvas; }
     private static CalendarWin cv;
@@ -343,12 +347,13 @@ class CalendarRect {
     private Paint paint;
         public int getColor() { return paint.getColor();}
         public void setColor(String color) { try {paint.setColor(Color.parseColor(color));} catch (Exception e) {Log.d("SquareDays","Bd color: " + color);} }
+        public void setColor(int color) { try {paint.setColor(color);} catch (Exception e) {Log.d("SquareDays","Bd color: " + color);} }
     String comment=null;
 
     CalendarRect() {
         paint = new Paint();
             paint.setStyle(Paint.Style.FILL);
-            paint.setColor(Color.parseColor("darkgrey"));
+            paint.setColor(COLOR_ERROR);
             paint.setStrokeWidth(2);
     }
     void draw() {
@@ -383,7 +388,7 @@ class CalendarRect {
             end = -1;
         } else {
             int tempColor = paint.getColor();
-            paint.setColor(0xFFFFFFFF);
+            paint.setColor(COLOR_NOW_LINE);
             drawLine(now);
             paint.setColor(tempColor);
         }

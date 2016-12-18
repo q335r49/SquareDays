@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.app.Fragment;
@@ -90,6 +91,15 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     private ViewPager mViewPager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        CalendarFrag.COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);
+        CalendarWin.COLOR_SCALE_TEXT = ResourcesCompat.getColor(getResources(), R.color.scale_text, null);
+        CalendarWin.COLOR_GRID_BACKGROUND = ResourcesCompat.getColor(getResources(), R.color.grid_background, null);
+        CalendarRect.COLOR_NOW_LINE = ResourcesCompat.getColor(getResources(), R.color.now_line, null);
+        CalendarRect.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
+        CommandsFrag.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
+        CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
+        CommandsFrag.COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
