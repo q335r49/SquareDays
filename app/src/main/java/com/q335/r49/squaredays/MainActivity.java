@@ -34,8 +34,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     private static final String EXT_STORAGE_DIR = "tracker";
     Context context;
     SharedPreferences sprefs;
-    //TODO: Bring back "labels" and sliders, such as a "status bar" for on-click?
-    //TODO: Think of a better label for the "swipe" area
+    //TODO: Tutorial in main menu
     //TODO: Polish the google play store entry
 
     public void processNewLogEntry(String E) {

@@ -185,7 +185,7 @@ public class CommandsFrag extends Fragment {
 
         gridV.removeAllViews();
         final ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        LayoutInflater layoutInflater = LayoutInflater.from(context);
+        final LayoutInflater layoutInflater = LayoutInflater.from(context);
         for (int ix = 0; ix<commands.size(); ix++) {
             final String[] sFinal = commands.get(ix);
             final int ixF = ix;
@@ -204,7 +204,7 @@ public class CommandsFrag extends Fragment {
             final int bg_Norm = testColor;
             final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
             child.setBackground(getRoundRect(bg_Norm));
-            //TODO: Bring mLongPressed "outside"; Simplify setBackground
+            //TODO: Bring mLongPressed "outside"; Simplify setBackground; use single instance of color chooser
             child.setOnTouchListener(new View.OnTouchListener() {
                 private Rect viewBounds;
                 private boolean offset_mode = false;
@@ -578,7 +578,7 @@ public class CommandsFrag extends Fragment {
                                     abString = "..";
                                     long now = System.currentTimeMillis()/1000L;
                                     if (duration != 0)
-                                        abString += " +COMMENT";
+                                        abString += " + COMMENT..";
                                     if (delay != 0)
                                         abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
                                                 + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + ")";
@@ -604,28 +604,60 @@ public class CommandsFrag extends Fragment {
                             duration = duration > 50 ? duration - 50 : 0;
                         }
                         long now = System.currentTimeMillis()/1000L;
+                        if (ab != null) {
+                            ab.setBackgroundDrawable(new ColorDrawable(prevBGColor));
+                            ab.setTitle(prevBarString);
                         if (duration != 0) {
-                            Toast.makeText(context, "TODO: Enter Comment", Toast.LENGTH_LONG).show();
-                            //TODO: Process comment
-                            if (ab != null) {
-                                ab.setBackgroundDrawable(new ColorDrawable(prevBGColor));
-                                ab.setTitle(prevBarString);
-                            }
-                        }
 
-                        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? 0 : Integer.toString(-delay * 60) + ">" + (duration == 0 ? "" : "SOME USER COMMENT"));
-                        File internalFile = new File(context.getFilesDir(), LOG_FILE);
-                        //TODO: Don't keep on openining the file?
-                        try {
-                            FileOutputStream out = new FileOutputStream(internalFile, true);
-                            out.write(entry.getBytes());
-                            out.write(System.getProperty("line.separator").getBytes());
-                            out.close();
-                        } catch (Exception e) {
-                            Log.e("SquareDays",e.toString());
-                            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+
+                            LayoutInflater inflater = LayoutInflater.from(getContext());
+                            View commentView = inflater.inflate(R.layout.comment_prompt, null);
+                            final EditText commentEntry = (EditText) commentView.findViewById(R.id.edit1);
+                            final int finalDelay = delay;
+
+                            final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                            alertDialogBuilder.setView(commentView);
+                            alertDialogBuilder
+                                    .setCancelable(true)
+                                    .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (finalDelay == 0 ? 0 : Integer.toString(-finalDelay * 60) + ">" + commentEntry.getText().toString() );
+                                            File internalFile = new File(context.getFilesDir(), LOG_FILE);
+                                            //TODO: Don't keep on opening the file? Ie, a text buffer?
+                                            try {
+                                                FileOutputStream out = new FileOutputStream(internalFile, true);
+                                                out.write(entry.getBytes());
+                                                out.write(System.getProperty("line.separator").getBytes());
+                                                out.close();
+                                            } catch (Exception e) {
+                                                Log.e("SquareDays", e.toString());
+                                                Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+                                            }
+                                            mListener.processNewLogEntry(entry);
+                                        }
+                                    })
+                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            dialog.cancel();
+                                        }
+                                    })
+                                    .create().show();
+                            }
+                        } else {
+                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? 0 : Integer.toString(-delay * 60) + ">");
+                            File internalFile = new File(context.getFilesDir(), LOG_FILE);
+                            //TODO: Don't keep on opening the file? Ie, a text buffer?
+                            try {
+                                FileOutputStream out = new FileOutputStream(internalFile, true);
+                                out.write(entry.getBytes());
+                                out.write(System.getProperty("line.separator").getBytes());
+                                out.close();
+                            } catch (Exception e) {
+                                Log.e("SquareDays", e.toString());
+                                Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+                            }
+                            mListener.processNewLogEntry(entry);
                         }
-                        mListener.processNewLogEntry(entry);
                         return false;
                     case MotionEvent.ACTION_CANCEL:
                         handler.removeCallbacks(mLongPressed);
