@@ -584,6 +584,7 @@ public class CommandsFrag extends Fragment {
                             alertDialogBuilder.setView(commentView);
                             alertDialogBuilder
                                     .setCancelable(true)
+                                    .setTitle("Comment:")
                                     .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
                                             String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (finalDelay == 0 ? "0" : Integer.toString(-finalDelay * 60)) + ">" + commentEntry.getText().toString();
