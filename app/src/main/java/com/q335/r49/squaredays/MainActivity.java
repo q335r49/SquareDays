@@ -37,12 +37,52 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     //TODO: Tutorial in main menu
     //TODO: Polish the google play store entry
 
-    public void processNewLogEntry(String E) {
+    private Toolbar AB;
+
+    public static final int PROC_ENTRY = 9;
+    public static final int AB_SETCOLOR = 10;
+    public static final int AB_SETTEXT = 11;
+    public static final int AB_SAVESTATE = 13;
+    public static final int AB_RESTORESTATE = 14;
+    int AB_curColor = 0;
+    String AB_curText = "";
+    int AB_savedColor = 0;
+    String AB_savedText = "";
+    public void procMess(String E) {
         GF.procMess(E);
     }
-    private int bgColor = Color.parseColor("darkgrey");
-        public void receiveCurBG(int c) { bgColor = c; }
-        public int getCurBG() { return bgColor; }
+    public void procMess(int code, int arg) {
+        switch (code) {
+            case AB_SETCOLOR:
+                AB.setBackgroundColor(arg); //TODO: Handle exceptions
+                AB_curColor = arg;
+                break;
+            case AB_SAVESTATE:
+                AB_savedColor = AB_curColor;
+                AB_savedText = AB_curText;
+                break;
+            case AB_RESTORESTATE:
+                AB.setBackgroundColor(AB_savedColor);
+                AB_curColor = AB_savedColor;
+                AB.setTitle(AB_curText);
+                AB_curText = AB_savedText;
+                break;
+            default:
+                Log.e("SquareDays", "Bad Message: CODE " + code + " ARG " + arg);
+        }
+    }
+    public void procMess(int code, String arg) {
+        switch (code) {
+            case PROC_ENTRY:
+                GF.procMess(arg);
+                break;
+            case AB_SETTEXT:
+                AB.setTitle(arg);
+                break;
+            default:
+                Log.e("SquareDays", "Bad Message: CODE " + code + " ARG " + arg);
+        }
+    }
 
     CalendarFrag GF;
         public void setGF(CalendarFrag GF) { this.GF = GF; }
@@ -59,8 +99,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         context = getApplicationContext();
         sprefs = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        AB = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(AB);
 
         BF = new CommandsFrag();
         GF = new CalendarFrag();

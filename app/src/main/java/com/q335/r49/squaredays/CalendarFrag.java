@@ -22,6 +22,12 @@ import java.util.List;
 import java.util.Queue;
 
 public class CalendarFrag extends Fragment {
+    public static final int PROC_ENTRY = 9;
+    public static final int AB_SETCOLOR = 10;
+    public static final int AB_SETTEXT = 11;
+    public static final int AB_SAVESTATE = 13;
+    public static final int AB_RESTORESTATE = 14;
+
     private ScaleView calView;
     private View fragView;
     private Queue<String> EntryBuffer = new LinkedList<>();
@@ -45,13 +51,11 @@ public class CalendarFrag extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         fragView = inflater.inflate(R.layout.fragment_calendar,container,false);
         calView = (ScaleView) (fragView.findViewById(R.id.drawing));
-        ActionBar bar = ((AppCompatActivity) getActivity()).getSupportActionBar();
         String Task = calView.getCurTask();
-        if (Task != null && bar != null) {
-            bar.setTitle(Task);
+        if (Task != null) {
+            mListener.procMess(AB_SETTEXT,Task);
             int color = calView.getCurTaskColor();
-            mListener.receiveCurBG(color);
-            bar.setBackgroundDrawable(new ColorDrawable(color));
+            mListener.procMess(AB_SETCOLOR,color);
         }
         mListener.setGF(this);
         return fragView;
@@ -93,7 +97,8 @@ public class CalendarFrag extends Fragment {
         mListener = null;
     }
     public interface OnFragmentInteractionListener {
-        void receiveCurBG(int i);
+        void procMess(int code, int arg);
+        void procMess(int code, String arg);
         void setGF(CalendarFrag cf);
     }
 }
@@ -360,6 +365,7 @@ class CalendarRect {
         if (end == -1) {
             end = System.currentTimeMillis() / 1000L;
                 draw(cv,canvas);
+                //TODO: make sure Curtask is always visible
             end = -1;
         }
     }

@@ -40,15 +40,23 @@ import java.util.List;
 import static android.content.Context.MODE_PRIVATE;
 
 public class CommandsFrag extends Fragment {
+    public static final int PROC_ENTRY = 9;
+    public static final int AB_SETCOLOR = 10;
+    public static final int AB_SETTEXT = 11;
+    public static final int AB_SAVESTATE = 13;
+    public static final int AB_RESTORESTATE = 14;
+
     SharedPreferences sprefs;
+    private OnFragmentInteractionListener mListener;
     private FlexboxLayout gridV;
     private List<String[]> commands = new ArrayList<>();
     private static final String LOG_FILE = "log.txt";
     private final static int COMMENT_IX = 0;
     private final static int COLOR_IX = 1;
-    private final static int PALETTE_LEN = 24;
+    private LayoutInflater inflater;
     Context context;
 
+    private final static int PALETTE_LEN = 24;
     class PaletteRing {
         private int length;
         private int size;
@@ -85,12 +93,7 @@ public class CommandsFrag extends Fragment {
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
-//    private int pxToDp(int px) {
-//        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-//        return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-//    }
 
-    //TODO: **** Don't set ab directly, use mListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,8 +104,9 @@ public class CommandsFrag extends Fragment {
         context = getActivity().getApplicationContext();
     }
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inf, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        inflater = inf;
         View view = inflater.inflate(R.layout.fragment_commands,container, false);
         gridV = (FlexboxLayout) view.findViewById(R.id.GV);
         sprefs = context.getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
@@ -115,7 +119,6 @@ public class CommandsFrag extends Fragment {
         if (s.isEmpty()) {
             commands.add(new String[]{"01 This is a task...", "red", "0", ""});
             commands.add(new String[]{"02 Long press a task to edit...", "blue", "0", ""});
-            //XTODO: First install tutorials / test First install
         } else {
             Type listType = new TypeToken<List<String[]>>() { }.getType();
             commands = new Gson().fromJson(s, listType);
@@ -185,20 +188,19 @@ public class CommandsFrag extends Fragment {
         lp.flexShrink=0.2f;
 
         gridV.removeAllViews();
-        final ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        final LayoutInflater layoutInflater = LayoutInflater.from(context);
+        final LayoutInflater inflaterF = inflater;
         for (int ix = 0; ix<commands.size(); ix++) {
-            final String[] sFinal = commands.get(ix);
+            final String[] comF = commands.get(ix);
             final int ixF = ix;
-            View child = layoutInflater.inflate(R.layout.gv_list_item, null);
+            View child = inflaterF.inflate(R.layout.gv_list_item, null);
             TextView label = (TextView) (child.findViewById(R.id.text1));
-            label.setText(sFinal[COMMENT_IX]);
+            label.setText(comF[COMMENT_IX]);
 
             gridV.addView(child,lp);
 
             int testColor=0xFFDDDDDD;
             try {
-                testColor = Color.parseColor(sFinal[COLOR_IX]);
+                testColor = Color.parseColor(comF[COLOR_IX]);
             } catch (IllegalArgumentException e) {
                 Log.e("SquareDays",e.toString());
             }
@@ -208,31 +210,21 @@ public class CommandsFrag extends Fragment {
             //TODO: Bring mLongPressed "outside"; Simplify setBackground; use single instance of color chooser
             child.setOnTouchListener(new View.OnTouchListener() {
                 private Rect viewBounds;
-                private boolean offset_mode = false;
-                private float offset_0x;
-                private float offset_0y;
+                private float offset_0x, offset_0y;
+                private boolean has_run, action_cancelled, offset_mode;
                 private final Handler handler = new Handler();
                 private Runnable mLongPressed;
-                boolean has_run = false;
-                boolean action_cancelled = false;
-                int prevBGColor;
-                CharSequence prevBarString;
-                float ratio_dp_px;
-
+                private final float ratio_dp_px = 1000f /(float) dpToPx(1000);
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     switch (event.getActionMasked()) {
                         case MotionEvent.ACTION_DOWN:
-                            ratio_dp_px = 1000f /(float) dpToPx(1000);
-                            prevBGColor = mListener.getCurBG();
-                            prevBarString = ab.getTitle();
+                            mListener.procMess(AB_SAVESTATE,0);
                             v.getParent().requestDisallowInterceptTouchEvent(true);
                             v.setBackground(getRoundRect(bg_Press));
                             viewBounds = new Rect(v.getLeft(),v.getTop(),v.getRight(),v.getBottom());
-                            offset_mode = false;
                             final View finalView = v;
-                            has_run = false;
-                            action_cancelled = false;
+                            has_run = action_cancelled = offset_mode = false;
                             mLongPressed = new Runnable() {
                                 public void run() {
                                     has_run = true;
@@ -245,10 +237,10 @@ public class CommandsFrag extends Fragment {
                                     alertDialogBuilder.setView(promptView);
 
                                     final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
-                                    commentEntry.setText(sFinal[COMMENT_IX]);
+                                    commentEntry.setText(comF[COMMENT_IX]);
                                     final View curColorV = promptView.findViewById(R.id.CurColor);
                                     try {
-                                        curColorV.setBackgroundColor(Color.parseColor(sFinal[COLOR_IX]));
+                                        curColorV.setBackgroundColor(Color.parseColor(comF[COLOR_IX]));
                                     } catch (Exception e) {
                                         curColorV.setBackgroundColor(Color.parseColor("darkgrey"));
                                     }
@@ -351,14 +343,10 @@ public class CommandsFrag extends Fragment {
                                     String abString = "";
                                     if (duration == 0 && delay  == 0) { //Canceled
                                         action_cancelled = true;
-                                        if (ab != null) {
-                                            ab.setBackgroundDrawable(new ColorDrawable(prevBGColor));
-                                            ab.setTitle(prevBarString);
-                                        }
+                                        mListener.procMess(AB_RESTORESTATE,0);
                                     } else {
                                         action_cancelled = false;
-                                        if (ab != null)
-                                            ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
+                                        mListener.procMess(AB_SETCOLOR,bg_Norm);
                                         abString = "..";
                                         long now = System.currentTimeMillis()/1000L;
                                         if (delay != 0)
@@ -367,8 +355,7 @@ public class CommandsFrag extends Fragment {
                                         if (duration != 0)
                                             abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60)
                                                     + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
-                                        if (ab != null)
-                                            ab.setTitle(abString.isEmpty()? sFinal[COMMENT_IX] : abString);
+                                        mListener.procMess(AB_SETTEXT, abString.isEmpty()? comF[COMMENT_IX] : abString);
                                     }
                                 }
                             }
@@ -390,21 +377,15 @@ public class CommandsFrag extends Fragment {
                             }
                             long now = System.currentTimeMillis()/1000L;
                             if (duration == 0) {
-                                if (ab != null) {
-                                    ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
-                                    ab.setTitle(sFinal[COMMENT_IX] + " @" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))));
-                                }
-                                mListener.receiveCurBG(bg_Norm);
+                                mListener.procMess(AB_SETCOLOR, bg_Norm);
+                                mListener.procMess(AB_SETTEXT, comF[COMMENT_IX] + " @" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))));
                             } else {
-                                Toast.makeText(context, sFinal[COMMENT_IX]
+                                Toast.makeText(context, comF[COMMENT_IX]
                                         + "\n" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + " > " + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration)))
                                         + "\n" + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60) + " min", Toast.LENGTH_LONG).show();
-                                if (ab != null) {
-                                    ab.setBackgroundDrawable(new ColorDrawable(prevBGColor));
-                                    ab.setTitle(prevBarString);
-                                }
+                                mListener.procMess(AB_RESTORESTATE,0);
                             }
-                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">" + sFinal[COLOR_IX] + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Integer.toString((-delay + duration) * 60)) + ">" + sFinal[COMMENT_IX];
+                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">" + comF[COLOR_IX] + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Integer.toString((-delay + duration) * 60)) + ">" + comF[COMMENT_IX];
 
                             File internalFile = new File(context.getFilesDir(), LOG_FILE);
                             try {
@@ -416,7 +397,7 @@ public class CommandsFrag extends Fragment {
                                 Log.e("SquareDays",e.toString());
                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                             }
-                            mListener.processNewLogEntry(entry);
+                            mListener.procMess(PROC_ENTRY, entry);
                             return false;
                         case MotionEvent.ACTION_CANCEL:
                             handler.removeCallbacks(mLongPressed);
@@ -431,7 +412,7 @@ public class CommandsFrag extends Fragment {
 
         final int bg_Press = 0xFFDDDDDD;
         final int bg_Norm = 0xFFAAAAAA;
-        View endButton = layoutInflater.inflate(R.layout.gv_list_item, null);
+        View endButton = inflaterF.inflate(R.layout.gv_list_item, null);
         endButton.setBackgroundColor(bg_Norm);
         TextView label = (TextView) (endButton.findViewById(R.id.text1));
         label.setText("End Task");
@@ -454,8 +435,7 @@ public class CommandsFrag extends Fragment {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         ratio_dp_px = 1000f /(float) dpToPx(1000);
-                        prevBGColor = mListener.getCurBG();
-                        prevBarString = ab.getTitle();
+                        mListener.procMess(AB_SAVESTATE,0);
                         v.getParent().requestDisallowInterceptTouchEvent(true);
                         v.setBackground(getRoundRect(bg_Press));
                         viewBounds = new Rect(v.getLeft(),v.getTop(),v.getRight(),v.getBottom());
@@ -568,14 +548,10 @@ public class CommandsFrag extends Fragment {
                                 String abString = "";
                                 if (duration == 0 && delay  == 0) {
                                     action_cancelled = true;
-                                    if (ab != null) {
-                                        ab.setBackgroundDrawable(new ColorDrawable(prevBGColor));
-                                        ab.setTitle(prevBarString);
-                                    }
+                                    mListener.procMess(AB_RESTORESTATE,0);
                                 } else {
                                     action_cancelled = false;
-                                    if (ab != null)
-                                        ab.setBackgroundDrawable(new ColorDrawable(bg_Norm));
+                                    mListener.procMess(AB_SETCOLOR,bg_Norm);
                                     abString = "..";
                                     long now = System.currentTimeMillis()/1000L;
                                     if (duration != 0)
@@ -583,8 +559,7 @@ public class CommandsFrag extends Fragment {
                                     if (delay != 0)
                                         abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
                                                 + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + ")";
-                                    if (ab != null)
-                                        ab.setTitle(abString.isEmpty()? "End Task" : abString);
+                                    mListener.procMess(AB_SETTEXT,abString.isEmpty()? "End Task" : abString);
                                 }
                             }
                         }
@@ -605,10 +580,7 @@ public class CommandsFrag extends Fragment {
                             duration = duration > 50 ? duration - 50 : 0;
                         }
                         long now = System.currentTimeMillis()/1000L;
-                        if (ab != null) {
-                            ab.setBackgroundDrawable(new ColorDrawable(prevBGColor));
-                            ab.setTitle(prevBarString);
-                        }
+                        mListener.procMess(AB_RESTORESTATE,0);
                         if (duration != 0) {
 
 
@@ -623,7 +595,7 @@ public class CommandsFrag extends Fragment {
                                     .setCancelable(true)
                                     .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-                                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (finalDelay == 0 ? 0 : Integer.toString(-finalDelay * 60) + ">" + commentEntry.getText().toString() );
+                                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>>" + (finalDelay == 0 ? 0 : Integer.toString(-finalDelay * 60) + ">" + commentEntry.getText().toString() );
                                             File internalFile = new File(context.getFilesDir(), LOG_FILE);
                                             //TODO: Don't keep on opening the file? Ie, a text buffer?
                                             try {
@@ -635,7 +607,7 @@ public class CommandsFrag extends Fragment {
                                                 Log.e("SquareDays", e.toString());
                                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                                             }
-                                            mListener.processNewLogEntry(entry);
+                                            mListener.procMess(PROC_ENTRY, entry);
                                             //TODO: set end ab message
                                         }
                                     })
@@ -646,7 +618,7 @@ public class CommandsFrag extends Fragment {
                                     })
                                     .create().show();
                         } else {
-                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? 0 : Integer.toString(-delay * 60) + ">");
+                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>>" + (delay == 0 ? 0 : Integer.toString(-delay * 60) + ">");
                             File internalFile = new File(context.getFilesDir(), LOG_FILE);
                             //TODO: Don't keep on opening the file? Ie, a text buffer?
                             try {
@@ -658,7 +630,7 @@ public class CommandsFrag extends Fragment {
                                 Log.e("SquareDays", e.toString());
                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                             }
-                            mListener.processNewLogEntry(entry);
+                            mListener.procMess(PROC_ENTRY, entry);
                             //TODO: set empty ab message
                         }
                         return false;
@@ -672,7 +644,7 @@ public class CommandsFrag extends Fragment {
             }
         });
 
-        View addButton = layoutInflater.inflate(R.layout.gv_list_item, null);
+        View addButton = inflaterF.inflate(R.layout.gv_list_item, null);
         label = (TextView) (addButton.findViewById(R.id.text1));
         label.setText("Swipe right here for calendar");
         gridV.addView(addButton,lp);
@@ -680,12 +652,6 @@ public class CommandsFrag extends Fragment {
         sprefs.edit().putString("commands", new Gson().toJson(commands)).apply();
     }
 
-    public interface OnFragmentInteractionListener {
-        void processNewLogEntry(String E);
-        int getCurBG();
-        void receiveCurBG(int c);
-        void setBF(CommandsFrag bf);
-    }
     public CommandsFrag() { } // Required empty public constructor
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
@@ -699,7 +665,6 @@ public class CommandsFrag extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-    private OnFragmentInteractionListener mListener;
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -713,5 +678,11 @@ public class CommandsFrag extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    public interface OnFragmentInteractionListener {
+        void procMess(int code, int arg);
+        void procMess(int code, String arg);
+        void setBF(CommandsFrag bf);
     }
 }
