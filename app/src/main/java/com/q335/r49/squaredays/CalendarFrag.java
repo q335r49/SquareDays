@@ -34,7 +34,7 @@ public class CalendarFrag extends Fragment {
     public void procMess(String E) {
         if (calView == null) {
             EntryBuffer.add(E);
-            Log.e("SquareDays","Empty calView: buffer size: " + Integer.toString(EntryBuffer.size()) + " / Entry: " + E);
+            Log.d("SquareDays","Empty calView: buffer size: " + Integer.toString(EntryBuffer.size()) + " / Entry: " + E);
         } else {
             for (String s = EntryBuffer.poll(); s != null; EntryBuffer.poll())
                 calView.procMess(s);
@@ -192,7 +192,7 @@ class CalendarWin {
         long ts;
         String[] args = line.split(">",-1);
         if (args.length < ARG_LEN) {
-            Log.e("SquareDays","Insufficient args: "+line);
+            Log.d("SquareDays","Insufficient args: "+line);
             return;
         }
         try {
@@ -207,7 +207,7 @@ class CalendarWin {
                     curTask.setColor(args[COLOR_POS]);
                     curTask.comment = args[COMMENT_POS];
                 } else
-                    Log.e("SquareDays","Empty start and end: "+line);
+                    Log.d("SquareDays","Empty start and end: "+line);
             } else if (args[START_POS].isEmpty()) {
                 curTask.end = ts + Long.parseLong(args[END_POS]);
                 curTask.comment += args[COMMENT_POS];
@@ -220,7 +220,7 @@ class CalendarWin {
                 shapes.add(markTD);
             }
         } catch (IllegalArgumentException e) {
-            Log.e("SquareDays","Bad color or number format: "+line);
+            Log.d("SquareDays","Bad color or number format: "+line);
         }
     }
     void loadAllEntries(List<String> log) {
@@ -335,7 +335,7 @@ class CalendarRect {
     long end=-1;
     private Paint paint;
         public int getColor() { return paint.getColor();}
-        public void setColor(String color) { try {paint.setColor(Color.parseColor(color));} catch (Exception e) {Log.e("SquareDays","Bd color: " + color);} }
+        public void setColor(String color) { try {paint.setColor(Color.parseColor(color));} catch (Exception e) {Log.d("SquareDays","Bd color: " + color);} }
     String comment=null;
 
     CalendarRect() {

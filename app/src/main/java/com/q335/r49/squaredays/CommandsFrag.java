@@ -595,7 +595,7 @@ public class CommandsFrag extends Fragment {
                                     .setCancelable(true)
                                     .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-                                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>>" + (finalDelay == 0 ? 0 : Integer.toString(-finalDelay * 60) + ">" + commentEntry.getText().toString() );
+                                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (finalDelay == 0 ? "0" : Integer.toString(-finalDelay * 60)) + ">" + commentEntry.getText().toString();
                                             File internalFile = new File(context.getFilesDir(), LOG_FILE);
                                             //TODO: Don't keep on opening the file? Ie, a text buffer?
                                             try {
@@ -607,8 +607,9 @@ public class CommandsFrag extends Fragment {
                                                 Log.e("SquareDays", e.toString());
                                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                                             }
+                                            mListener.procMess(AB_SETCOLOR,0xFF444444);
+                                            mListener.procMess(AB_SETTEXT, "No task");
                                             mListener.procMess(PROC_ENTRY, entry);
-                                            //TODO: set end ab message
                                         }
                                     })
                                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -618,7 +619,7 @@ public class CommandsFrag extends Fragment {
                                     })
                                     .create().show();
                         } else {
-                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>>" + (delay == 0 ? 0 : Integer.toString(-delay * 60) + ">");
+                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Integer.toString(-delay * 60)) + ">";
                             File internalFile = new File(context.getFilesDir(), LOG_FILE);
                             //TODO: Don't keep on opening the file? Ie, a text buffer?
                             try {
@@ -630,8 +631,9 @@ public class CommandsFrag extends Fragment {
                                 Log.e("SquareDays", e.toString());
                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                             }
+                            mListener.procMess(AB_SETCOLOR,0x444444);
+                            mListener.procMess(AB_SETTEXT, "No task");
                             mListener.procMess(PROC_ENTRY, entry);
-                            //TODO: set empty ab message
                         }
                         return false;
                     case MotionEvent.ACTION_CANCEL:
