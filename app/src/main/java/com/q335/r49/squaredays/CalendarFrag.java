@@ -241,9 +241,9 @@ class CalendarWin {
         BG.setColor("darkgrey");
 
         CalendarRect.setRectScalingFactors(0.7f, 0.94f);
-            BG.draw(this,canvas);
-        CalendarRect.setRectScalingFactors(0.86f, 0.94f);
+        BG.draw(this,canvas);
 
+        CalendarRect.setRectScalingFactors(0.86f, 0.94f);
         for (CalendarRect s : shapes)
             s.draw(this,canvas);
 
