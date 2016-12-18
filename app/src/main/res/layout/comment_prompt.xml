@@ -10,7 +10,7 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="edit1"
+        android:inputType="text"
         android:text=""
         android:id="@+id/edit1" />
 </LinearLayout>

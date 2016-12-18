@@ -90,6 +90,7 @@ public class CommandsFrag extends Fragment {
 //        return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
 //    }
 
+    //TODO: **** Don't set ab directly, use mListener
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -607,6 +608,7 @@ public class CommandsFrag extends Fragment {
                         if (ab != null) {
                             ab.setBackgroundDrawable(new ColorDrawable(prevBGColor));
                             ab.setTitle(prevBarString);
+                        }
                         if (duration != 0) {
 
 
@@ -634,6 +636,7 @@ public class CommandsFrag extends Fragment {
                                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                                             }
                                             mListener.processNewLogEntry(entry);
+                                            //TODO: set end ab message
                                         }
                                     })
                                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -642,7 +645,6 @@ public class CommandsFrag extends Fragment {
                                         }
                                     })
                                     .create().show();
-                            }
                         } else {
                             String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? 0 : Integer.toString(-delay * 60) + ">");
                             File internalFile = new File(context.getFilesDir(), LOG_FILE);
@@ -657,6 +659,7 @@ public class CommandsFrag extends Fragment {
                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                             }
                             mListener.processNewLogEntry(entry);
+                            //TODO: set empty ab message
                         }
                         return false;
                     case MotionEvent.ACTION_CANCEL:
