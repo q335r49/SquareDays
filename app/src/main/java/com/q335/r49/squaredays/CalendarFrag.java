@@ -205,6 +205,7 @@ class CalendarWin {
                     Log.e("SquareDays","Empty start and end: "+line);
             } else if (args[START_POS].isEmpty()) {
                 curTask.end = ts + Long.parseLong(args[END_POS]);
+                curTask.comment += args[COMMENT_POS];
             } else {
                 CalendarRect markTD = new CalendarRect();
                 markTD.start = ts + Long.parseLong(args[START_POS]);

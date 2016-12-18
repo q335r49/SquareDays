@@ -613,9 +613,19 @@ public class CommandsFrag extends Fragment {
                             }
                         }
 
-                        //TODO: What if ending is before starting? Actually, no problem -- handle it in Draw
-                        //TODO: Process message
-                        mListener.processNewLogEntry("IM_END" + delay + " + COMMENT");
+                        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? 0 : Integer.toString(-delay * 60) + ">" + (duration == 0 ? "" : "SOME USER COMMENT"));
+                        File internalFile = new File(context.getFilesDir(), LOG_FILE);
+                        //TODO: Don't keep on openining the file?
+                        try {
+                            FileOutputStream out = new FileOutputStream(internalFile, true);
+                            out.write(entry.getBytes());
+                            out.write(System.getProperty("line.separator").getBytes());
+                            out.close();
+                        } catch (Exception e) {
+                            Log.e("SquareDays",e.toString());
+                            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+                        }
+                        mListener.processNewLogEntry(entry);
                         return false;
                     case MotionEvent.ACTION_CANCEL:
                         handler.removeCallbacks(mLongPressed);
