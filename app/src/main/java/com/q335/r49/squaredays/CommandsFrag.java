@@ -153,7 +153,7 @@ public class CommandsFrag extends Fragment {
                 color = Color.parseColor(sa[COLOR_IX]);
                 palette.add(color);
             } catch (Exception e) {
-                Log.e("SquareDays","Bad color " + sa[COLOR_IX]);
+                Log.d("SquareDays","Bad color " + sa[COLOR_IX]);
             }
         }
         makeView();
@@ -202,7 +202,7 @@ public class CommandsFrag extends Fragment {
             try {
                 testColor = Color.parseColor(comF[COLOR_IX]);
             } catch (IllegalArgumentException e) {
-                Log.e("SquareDays",e.toString());
+                Log.d("SquareDays",e.toString());
             }
             final int bg_Norm = testColor;
             final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
@@ -394,7 +394,7 @@ public class CommandsFrag extends Fragment {
                                 out.write(System.getProperty("line.separator").getBytes());
                                 out.close();
                             } catch (Exception e) {
-                                Log.e("SquareDays",e.toString());
+                                Log.d("SquareDays",e.toString());
                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                             }
                             mListener.procMess(PROC_ENTRY, entry);
@@ -604,7 +604,7 @@ public class CommandsFrag extends Fragment {
                                                 out.write(System.getProperty("line.separator").getBytes());
                                                 out.close();
                                             } catch (Exception e) {
-                                                Log.e("SquareDays", e.toString());
+                                                Log.d("SquareDays", e.toString());
                                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                                             }
                                             mListener.procMess(AB_SETCOLOR,0xFF444444);
@@ -628,7 +628,7 @@ public class CommandsFrag extends Fragment {
                                 out.write(System.getProperty("line.separator").getBytes());
                                 out.close();
                             } catch (Exception e) {
-                                Log.e("SquareDays", e.toString());
+                                Log.d("SquareDays", e.toString());
                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                             }
                             mListener.procMess(AB_SETCOLOR,0x444444);

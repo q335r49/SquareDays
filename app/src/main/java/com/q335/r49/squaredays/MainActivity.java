@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
             case AB_RESTORESTATE:
                 AB.setBackgroundColor(AB_savedColor);
                 AB_curColor = AB_savedColor;
-                AB.setTitle(AB_curText);
+                AB.setTitle(AB_savedText);
                 AB_curText = AB_savedText;
                 break;
             default:
