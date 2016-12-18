@@ -5,11 +5,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,12 +19,6 @@ import java.util.List;
 import java.util.Queue;
 
 public class CalendarFrag extends Fragment {
-    public static final int PROC_ENTRY = 9;
-    public static final int AB_SETCOLOR = 10;
-    public static final int AB_SETTEXT = 11;
-    public static final int AB_SAVESTATE = 13;
-    public static final int AB_RESTORESTATE = 14;
-
     private ScaleView calView;
     private View fragView;
     private Queue<String> EntryBuffer = new LinkedList<>();
@@ -53,9 +44,13 @@ public class CalendarFrag extends Fragment {
         calView = (ScaleView) (fragView.findViewById(R.id.drawing));
         String Task = calView.getCurTask();
         if (Task != null) {
-            mListener.procMess(AB_SETTEXT,Task);
+            mListener.procMess(mListener.AB_SETTEXT,Task);
             int color = calView.getCurTaskColor();
-            mListener.procMess(AB_SETCOLOR,color);
+            mListener.procMess(mListener.AB_SETCOLOR,color);
+        } else {
+            mListener.procMess(mListener.AB_SETTEXT,"No active task");
+            int color = calView.getCurTaskColor();
+            mListener.procMess(mListener.AB_SETCOLOR,0xFF444444);
         }
         mListener.setGF(this);
         return fragView;
@@ -97,6 +92,11 @@ public class CalendarFrag extends Fragment {
         mListener = null;
     }
     public interface OnFragmentInteractionListener {
+        int PROC_ENTRY = 9;
+        int AB_SETCOLOR = 10;
+        int AB_SETTEXT = 11;
+        int AB_SAVESTATE = 13;
+        int AB_RESTORESTATE = 14;
         void procMess(int code, int arg);
         void procMess(int code, String arg);
         void setGF(CalendarFrag cf);
@@ -237,7 +237,10 @@ class CalendarWin {
 
         float scaleX = 1f - LINE_WIDTH*ratio_grid_screen_W;
         float scaleY = 1f - LINE_WIDTH*ratio_grid_screen_H;
+
         CalendarRect.setRectScalingFactors(scaleX,scaleY);
+        CalendarRect.setCanvas(canvas);
+        CalendarRect.setCv(this);
 
         long start = conv_grid_ts(0f,(float) (Math.floor(g0y)-1));
         long end = conv_grid_ts(7f,(float) (Math.ceil(g0y+gridH)+1));
@@ -247,11 +250,11 @@ class CalendarWin {
         BG.setColor("darkgrey");
 
         CalendarRect.setRectScalingFactors(0.7f, 0.94f);
-        BG.draw(this,canvas);
+        BG.draw();
 
         CalendarRect.setRectScalingFactors(0.86f, 0.94f);
         for (CalendarRect s : shapes)
-            s.draw(this,canvas);
+            s.draw();
 
         if (gridH >= 3f) {
             final float GRID = 1f;
@@ -303,14 +306,18 @@ class CalendarWin {
             }
         }
 
-        CalendarRect.setRectScalingFactors(0.5f, 0.94f);
-        curTask.drawCur(this,canvas);
+        CalendarRect.setRectScalingFactors(0.7f, 0.94f);
+        curTask.drawCur();
 
         if (!statusText.isEmpty())
             canvas.drawText(statusText,20,LINE_WIDTH*2,textStyle);
     }
 }
 class CalendarRect {
+    private static Canvas canvas;
+        static void setCanvas(Canvas canvas) { CalendarRect.canvas = canvas; }
+    private static CalendarWin cv;
+        static void setCv(CalendarWin cv) { CalendarRect.cv = cv; }
     private static final float MIN_SCALE = 0.3f;
     private static float RECT_SCALING_FACTOR_X = 0.86f;
     private static float RECT_SCALING_FACTOR_Y = 0.94f;
@@ -343,30 +350,45 @@ class CalendarRect {
             paint.setStyle(Paint.Style.FILL);
             paint.setColor(Color.parseColor("darkgrey"));
     }
-
-    void draw(CalendarWin cv, Canvas canvas) {
+    void draw() {
         if (start == -1 || end == -1 || end <= start)
             return;
         long corner = start;
         long midn = start - (start - cv.getOrig() + 864000000000000000L) % 86400L + 86399L;
         for (; midn < end; midn += 86400L) {
-            drawScaledRect(cv.conv_ts_screen(corner, 0),cv.conv_ts_screen(midn, 1f),cv.conv_ts_screen(midn-43199L, 0.5f),canvas);
+            drawScaledRect(cv.conv_ts_screen(corner, 0),cv.conv_ts_screen(midn, 1f),cv.conv_ts_screen(midn-43199L, 0.5f));
             corner = midn+1;
         }
-        drawScaledRect(cv.conv_ts_screen(corner, 0),cv.conv_ts_screen(end, 1f),cv.conv_ts_screen(midn-43199L, 0.5f),canvas);
+        drawScaledRect(cv.conv_ts_screen(corner, 0),cv.conv_ts_screen(end, 1f),cv.conv_ts_screen(midn-43199L, 0.5f));
     }
-    private void drawScaledRect(float[] r0, float[] r1, float[] rC, Canvas canvas) {
+    private void drawScaledRect(float[] r0, float[] r1, float[] rC) {
         canvas.drawRect((r0[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0],
                 (r0[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1],
                 (r1[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0],
                 (r1[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1],paint);
     }
-    void drawCur(CalendarWin cv, Canvas canvas) {
+    private void drawScaledLine(float[] r0, float[] r1, float[] rC) {
+        canvas.drawLine((r0[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0],
+                (r0[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1],
+                (r1[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0],
+                (r1[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1],paint);
+    }
+    void drawCur() {
+        long now = System.currentTimeMillis() / 1000L;
         if (end == -1) {
-            end = System.currentTimeMillis() / 1000L;
-                draw(cv,canvas);
-                //TODO: make sure Curtask is always visible
+            end = now;
+                draw();
             end = -1;
+            drawLine(now);
+        } else {
+            int tempColor = paint.getColor();
+            paint.setColor(0xFFFFFFFF);
+            drawLine(now);
+            paint.setColor(tempColor);
         }
+    }
+    void drawLine(long ts) {
+        long midn = start - (start - cv.getOrig() + 864000000000000000L) % 86400L + 86399L;
+        drawScaledLine(cv.conv_ts_screen(ts,0f),cv.conv_ts_screen(ts,1f),cv.conv_ts_screen(midn,0.5f));
     }
 }

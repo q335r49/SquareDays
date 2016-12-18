@@ -12,8 +12,6 @@ import android.graphics.drawable.shapes.RoundRectShape;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,11 +38,6 @@ import java.util.List;
 import static android.content.Context.MODE_PRIVATE;
 
 public class CommandsFrag extends Fragment {
-    public static final int PROC_ENTRY = 9;
-    public static final int AB_SETCOLOR = 10;
-    public static final int AB_SETTEXT = 11;
-    public static final int AB_SAVESTATE = 13;
-    public static final int AB_RESTORESTATE = 14;
 
     SharedPreferences sprefs;
     private OnFragmentInteractionListener mListener;
@@ -207,7 +200,6 @@ public class CommandsFrag extends Fragment {
             final int bg_Norm = testColor;
             final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
             child.setBackground(getRoundRect(bg_Norm));
-            //TODO: Bring mLongPressed "outside"; Simplify setBackground; use single instance of color chooser
             child.setOnTouchListener(new View.OnTouchListener() {
                 private Rect viewBounds;
                 private float offset_0x, offset_0y;
@@ -219,7 +211,7 @@ public class CommandsFrag extends Fragment {
                 public boolean onTouch(View v, MotionEvent event) {
                     switch (event.getActionMasked()) {
                         case MotionEvent.ACTION_DOWN:
-                            mListener.procMess(AB_SAVESTATE,0);
+                            mListener.procMess(mListener.AB_SAVESTATE,0);
                             v.getParent().requestDisallowInterceptTouchEvent(true);
                             v.setBackground(getRoundRect(bg_Press));
                             viewBounds = new Rect(v.getLeft(),v.getTop(),v.getRight(),v.getBottom());
@@ -343,10 +335,10 @@ public class CommandsFrag extends Fragment {
                                     String abString = "";
                                     if (duration == 0 && delay  == 0) { //Canceled
                                         action_cancelled = true;
-                                        mListener.procMess(AB_RESTORESTATE,0);
+                                        mListener.procMess(mListener.AB_RESTORESTATE,0);
                                     } else {
                                         action_cancelled = false;
-                                        mListener.procMess(AB_SETCOLOR,bg_Norm);
+                                        mListener.procMess(mListener.AB_SETCOLOR,bg_Norm);
                                         abString = "..";
                                         long now = System.currentTimeMillis()/1000L;
                                         if (delay != 0)
@@ -355,7 +347,7 @@ public class CommandsFrag extends Fragment {
                                         if (duration != 0)
                                             abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60)
                                                     + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
-                                        mListener.procMess(AB_SETTEXT, abString.isEmpty()? comF[COMMENT_IX] : abString);
+                                        mListener.procMess(mListener.AB_SETTEXT, abString.isEmpty()? comF[COMMENT_IX] : abString);
                                     }
                                 }
                             }
@@ -377,13 +369,13 @@ public class CommandsFrag extends Fragment {
                             }
                             long now = System.currentTimeMillis()/1000L;
                             if (duration == 0) {
-                                mListener.procMess(AB_SETCOLOR, bg_Norm);
-                                mListener.procMess(AB_SETTEXT, comF[COMMENT_IX] + " @" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))));
+                                mListener.procMess(mListener.AB_SETCOLOR, bg_Norm);
+                                mListener.procMess(mListener.AB_SETTEXT, comF[COMMENT_IX] + " @" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))));
                             } else {
                                 Toast.makeText(context, comF[COMMENT_IX]
                                         + "\n" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + " > " + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration)))
                                         + "\n" + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60) + " min", Toast.LENGTH_LONG).show();
-                                mListener.procMess(AB_RESTORESTATE,0);
+                                mListener.procMess(mListener.AB_RESTORESTATE,0);
                             }
                             String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">" + comF[COLOR_IX] + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Integer.toString((-delay + duration) * 60)) + ">" + comF[COMMENT_IX];
 
@@ -397,7 +389,7 @@ public class CommandsFrag extends Fragment {
                                 Log.d("SquareDays",e.toString());
                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                             }
-                            mListener.procMess(PROC_ENTRY, entry);
+                            mListener.procMess(mListener.PROC_ENTRY, entry);
                             return false;
                         case MotionEvent.ACTION_CANCEL:
                             handler.removeCallbacks(mLongPressed);
@@ -426,8 +418,6 @@ public class CommandsFrag extends Fragment {
             private Runnable mLongPressed;
             boolean has_run = false;
             boolean action_cancelled = false;
-            int prevBGColor;
-            CharSequence prevBarString;
             float ratio_dp_px;
 
             @Override
@@ -435,7 +425,7 @@ public class CommandsFrag extends Fragment {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
                         ratio_dp_px = 1000f /(float) dpToPx(1000);
-                        mListener.procMess(AB_SAVESTATE,0);
+                        mListener.procMess(mListener.AB_SAVESTATE,0);
                         v.getParent().requestDisallowInterceptTouchEvent(true);
                         v.setBackground(getRoundRect(bg_Press));
                         viewBounds = new Rect(v.getLeft(),v.getTop(),v.getRight(),v.getBottom());
@@ -548,10 +538,10 @@ public class CommandsFrag extends Fragment {
                                 String abString = "";
                                 if (duration == 0 && delay  == 0) {
                                     action_cancelled = true;
-                                    mListener.procMess(AB_RESTORESTATE,0);
+                                    mListener.procMess(mListener.AB_RESTORESTATE,0);
                                 } else {
                                     action_cancelled = false;
-                                    mListener.procMess(AB_SETCOLOR,bg_Norm);
+                                    mListener.procMess(mListener.AB_SETCOLOR,bg_Norm);
                                     abString = "..";
                                     long now = System.currentTimeMillis()/1000L;
                                     if (duration != 0)
@@ -559,7 +549,7 @@ public class CommandsFrag extends Fragment {
                                     if (delay != 0)
                                         abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
                                                 + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + ")";
-                                    mListener.procMess(AB_SETTEXT,abString.isEmpty()? "End Task" : abString);
+                                    mListener.procMess(mListener.AB_SETTEXT,abString.isEmpty()? "End Task" : abString);
                                 }
                             }
                         }
@@ -580,7 +570,7 @@ public class CommandsFrag extends Fragment {
                             duration = duration > 50 ? duration - 50 : 0;
                         }
                         long now = System.currentTimeMillis()/1000L;
-                        mListener.procMess(AB_RESTORESTATE,0);
+                        mListener.procMess(mListener.AB_RESTORESTATE,0);
                         if (duration != 0) {
 
 
@@ -597,7 +587,6 @@ public class CommandsFrag extends Fragment {
                                         public void onClick(DialogInterface dialog, int id) {
                                             String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (finalDelay == 0 ? "0" : Integer.toString(-finalDelay * 60)) + ">" + commentEntry.getText().toString();
                                             File internalFile = new File(context.getFilesDir(), LOG_FILE);
-                                            //TODO: Don't keep on opening the file? Ie, a text buffer?
                                             try {
                                                 FileOutputStream out = new FileOutputStream(internalFile, true);
                                                 out.write(entry.getBytes());
@@ -607,9 +596,9 @@ public class CommandsFrag extends Fragment {
                                                 Log.d("SquareDays", e.toString());
                                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                                             }
-                                            mListener.procMess(AB_SETCOLOR,0xFF444444);
-                                            mListener.procMess(AB_SETTEXT, "No task");
-                                            mListener.procMess(PROC_ENTRY, entry);
+                                            mListener.procMess(mListener.AB_SETCOLOR,0xFF444444);
+                                            mListener.procMess(mListener.AB_SETTEXT, "No task");
+                                            mListener.procMess(mListener.PROC_ENTRY, entry);
                                         }
                                     })
                                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -621,7 +610,6 @@ public class CommandsFrag extends Fragment {
                         } else {
                             String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Integer.toString(-delay * 60)) + ">";
                             File internalFile = new File(context.getFilesDir(), LOG_FILE);
-                            //TODO: Don't keep on opening the file? Ie, a text buffer?
                             try {
                                 FileOutputStream out = new FileOutputStream(internalFile, true);
                                 out.write(entry.getBytes());
@@ -631,9 +619,9 @@ public class CommandsFrag extends Fragment {
                                 Log.d("SquareDays", e.toString());
                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                             }
-                            mListener.procMess(AB_SETCOLOR,0x444444);
-                            mListener.procMess(AB_SETTEXT, "No task");
-                            mListener.procMess(PROC_ENTRY, entry);
+                            mListener.procMess(mListener.AB_SETCOLOR,0x444444);
+                            mListener.procMess(mListener.AB_SETTEXT, "No task");
+                            mListener.procMess(mListener.PROC_ENTRY, entry);
                         }
                         return false;
                     case MotionEvent.ACTION_CANCEL:
@@ -683,6 +671,11 @@ public class CommandsFrag extends Fragment {
     }
 
     public interface OnFragmentInteractionListener {
+        int PROC_ENTRY = 9;
+        int AB_SETCOLOR = 10;
+        int AB_SETTEXT = 11;
+        int AB_SAVESTATE = 13;
+        int AB_RESTORESTATE = 14;
         void procMess(int code, int arg);
         void procMess(int code, String arg);
         void setBF(CommandsFrag bf);

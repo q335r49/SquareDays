@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     //TODO: Tutorial in main menu
     //TODO: Polish the google play store entry
     //TODO: Remove bad logs so as to not hog the catLog
+    //TODO: properly initialize AB text, color
 
     private Toolbar AB;
 
@@ -73,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                 break;
             case AB_SETTEXT:
                 AB.setTitle(arg);
+                AB_curText = arg;
                 break;
             default:
                 Log.d("SquareDays", "Bad Message: CODE " + code + " ARG " + arg);
