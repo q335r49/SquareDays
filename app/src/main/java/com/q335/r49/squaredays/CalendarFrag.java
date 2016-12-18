@@ -298,14 +298,15 @@ class CalendarWin {
             }
         }
 
+        CalendarRect.setRectScalingFactors(0.5f, 0.94f);
+        curTask.drawCur(this,canvas);
+
         if (!statusText.isEmpty())
             canvas.drawText(statusText,20,LINE_WIDTH*2,textStyle);
-
-        curTask.drawCur(this,canvas);
     }
 }
 class CalendarRect {
-    private static final float MIN_SCALE = 0.7f;
+    private static final float MIN_SCALE = 0.3f;
     private static float RECT_SCALING_FACTOR_X = 0.86f;
     private static float RECT_SCALING_FACTOR_Y = 0.94f;
     static float getRectScalingFactorY() { return RECT_SCALING_FACTOR_Y; }
@@ -358,10 +359,7 @@ class CalendarRect {
     void drawCur(CalendarWin cv, Canvas canvas) {
         if (end == -1) {
             end = System.currentTimeMillis() / 1000L;
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(cv.getLineWidth()/4);
-            draw(cv,canvas);
-            paint.setStyle(Paint.Style.FILL);
+                draw(cv,canvas);
             end = -1;
         }
     }
