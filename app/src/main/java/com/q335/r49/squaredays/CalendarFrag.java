@@ -7,6 +7,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,13 +45,12 @@ public class CalendarFrag extends Fragment {
         calView = (ScaleView) (fragView.findViewById(R.id.drawing));
         String Task = calView.getCurTask();
         if (Task != null) {
-            mListener.procMess(mListener.AB_SETTEXT,Task);
+            mListener.procMess(OnFragmentInteractionListener.AB_SETTEXT,Task);
             int color = calView.getCurTaskColor();
-            mListener.procMess(mListener.AB_SETCOLOR,color);
+            mListener.procMess(OnFragmentInteractionListener.AB_SETCOLOR,color);
         } else {
-            mListener.procMess(mListener.AB_SETTEXT,"No active task");
-            int color = calView.getCurTaskColor();
-            mListener.procMess(mListener.AB_SETCOLOR,0xFF444444);
+            mListener.procMess(OnFragmentInteractionListener.AB_SETTEXT,"No active task");
+            mListener.procMess(OnFragmentInteractionListener.AB_SETCOLOR, ResourcesCompat.getColor(getResources(), R.color.no_task, null));
         }
         mListener.setGF(this);
         return fragView;
@@ -105,8 +105,8 @@ public class CalendarFrag extends Fragment {
 class CalendarWin {
     private ArrayList<CalendarRect> shapes;
     private CalendarRect curTask;
-        public String getCurComment() { return curTask.end == -1 ? curTask.comment  : null; }
-        public int getCurColor() { return curTask.getColor(); }
+        String getCurComment() { return curTask.end == -1 ? curTask.comment  : null; }
+        int getCurColor() { return curTask.getColor(); }
     private long orig;
         long getOrig() { return orig; }
     private float g0x;
@@ -349,6 +349,7 @@ class CalendarRect {
         paint = new Paint();
             paint.setStyle(Paint.Style.FILL);
             paint.setColor(Color.parseColor("darkgrey"));
+            paint.setStrokeWidth(2);
     }
     void draw() {
         if (start == -1 || end == -1 || end <= start)
@@ -378,8 +379,8 @@ class CalendarRect {
         if (end == -1) {
             end = now;
                 draw();
+                drawLine(now);
             end = -1;
-            drawLine(now);
         } else {
             int tempColor = paint.getColor();
             paint.setColor(0xFFFFFFFF);
@@ -388,7 +389,7 @@ class CalendarRect {
         }
     }
     void drawLine(long ts) {
-        long midn = start - (start - cv.getOrig() + 864000000000000000L) % 86400L + 86399L;
-        drawScaledLine(cv.conv_ts_screen(ts,0f),cv.conv_ts_screen(ts,1f),cv.conv_ts_screen(midn,0.5f));
+        long noon = ts - (ts - cv.getOrig() + 864000000000000000L) % 86400L + 43200;
+        drawScaledLine(cv.conv_ts_screen(ts,0f),cv.conv_ts_screen(ts,1f),cv.conv_ts_screen(noon,0.5f));
     }
 }
