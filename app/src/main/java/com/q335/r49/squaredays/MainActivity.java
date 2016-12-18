@@ -34,8 +34,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     SharedPreferences sprefs;
     //TODO: Tutorial in main menu
     //TODO: Polish the google play store entry
-    //TODO: Remove bad logs so as to not hog the catLog
-    //TODO: properly initialize AB text, color
 
     private Toolbar AB;
 
@@ -51,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     public void procMess(int code, int arg) {
         switch (code) {
             case AB_SETCOLOR:
-                AB.setBackgroundColor(arg); //TODO: Handle exceptions
+                AB.setBackgroundColor(arg);
                 AB_curColor = arg;
                 break;
             case AB_SAVESTATE:
