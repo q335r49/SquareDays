@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                 AB_curText = AB_savedText;
                 break;
             default:
-                Log.d("SquareDays", "Bad Message: CODE " + code + " ARG " + arg);
+                Log.d("SquareDays", "Bad Message: CODE-" + code + " ARG-" + arg);
         }
     }
     public void procMess(int code, String arg) {

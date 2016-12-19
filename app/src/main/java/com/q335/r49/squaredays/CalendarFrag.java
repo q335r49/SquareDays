@@ -302,7 +302,6 @@ class CalendarRect {
     static int COLOR_NOW_LINE;
     static int COLOR_ERROR;
 
-    //TODO: Fix min scale
     private static Canvas canvas;
         static void setCanvas(Canvas canvas) { CalendarRect.canvas = canvas; }
     private static CalendarWin cv;
