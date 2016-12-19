@@ -277,7 +277,6 @@ class CalendarWin {
             gridSize = 1f/2880f;
             timeFormat = " h:mm:ss";
         }
-        int counter = 0;
         float scaledMark = 0;
         float startGrid = g0y + (1f - CalendarRect.getRectScalingFactorY()) * (g0y - (float) Math.floor(g0y) - 0.5f);
         for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
@@ -286,9 +285,7 @@ class CalendarWin {
                 canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, textStyle);
                 canvas.drawText((new SimpleDateFormat(timeFormat).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
             }
-            counter++;
         }
-        Log.d("SquareDays",Integer.toString(counter));
 
         CalendarRect.setRectScalingFactors(0.7f, 0.94f);
         curTask.drawCur();
