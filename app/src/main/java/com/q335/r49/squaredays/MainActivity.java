@@ -33,10 +33,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     private static final String EXT_STORAGE_DIR = "tracker";
     Context context;
     SharedPreferences sprefs;
-    //TODO: Tutorial in main menu
     //TODO: Polish the google play store entry
     //TODO: Display comment on selection
-    //TODO: Don't worry about "leaving the rectangle" -- any drag of greater than 50 will do!
 
     private Toolbar AB;
 

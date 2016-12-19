@@ -204,9 +204,9 @@ public class CommandsFrag extends Fragment {
             final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
             child.setBackground(getRoundRect(bg_Norm));
             child.setOnTouchListener(new View.OnTouchListener() {
-                private Rect viewBounds;
                 private float offset_0x, offset_0y;
-                private boolean has_run, action_cancelled, offset_mode;
+                private boolean has_run;
+                private boolean has_dragged;
                 private final Handler handler = new Handler();
                 private Runnable mLongPressed;
                 private final float ratio_dp_px = 1000f /(float) dpToPx(1000);
@@ -214,16 +214,17 @@ public class CommandsFrag extends Fragment {
                 public boolean onTouch(View v, MotionEvent event) {
                     switch (event.getActionMasked()) {
                         case MotionEvent.ACTION_DOWN:
+                            offset_0x = event.getX();
+                            offset_0y = event.getY();
                             mListener.procMess(mListener.AB_SAVESTATE,0);
                             v.getParent().requestDisallowInterceptTouchEvent(true);
                             v.setBackground(getRoundRect(bg_Press));
-                            viewBounds = new Rect(v.getLeft(),v.getTop(),v.getRight(),v.getBottom());
                             final View finalView = v;
-                            has_run = action_cancelled = offset_mode = false;
+                            has_run = false;
+                            has_dragged = false;
                             mLongPressed = new Runnable() {
                                 public void run() {
                                     has_run = true;
-                                    action_cancelled = false;
                                     finalView.setBackground(getRoundRect(bg_Norm));
                                     Context context = getContext();
                                     LayoutInflater layoutInflater = LayoutInflater.from(context);
@@ -324,75 +325,62 @@ public class CommandsFrag extends Fragment {
                         case MotionEvent.ACTION_MOVE:
                             if (has_run)
                                 return false;
-                            if(offset_mode || !viewBounds.contains(v.getLeft() + (int) event.getX(), v.getTop() + (int) event.getY())){
-                                handler.removeCallbacks(mLongPressed);
-                                if (!offset_mode) {
-                                    offset_mode = true;
-                                    offset_0x = event.getX();
-                                    offset_0y = event.getY();
-                                } else {
-                                    int delay = (int) Math.abs((event.getX() - offset_0x)*ratio_dp_px);
-                                    int duration = (int) Math.abs((event.getY() - offset_0y)*ratio_dp_px);
-                                    delay = delay > 50 ? delay - 50 : 0;
-                                    duration = duration > 50 ? duration - 50 : 0;
-                                    String abString = "";
-                                    if (duration == 0 && delay  == 0) { //Canceled
-                                        action_cancelled = true;
-                                        mListener.procMess(mListener.AB_RESTORESTATE,0);
-                                    } else {
-                                        action_cancelled = false;
-                                        mListener.procMess(mListener.AB_SETCOLOR,bg_Norm);
-                                        abString = "..";
-                                        long now = System.currentTimeMillis()/1000L;
-                                        if (delay != 0)
-                                            abString += " already  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
-                                                    + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + ")";
-                                        if (duration != 0)
-                                            abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60)
-                                                    + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
-                                        mListener.procMess(mListener.AB_SETTEXT, abString.isEmpty()? comF[COMMENT_IX] : abString);
-                                    }
-                                }
+                            int delay = (int) Math.abs((event.getX() - offset_0x)*ratio_dp_px);
+                            int duration = (int) Math.abs((event.getY() - offset_0y)*ratio_dp_px);
+                            delay = delay > 50 ? delay - 50 : 0;
+                            duration = duration > 50 ? duration - 50 : 0;
+                            String abString = "";
+                            if (duration == 0 && delay  == 0) { //Canceled
+                                mListener.procMess(mListener.AB_RESTORESTATE,0);
+                            } else {
+                                handler.removeCallbacks(mLongPressed); // TODO: do this only once
+                                has_dragged = true;
+                                mListener.procMess(mListener.AB_SETCOLOR,bg_Norm);
+                                abString = "..";
+                                long now = System.currentTimeMillis()/1000L;
+                                if (delay != 0)
+                                    abString += " already  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
+                                            + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + ")";
+                                if (duration != 0)
+                                    abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60)
+                                            + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
+                                mListener.procMess(mListener.AB_SETTEXT, abString.isEmpty()? comF[COMMENT_IX] : abString);
                             }
                             return true;
                         case MotionEvent.ACTION_UP:
                             if (has_run)
                                 return false;
                             v.setBackground(getRoundRect(bg_Norm));
-                            if (action_cancelled)
-                                return false;
                             handler.removeCallbacks(mLongPressed);
-                            int delay = 0;
-                            int duration = 0;
-                            if (offset_mode) {
-                                delay = (int) Math.abs((event.getX() - offset_0x) * ratio_dp_px);
-                                duration = (int) Math.abs((event.getY() - offset_0y) * ratio_dp_px);
-                                delay = delay > 50 ? delay - 50 : 0;
-                                duration = duration > 50 ? duration - 50 : 0;
-                            }
-                            long now = System.currentTimeMillis()/1000L;
-                            if (duration == 0) {
-                                mListener.procMess(mListener.AB_SETCOLOR, bg_Norm);
-                                mListener.procMess(mListener.AB_SETTEXT, comF[COMMENT_IX] + " @" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))));
-                            } else {
-                                Toast.makeText(context, comF[COMMENT_IX]
-                                        + "\n" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + " > " + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration)))
-                                        + "\n" + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60) + " min", Toast.LENGTH_LONG).show();
-                                mListener.procMess(mListener.AB_RESTORESTATE,0);
-                            }
-                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">" + comF[COLOR_IX] + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Integer.toString((-delay + duration) * 60)) + ">" + comF[COMMENT_IX];
-
-                            File internalFile = new File(context.getFilesDir(), LOG_FILE);
-                            try {
-                                FileOutputStream out = new FileOutputStream(internalFile, true);
-                                out.write(entry.getBytes());
-                                out.write(System.getProperty("line.separator").getBytes());
-                                out.close();
-                            } catch (Exception e) {
-                                Log.d("SquareDays",e.toString());
-                                Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
-                            }
-                            mListener.procMess(mListener.PROC_ENTRY, entry);
+                            delay = (int) Math.abs((event.getX() - offset_0x) * ratio_dp_px);
+                            duration = (int) Math.abs((event.getY() - offset_0y) * ratio_dp_px);
+                            delay = delay > 50 ? delay - 50 : 0;
+                            duration = duration > 50 ? duration - 50 : 0;
+                            if (delay != 0 || duration != 0 || !has_dragged) {
+                                long now = System.currentTimeMillis() / 1000L;
+                                if (duration == 0) {
+                                    mListener.procMess(mListener.AB_SETCOLOR, bg_Norm);
+                                    mListener.procMess(mListener.AB_SETTEXT, comF[COMMENT_IX] + " @" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))));
+                                } else {
+                                    Toast.makeText(context, comF[COMMENT_IX]
+                                            + "\n" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))) + " > " + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay + 60 * duration)))
+                                            + "\n" + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60) + " min", Toast.LENGTH_LONG).show();
+                                    mListener.procMess(mListener.AB_RESTORESTATE, 0);
+                                }
+                                String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">" + comF[COLOR_IX] + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Integer.toString((-delay + duration) * 60)) + ">" + comF[COMMENT_IX];
+                                File internalFile = new File(context.getFilesDir(), LOG_FILE);
+                                try {
+                                    FileOutputStream out = new FileOutputStream(internalFile, true);
+                                    out.write(entry.getBytes());
+                                    out.write(System.getProperty("line.separator").getBytes());
+                                    out.close();
+                                } catch (Exception e) {
+                                    Log.d("SquareDays", e.toString());
+                                    Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+                                }
+                                mListener.procMess(mListener.PROC_ENTRY, entry);
+                            } else
+                                mListener.procMess(mListener.AB_RESTORESTATE, 0);
                             return false;
                         case MotionEvent.ACTION_CANCEL:
                             handler.removeCallbacks(mLongPressed);
@@ -413,34 +401,28 @@ public class CommandsFrag extends Fragment {
         label.setText("End Task");
         gridV.addView(endButton,lp);
         endButton.setOnTouchListener(new View.OnTouchListener() {
-            private Rect viewBounds;
-            private boolean offset_mode = false;
             private float offset_0x;
             private float offset_0y;
             private final Handler handler = new Handler();
             private Runnable mLongPressed;
             boolean has_run = false;
-            boolean action_cancelled = false;
-            float ratio_dp_px;
+            boolean has_dragged;
+            private final float ratio_dp_px = 1000f /(float) dpToPx(1000);
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        ratio_dp_px = 1000f /(float) dpToPx(1000);
+                        offset_0x = event.getX();
+                        offset_0y = event.getY();
                         mListener.procMess(mListener.AB_SAVESTATE,0);
                         v.getParent().requestDisallowInterceptTouchEvent(true);
                         v.setBackground(getRoundRect(bg_Press));
-                        viewBounds = new Rect(v.getLeft(),v.getTop(),v.getRight(),v.getBottom());
-                        offset_mode = false;
-                        final View finalView = v;
                         has_run = false;
-                        action_cancelled = false;
+                        has_dragged = false;
                         mLongPressed = new Runnable() {
                             public void run() {
                                 has_run = true;
-                                action_cancelled = false;
-
                                 LayoutInflater layoutInflater = LayoutInflater.from(getContext());
                                 View promptView = layoutInflater.inflate(R.layout.prompts, null);
                                 final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
@@ -527,52 +509,36 @@ public class CommandsFrag extends Fragment {
                     case MotionEvent.ACTION_MOVE:
                         if (has_run)
                             return false;
-                        if(offset_mode || !viewBounds.contains(v.getLeft() + (int) event.getX(), v.getTop() + (int) event.getY())) {
-                            handler.removeCallbacks(mLongPressed);
-                            if (!offset_mode) {
-                                offset_mode = true;
-                                offset_0x = event.getX();
-                                offset_0y = event.getY();
-                            } else {
-                                int delay = (int) Math.abs((event.getX() - offset_0x)*ratio_dp_px);
-                                int duration = (int) Math.abs((event.getY() - offset_0y)*ratio_dp_px);
-                                delay = delay > 50 ? delay - 50 : 0;
-                                duration = duration > 50 ? duration - 50 : 0;
-                                String abString = "";
-                                if (duration == 0 && delay  == 0) {
-                                    action_cancelled = true;
-                                    mListener.procMess(mListener.AB_RESTORESTATE,0);
-                                } else {
-                                    action_cancelled = false;
-                                    mListener.procMess(mListener.AB_SETCOLOR,bg_Norm);
-                                    abString = "..";
-                                    long now = System.currentTimeMillis()/1000L;
-                                    if (duration != 0)
-                                        abString += " + COMMENT..";
-                                    if (delay != 0)
-                                        abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
-                                                + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + ")";
-                                    mListener.procMess(mListener.AB_SETTEXT,abString.isEmpty()? "End Task" : abString);
-                                }
-                            }
+                        int delay = (int) Math.abs((event.getX() - offset_0x)*ratio_dp_px);
+                        int duration = (int) Math.abs((event.getY() - offset_0y)*ratio_dp_px);
+                        delay = delay > 50 ? delay - 50 : 0;
+                        duration = duration > 50 ? duration - 50 : 0;
+                        String abString = "";
+                        if (duration == 0 && delay  == 0) {
+                            mListener.procMess(mListener.AB_RESTORESTATE,0);
+                        } else {
+                            handler.removeCallbacks(mLongPressed); // TODO: do this only once
+                            has_dragged = true;
+                            mListener.procMess(mListener.AB_SETCOLOR,bg_Norm);
+                            abString = "..";
+                            long now = System.currentTimeMillis()/1000L;
+                            if (duration != 0)
+                                abString += " + COMMENT..";
+                            if (delay != 0)
+                                abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
+                                        + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + ")";
+                            mListener.procMess(mListener.AB_SETTEXT,abString.isEmpty()? "End Task" : abString);
                         }
                         return true;
                     case MotionEvent.ACTION_UP:
                         if (has_run)
                             return false;
                         v.setBackground(getRoundRect(bg_Norm));
-                        if (action_cancelled)
-                            return false;
                         handler.removeCallbacks(mLongPressed);
-                        int delay = 0;
-                        int duration = 0;
-                        if (offset_mode) {
-                            delay = (int) Math.abs((event.getX() - offset_0x) * ratio_dp_px);
-                            duration = (int) Math.abs((event.getY() - offset_0y) * ratio_dp_px);
-                            delay = delay > 50 ? delay - 50 : 0;
-                            duration = duration > 50 ? duration - 50 : 0;
-                        }
-                        long now = System.currentTimeMillis()/1000L;
+                        delay = (int) Math.abs((event.getX() - offset_0x) * ratio_dp_px);
+                        duration = (int) Math.abs((event.getY() - offset_0y) * ratio_dp_px);
+                        delay = delay > 50 ? delay - 50 : 0;
+                        duration = duration > 50 ? duration - 50 : 0;
                         mListener.procMess(mListener.AB_RESTORESTATE,0);
                         if (duration != 0) {
                             LayoutInflater inflater = LayoutInflater.from(getContext());
@@ -599,7 +565,7 @@ public class CommandsFrag extends Fragment {
                                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                                             }
                                             mListener.procMess(mListener.AB_SETCOLOR,COLOR_NO_TASK);
-                                            mListener.procMess(mListener.AB_SETTEXT, "No task");
+                                            mListener.procMess(mListener.AB_SETTEXT, "No active task");
                                             mListener.procMess(mListener.PROC_ENTRY, entry);
                                         }
                                     })
@@ -609,7 +575,7 @@ public class CommandsFrag extends Fragment {
                                         }
                                     })
                                     .create().show();
-                        } else {
+                        } else if (delay != 0 || !has_dragged) {
                             String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Integer.toString(-delay * 60)) + ">";
                             File internalFile = new File(context.getFilesDir(), LOG_FILE);
                             try {
@@ -622,7 +588,7 @@ public class CommandsFrag extends Fragment {
                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                             }
                             mListener.procMess(mListener.AB_SETCOLOR,COLOR_NO_TASK);
-                            mListener.procMess(mListener.AB_SETTEXT, "No task");
+                            mListener.procMess(mListener.AB_SETTEXT, "No active task");
                             mListener.procMess(mListener.PROC_ENTRY, entry);
                         }
                         return false;
