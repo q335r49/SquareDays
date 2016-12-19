@@ -238,7 +238,8 @@ class CalendarWin {
         int screenH = canvas.getHeight();
         ratio_grid_screen_W = gridW/canvas.getWidth();
         ratio_grid_screen_H = gridH/screenH;
-        CalendarRect.setRectScalingFactors(1f - LINE_WIDTH*ratio_grid_screen_W,1f - LINE_WIDTH*ratio_grid_screen_H);
+        float scaleX = 1f - LINE_WIDTH*ratio_grid_screen_W;
+        float scaleY = 1f - LINE_WIDTH*ratio_grid_screen_H;
         CalendarRect.setCanvas(canvas);
         CalendarRect.setCv(this);
 
@@ -249,10 +250,10 @@ class CalendarWin {
         BG.end = end;
         BG.setColor(COLOR_GRID_BACKGROUND);
 
-        CalendarRect.setRectScalingFactors(0.7f, 0.94f);
+        CalendarRect.setRectScalingFactors(scaleX,scaleY);
         BG.draw();
 
-        CalendarRect.setRectScalingFactors(0.86f, 0.94f);
+        CalendarRect.setRectScalingFactors(0.86f,scaleY);
         for (CalendarRect s : shapes)
             s.draw();
 
@@ -287,11 +288,13 @@ class CalendarWin {
             }
         }
 
-        CalendarRect.setRectScalingFactors(0.7f, 0.94f);
+        CalendarRect.setRectScalingFactors(0.7f, scaleY);
         curTask.drawCur();
 
         if (!statusText.isEmpty())
             canvas.drawText(statusText,20,LINE_WIDTH*2,textStyle);
+
+        CalendarRect.setRectScalingFactors(scaleX,scaleY);
     }
 }
 class CalendarRect {
@@ -304,7 +307,7 @@ class CalendarRect {
         static void setCanvas(Canvas canvas) { CalendarRect.canvas = canvas; }
     private static CalendarWin cv;
         static void setCv(CalendarWin cv) { CalendarRect.cv = cv; }
-    private static final float MIN_SCALE = 0.3f;
+    private static final float MIN_SCALE = 0.7f;
     private static float RECT_SCALING_FACTOR_X = 0.86f;
     private static float RECT_SCALING_FACTOR_Y = 0.94f;
         static float getRectScalingFactorY() { return RECT_SCALING_FACTOR_Y; }

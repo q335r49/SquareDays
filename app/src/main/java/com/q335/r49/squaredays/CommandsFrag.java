@@ -312,8 +312,10 @@ public class CommandsFrag extends Fragment {
                             if (duration == 0 && delay  == 0) { //Canceled
                                 mListener.procMess(mListener.AB_RESTORESTATE,0);
                             } else {
-                                handler.removeCallbacks(mLongPressed); // TODO: do this only once
-                                has_dragged = true;
+                                if (!has_dragged) {
+                                    handler.removeCallbacks(mLongPressed);
+                                    has_dragged = true;
+                                }
                                 mListener.procMess(mListener.AB_SETCOLOR,bg_Norm);
                                 abString = "..";
                                 long now = System.currentTimeMillis()/1000L;
@@ -357,7 +359,7 @@ public class CommandsFrag extends Fragment {
                                     Log.d("SquareDays", e.toString());
                                     Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                                 }
-                                mListener.procMess(mListener.PROC_ENTRY, entry); //TODO: combine proc_entry and set_color / text
+                                mListener.procMess(mListener.PROC_ENTRY, entry);
                             } else
                                 mListener.procMess(mListener.AB_RESTORESTATE, 0);
                             return false;
@@ -496,8 +498,10 @@ public class CommandsFrag extends Fragment {
                         if (duration == 0 && delay  == 0) {
                             mListener.procMess(mListener.AB_RESTORESTATE,0);
                         } else {
-                            handler.removeCallbacks(mLongPressed); // TODO: do this only once
-                            has_dragged = true;
+                            if (!has_dragged) {
+                                handler.removeCallbacks(mLongPressed);
+                                has_dragged = true;
+                            }
                             mListener.procMess(mListener.AB_SETCOLOR,bg_Norm);
                             abString = "..";
                             long now = System.currentTimeMillis()/1000L;
