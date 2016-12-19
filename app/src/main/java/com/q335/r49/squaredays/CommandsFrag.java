@@ -5,10 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RoundRectShape;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -161,13 +158,6 @@ public class CommandsFrag extends Fragment {
                 Math.min(Math.round(Color.green(color) * factor),255),
                 Math.min(Math.round(Color.blue(color) * factor),255));
     }
-    private static float[] RR_radii = {0f, 0f, 0f, 0f, 0f, 0f, 0f, 0f};
-    public static ShapeDrawable getRoundRect(int color) {
-        ShapeDrawable bgshape = new ShapeDrawable();
-        bgshape.setShape(new RoundRectShape(RR_radii,null,null));
-        bgshape.getPaint().setColor(color);
-        return bgshape;
-    }
 
     private void makeView() {
         Collections.sort(commands, new Comparator<String[]>() {
@@ -202,7 +192,7 @@ public class CommandsFrag extends Fragment {
             }
             final int bg_Norm = testColor;
             final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
-            child.setBackground(getRoundRect(bg_Norm));
+            child.setBackgroundColor(bg_Norm);
             child.setOnTouchListener(new View.OnTouchListener() {
                 private float offset_0x, offset_0y;
                 private boolean has_run;
@@ -218,14 +208,14 @@ public class CommandsFrag extends Fragment {
                             offset_0y = event.getY();
                             mListener.procMess(mListener.AB_SAVESTATE,0);
                             v.getParent().requestDisallowInterceptTouchEvent(true);
-                            v.setBackground(getRoundRect(bg_Press));
+                            v.setBackgroundColor(bg_Press);
                             final View finalView = v;
                             has_run = false;
                             has_dragged = false;
                             mLongPressed = new Runnable() {
                                 public void run() {
                                     has_run = true;
-                                    finalView.setBackground(getRoundRect(bg_Norm));
+                                    finalView.setBackgroundColor(bg_Norm);
                                     Context context = getContext();
                                     LayoutInflater layoutInflater = LayoutInflater.from(context);
                                     View promptView = layoutInflater.inflate(R.layout.prompts, null);
@@ -350,7 +340,7 @@ public class CommandsFrag extends Fragment {
                         case MotionEvent.ACTION_UP:
                             if (has_run)
                                 return false;
-                            v.setBackground(getRoundRect(bg_Norm));
+                            v.setBackgroundColor(bg_Norm);
                             handler.removeCallbacks(mLongPressed);
                             delay = (int) Math.abs((event.getX() - offset_0x) * ratio_dp_px);
                             duration = (int) Math.abs((event.getY() - offset_0y) * ratio_dp_px);
@@ -384,7 +374,7 @@ public class CommandsFrag extends Fragment {
                             return false;
                         case MotionEvent.ACTION_CANCEL:
                             handler.removeCallbacks(mLongPressed);
-                            v.setBackground(getRoundRect(bg_Norm));
+                            v.setBackgroundColor(bg_Norm);
                             return false;
                         default:
                             return true;
@@ -417,7 +407,7 @@ public class CommandsFrag extends Fragment {
                         offset_0y = event.getY();
                         mListener.procMess(mListener.AB_SAVESTATE,0);
                         v.getParent().requestDisallowInterceptTouchEvent(true);
-                        v.setBackground(getRoundRect(bg_Press));
+                        v.setBackgroundColor(bg_Press);
                         has_run = false;
                         has_dragged = false;
                         mLongPressed = new Runnable() {
@@ -533,7 +523,7 @@ public class CommandsFrag extends Fragment {
                     case MotionEvent.ACTION_UP:
                         if (has_run)
                             return false;
-                        v.setBackground(getRoundRect(bg_Norm));
+                        v.setBackgroundColor(bg_Norm);
                         handler.removeCallbacks(mLongPressed);
                         delay = (int) Math.abs((event.getX() - offset_0x) * ratio_dp_px);
                         duration = (int) Math.abs((event.getY() - offset_0y) * ratio_dp_px);
@@ -594,7 +584,7 @@ public class CommandsFrag extends Fragment {
                         return false;
                     case MotionEvent.ACTION_CANCEL:
                         handler.removeCallbacks(mLongPressed);
-                        v.setBackground(getRoundRect(bg_Norm));
+                        v.setBackgroundColor(bg_Norm);
                         return false;
                     default:
                         return true;
