@@ -179,24 +179,18 @@ public class CommandsFrag extends Fragment {
             final String[] comF = commands.get(ix);
             final int ixF = ix;
             View child = inflaterF.inflate(R.layout.gv_list_item, null);
+                gridV.addView(child,lp);
             TextView label = (TextView) (child.findViewById(R.id.text1));
-            label.setText(comF[COMMENT_IX]);
-
-            gridV.addView(child,lp);
-
+                label.setText(comF[COMMENT_IX]);
             int testColor=COLOR_ERROR;
-            try {
-                testColor = Color.parseColor(comF[COLOR_IX]);
-            } catch (IllegalArgumentException e) {
-                Log.d("SquareDays",e.toString());
-            }
+                try { testColor = Color.parseColor(comF[COLOR_IX]); } catch (IllegalArgumentException e) { Log.d("SquareDays",e.toString()); }
             final int bg_Norm = testColor;
             final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
-            child.setBackgroundColor(bg_Norm);
+                child.setBackgroundColor(bg_Norm);
+
             child.setOnTouchListener(new View.OnTouchListener() {
                 private float offset_0x, offset_0y;
-                private boolean has_run;
-                private boolean has_dragged;
+                private boolean has_run, has_dragged;
                 private final Handler handler = new Handler();
                 private Runnable mLongPressed;
                 private final float ratio_dp_px = 1000f /(float) dpToPx(1000);
@@ -210,32 +204,27 @@ public class CommandsFrag extends Fragment {
                             v.getParent().requestDisallowInterceptTouchEvent(true);
                             v.setBackgroundColor(bg_Press);
                             final View finalView = v;
-                            has_run = false;
-                            has_dragged = false;
+                            has_run = has_dragged = false;
                             mLongPressed = new Runnable() {
                                 public void run() {
                                     has_run = true;
                                     finalView.setBackgroundColor(bg_Norm);
                                     Context context = getContext();
-                                    LayoutInflater layoutInflater = LayoutInflater.from(context);
-                                    View promptView = layoutInflater.inflate(R.layout.prompts, null);
+                                    View promptView = inflater.inflate(R.layout.prompts, null);
                                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
                                     alertDialogBuilder.setView(promptView);
 
                                     final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
-                                    commentEntry.setText(comF[COMMENT_IX]);
+                                        commentEntry.setText(comF[COMMENT_IX]);
                                     final View curColorV = promptView.findViewById(R.id.CurColor);
                                     try {
                                         curColorV.setBackgroundColor(Color.parseColor(comF[COLOR_IX]));
-                                    } catch (Exception e) {
-                                        curColorV.setBackgroundColor(COLOR_ERROR);
-                                    }
+                                    } catch (Exception e) { curColorV.setBackgroundColor(COLOR_ERROR); }
 
                                     final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                                     final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
                                     final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
                                     final SeekBar seekBlue = (SeekBar) promptView.findViewById(R.id.seekBlue);
-
                                     seekRed.setProgress(Color.red(curColor));
                                     seekRed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                                         @Override
@@ -357,7 +346,7 @@ public class CommandsFrag extends Fragment {
                                             + "\n" + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60) + " min", Toast.LENGTH_LONG).show();
                                     mListener.procMess(mListener.AB_RESTORESTATE, 0);
                                 }
-                                String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">" + comF[COLOR_IX] + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Integer.toString((-delay + duration) * 60)) + ">" + comF[COMMENT_IX];
+                                String entry = Long.toString(now) + ">" + (new Date()).toString() + ">" + comF[COLOR_IX] + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Integer.toString((-delay + duration) * 60)) + ">" + comF[COMMENT_IX];
                                 File internalFile = new File(context.getFilesDir(), LOG_FILE);
                                 try {
                                     FileOutputStream out = new FileOutputStream(internalFile, true);
@@ -368,7 +357,7 @@ public class CommandsFrag extends Fragment {
                                     Log.d("SquareDays", e.toString());
                                     Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                                 }
-                                mListener.procMess(mListener.PROC_ENTRY, entry);
+                                mListener.procMess(mListener.PROC_ENTRY, entry); //TODO: combine proc_entry and set_color / text
                             } else
                                 mListener.procMess(mListener.AB_RESTORESTATE, 0);
                             return false;
