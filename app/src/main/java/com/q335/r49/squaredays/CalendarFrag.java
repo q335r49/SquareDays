@@ -277,25 +277,24 @@ class CalendarWin {
             gridSize = 1f/2880f;
             timeFormat = " h:mm:ss";
         }
+        int counter = 0;
         float scaledMark = 0;
-        float startGrid = g0y - conv_gridy_to_screeny(g0y) * ratio_grid_screen_H ;
-        for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize - 1.999f*gridSize; scaledMark < screenH; startGrid += gridSize) {
-            scaledMark = conv_gridy_to_screeny(startGrid);
-            canvas.drawLine(0f,scaledMark,LINE_WIDTH * 6f,scaledMark,textStyle);
-            canvas.drawText((new SimpleDateFormat(timeFormat).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
+        float startGrid = g0y + (1f - CalendarRect.getRectScalingFactorY()) * (g0y - (float) Math.floor(g0y) - 0.5f);
+        for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
+            scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * CalendarRect.getRectScalingFactorY() + (float) Math.floor(startGrid) + 0.5f - g0y) / ratio_grid_screen_H;
+            if (scaledMark > 0f) {
+                canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, textStyle);
+                canvas.drawText((new SimpleDateFormat(timeFormat).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
+            }
+            counter++;
         }
+        Log.d("SquareDays",Integer.toString(counter));
 
         CalendarRect.setRectScalingFactors(0.7f, 0.94f);
         curTask.drawCur();
 
         if (!statusText.isEmpty())
             canvas.drawText(statusText,20,LINE_WIDTH*2,textStyle);
-    }
-
-    float conv_gridy_to_screeny(float y) {
-        float mark = (y - g0y)/ ratio_grid_screen_H;
-        float center = ((float) Math.floor(y) + 0.5f - g0y)/ ratio_grid_screen_H;
-        return (mark - center) * CalendarRect.getRectScalingFactorY() + center;
     }
 }
 class CalendarRect {
