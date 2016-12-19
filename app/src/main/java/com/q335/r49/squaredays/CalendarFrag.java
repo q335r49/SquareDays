@@ -142,12 +142,6 @@ class CalendarWin {
     long conv_grid_ts(float gx, float gy) {
         return (long) (conv_grid_num(gx,gy)*86400) + orig;
     }
-    float[] conv_ts_grid(long ts, float offset) {
-        long days = ts >= orig ? (ts - orig)/86400L : (ts - orig + 1) / 86400L - 1L;
-        float dow = (float) ((days + 4611686018427387900L)%7);
-        float weeks = (float) (days >= 0? days/7 : (days + 1) / 7 - 1) + ((float) ((ts - orig +4611686018427360000L)%86400) / 86400);
-        return new float[] {(dow - g0x), (weeks - g0y)};
-    }
 
     CalendarWin(long orig, float gridW, float gridH) {
         shapes = new ArrayList<>();
@@ -241,8 +235,9 @@ class CalendarWin {
         }
     }
     void draw(Canvas canvas) {
+        int screenH = canvas.getHeight();
         ratio_grid_screen_W = gridW/canvas.getWidth();
-        ratio_grid_screen_H = gridH/canvas.getHeight();
+        ratio_grid_screen_H = gridH/screenH;
         CalendarRect.setRectScalingFactors(1f - LINE_WIDTH*ratio_grid_screen_W,1f - LINE_WIDTH*ratio_grid_screen_H);
         CalendarRect.setCanvas(canvas);
         CalendarRect.setCv(this);
@@ -261,60 +256,33 @@ class CalendarWin {
         for (CalendarRect s : shapes)
             s.draw();
 
-        float startDate;
-        startDate = (float) Math.floor(g0y * 1f) / 1f;
-        if (gridH >= 3f) { final float GRID = 1f;
-            startDate = (float) Math.floor(g0y * GRID) / GRID;
-            for (int i = 0; i < gridH + 1; i++) {
-                float[] lblXY = conv_grid_screen(-0.5f, startDate + i);
-                canvas.drawLine(0f,lblXY[1],LINE_WIDTH * 6f,lblXY[1],textStyle);
-                canvas.drawText((new SimpleDateFormat(" M.d").format(new Date(conv_grid_ts(-1, startDate + i) * 1000))), 0, lblXY[1] + LINE_WIDTH * 2.1f, textStyle);
-            }
-        } else if (gridH >= 1f) { final float GRID = 6f;
-            float startHour = (float) Math.floor(g0y * GRID) / GRID + 1f/GRID/1000;
-            for (float i = 0; i < gridH + 1f/GRID; i += 1f/GRID) {
-                float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
-                float[] c = conv_grid_screen(0f, (float) Math.floor(startHour + i) + 0.5f);
-                float gridy = (lblXY[1] - c[1]) * CalendarRect.getRectScalingFactorY() + c[1];
-                canvas.drawLine(0f,gridy,LINE_WIDTH * 6f,gridy,textStyle);
-                canvas.drawText((new SimpleDateFormat(" h:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 0, gridy + LINE_WIDTH * 2.1f, textStyle);
-            }
-        } else if (gridH >= 1f/6f) { final float GRID = 24f;
-            float startHour = (float) Math.floor(g0y * GRID) / GRID + 1f/GRID/1000;
-            for (float i = 0; i < gridH + 1f/GRID; i += 1f/GRID) {
-                float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
-                float[] c = conv_grid_screen(0f, (float) Math.floor(startHour + i) + 0.5f);
-                float gridy = (lblXY[1] - c[1]) * CalendarRect.getRectScalingFactorY() + c[1];
-                canvas.drawLine(0f,gridy,LINE_WIDTH * 6f,gridy,textStyle);
-                canvas.drawText((new SimpleDateFormat(" h:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 0, gridy + LINE_WIDTH * 2.1f, textStyle);
-            }
-        } else if (gridH >= 1f/24f) { final float GRID = 144f;
-            float startHour = (float) Math.floor(g0y * GRID) / GRID + 1f/GRID/1000;
-            for (float i = 0; i < gridH + 1f/GRID; i += 1f/GRID) {
-                float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
-                float[] c = conv_grid_screen(0f, (float) Math.floor(startHour + i) + 0.5f);
-                float gridy = (lblXY[1] - c[1]) * CalendarRect.getRectScalingFactorY() + c[1];
-                canvas.drawLine(0f,gridy,LINE_WIDTH * 6f,gridy,textStyle);
-                canvas.drawText((new SimpleDateFormat(" h:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 0, gridy + LINE_WIDTH * 2.1f, textStyle);
-            }
-        } else if (gridH >= 1f/144f) { final float GRID = 720f;
-            float startHour = (float) Math.floor(g0y * GRID) / GRID + 1f/GRID/1000;
-            for (float i = 0; i < gridH + 1f/GRID; i += 1f/GRID) {
-                float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
-                float[] c = conv_grid_screen(0f, (float) Math.floor(startHour + i) + 0.5f);
-                float gridy = (lblXY[1] - c[1]) * CalendarRect.getRectScalingFactorY() + c[1];
-                canvas.drawLine(0f,gridy,LINE_WIDTH * 6f,gridy,textStyle);
-                canvas.drawText((new SimpleDateFormat(" h:mm").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 0, gridy + LINE_WIDTH * 2.1f, textStyle);
-            }
-        } else { final float GRID = 2880f;
-            float startHour = (float) Math.floor(g0y * GRID) / GRID + 1f/GRID/1000;
-            for (float i = 0; i < gridH + 1f/GRID; i += 1f/GRID) {
-                float[] lblXY = conv_grid_screen(-0.5f, startHour + i);
-                float[] c = conv_grid_screen(0f, (float) Math.floor(startHour + i) + 0.5f);
-                float gridy = (lblXY[1] - c[1]) * CalendarRect.getRectScalingFactorY() + c[1];
-                canvas.drawLine(0f,gridy,LINE_WIDTH * 6f,gridy,textStyle);
-                canvas.drawText((new SimpleDateFormat(" h:mm:ss").format(new Date(conv_grid_ts(-1, startHour + i) * 1000))), 0, gridy + LINE_WIDTH * 2.1f, textStyle);
-            }
+        float gridSize;
+        String timeFormat;
+        if (gridH > 3f) {
+            gridSize = 1f;
+            timeFormat = " M.d";
+        } else if (gridH > 1f) {
+            gridSize = 1f/6f;
+            timeFormat = " h:mm";
+        } else if (gridH > 1f/6f) {
+            gridSize = 1f/24f;
+            timeFormat = " h:mm";
+        } else if (gridH > 1f/24f) {
+            gridSize = 1f/144f;
+            timeFormat = " h:mm";
+        } else if (gridH > 1f/144f) {
+            gridSize = 1f/720f;
+            timeFormat = " h:mm";
+        } else {
+            gridSize = 1f/2880f;
+            timeFormat = " h:mm:ss";
+        }
+        float scaledMark = 0;
+        float startGrid = g0y - conv_gridy_to_screeny(g0y) * ratio_grid_screen_H ;
+        for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize - 1.999f*gridSize; scaledMark < screenH; startGrid += gridSize) {
+            scaledMark = conv_gridy_to_screeny(startGrid);
+            canvas.drawLine(0f,scaledMark,LINE_WIDTH * 6f,scaledMark,textStyle);
+            canvas.drawText((new SimpleDateFormat(timeFormat).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
         }
 
         CalendarRect.setRectScalingFactors(0.7f, 0.94f);
@@ -323,11 +291,19 @@ class CalendarWin {
         if (!statusText.isEmpty())
             canvas.drawText(statusText,20,LINE_WIDTH*2,textStyle);
     }
+
+    float conv_gridy_to_screeny(float y) {
+        float mark = (y - g0y)/ ratio_grid_screen_H;
+        float center = ((float) Math.floor(y) + 0.5f - g0y)/ ratio_grid_screen_H;
+        return (mark - center) * CalendarRect.getRectScalingFactorY() + center;
+    }
 }
 class CalendarRect {
+
     static int COLOR_NOW_LINE;
     static int COLOR_ERROR;
 
+    //TODO: Fix min scale
     private static Canvas canvas;
         static void setCanvas(Canvas canvas) { CalendarRect.canvas = canvas; }
     private static CalendarWin cv;
@@ -393,12 +369,6 @@ class CalendarRect {
                 (r0[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1],
                 (r1[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0],
                 (r1[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1],paint);
-    }
-    static void drawScaledLine(float r0x, float r0y, float r1x, float r1y, float cx, float cy, Paint paint) {
-        canvas.drawLine((r0x-cx)*RECT_SCALING_FACTOR_X+cx,
-                (r0y-cy)*RECT_SCALING_FACTOR_Y+cy,
-                (r1x-cx)*RECT_SCALING_FACTOR_X+cx,
-                (r1y-cy)*RECT_SCALING_FACTOR_Y+cy,paint);
     }
     void drawCur() {
         long now = System.currentTimeMillis() / 1000L;
