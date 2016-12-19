@@ -637,8 +637,6 @@ public class CommandsFrag extends Fragment {
         });
 
         View addButton = inflaterF.inflate(R.layout.gv_list_item, null);
-        label = (TextView) (addButton.findViewById(R.id.text1));
-        label.setText("Swipe right here for calendar");
         gridV.addView(addButton,lp);
 
         sprefs.edit().putString("commands", new Gson().toJson(commands)).apply();

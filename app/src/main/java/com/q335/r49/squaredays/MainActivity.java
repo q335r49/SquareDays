@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 import java.io.File;
 import java.io.FileInputStream;
@@ -34,6 +35,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     SharedPreferences sprefs;
     //TODO: Tutorial in main menu
     //TODO: Polish the google play store entry
+    //TODO: Display comment on selection
+    //TODO: Don't worry about "leaving the rectangle" -- any drag of greater than 50 will do!
 
     private Toolbar AB;
 
@@ -276,6 +279,13 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                             }
                         })
                         .show();
+                return true;
+            }
+            case R.id.menuItemHelp: {
+                FragmentManager fm = getSupportFragmentManager();
+                HelpScroller helpV = HelpScroller.newInstance("","");
+                helpV.show(fm, "fragment_edit_name");
+                return true;
             }
             default:
                 return super.onOptionsItemSelected(item);
