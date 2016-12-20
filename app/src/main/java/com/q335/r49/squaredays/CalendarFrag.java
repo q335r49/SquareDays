@@ -123,24 +123,21 @@ class CalendarWin {
         return new float[] {(dow - g0x)/ ratio_grid_screen_W + offset / ratio_grid_screen_W, (weeks - g0y)/ ratio_grid_screen_H};
     }
     private float[] conv_grid_screen(float gx, float gy) { return new float[] { (gx - g0x)/ ratio_grid_screen_W, (gy - g0y)/ ratio_grid_screen_H}; }
-    private float[] conv_screen_grid_sc(float sx, float sy) {
+    private float   conv_screen_grid_X(float sx) {
         float gx = sx*ratio_grid_screen_W+g0x;
-        float gy = sy*ratio_grid_screen_H+g0y;
         float cx = (float) Math.floor(gx) + 0.5f;
-        float cy = (float) Math.floor(gy) + 0.5f;
         gx = (gx-cx)/RECT_SCALING_FACTOR_X;
+        return gx > 0.5f ? 0.5f + cx : gx < -0.5f? -0.5f + cx : gx + cx;
+    }
+    private float   conv_screen_grid_Y(float sy) {
+        float gy = sy*ratio_grid_screen_H+g0y;
+        float cy = (float) Math.floor(gy) + 0.5f;
         gy = (gy-cy)/RECT_SCALING_FACTOR_Y;
-        return new float[] {gx > 0.5f ? 0.5f + cx : gx < -0.5f? -0.5f + cx : gx + cx,
-                            gy > 0.5f ? 0.5f + cy : gy < -0.5f? -0.5f + cy : gy + cy};
+        return gy > 0.5f ? 0.5f + cy : gy < -0.5f? -0.5f + cy : gy + cy;
     }
-    private float   conv_grid_num(float gx, float gy) {
-        float dow = gx < 0 ?  0 : gx >= 6 ? 6 : gx;
-        float weeks = (float) Math.floor(gy)*7;
-        return (float) (weeks + dow + (gy-Math.floor(gy)));
-    }
-    private long    conv_grid_ts(float gx, float gy) {
-        return (long) (conv_grid_num(gx,gy)*86400) + orig;
-    }
+    private long    conv_screen_ts(float sx, float sy) { return conv_grid_ts(conv_screen_grid_X(sx), conv_screen_grid_Y(sy)); }
+    private float   conv_grid_num (float gx, float gy) { return (float) Math.floor(gy)*7 + (gx < 0f ?  0f : gx >= 6f ? 6f : (float) Math.floor(gx)) + (gy - (float) Math.floor(gy)); }
+    private long    conv_grid_ts  (float gx, float gy) { return (long) (conv_grid_num(gx,gy)*86400) + orig; }
 
     private Paint nowLineStyle;
     private Paint statusBarStyle;
@@ -184,15 +181,8 @@ class CalendarWin {
             RECT_SCALING_FACTOR_Y *= borderScale;
         }
     }
-    public void onTouch(float sx, float sy) {
-        float[] gridcoords = conv_screen_grid_sc(sx,sy);
-        float x = gridcoords[0];
-        float y = gridcoords[1];
-        int dow = (int)Math.floor(x);
-        int weeks = (int)Math.floor(y);
-        double hours = (y - weeks) * 24;
-        double minutes = (hours - Math.floor(hours))*60;
-        statusText = "["+sx+","+sy+"] dow"+dow+" weeks"+weeks+" time"+(int)Math.floor(hours)+":"+(int)Math.floor(minutes);
+    void onTouch(float sx, float sy) {
+        statusText = new SimpleDateFormat("M.d h:mm:ss").format(new Date(conv_screen_ts(sx, sy) * 1000L));
     }
 
     private ArrayList<CalendarRect> shapes;
@@ -281,7 +271,7 @@ class CalendarWin {
             gridSize = 1f/2880f;
             timeFormat = " h:mm:ss";
         }
-        float scaledMark = 0;
+        float scaledMark = 0; //TODO: Mark date at 12:00
         float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
         for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
             scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / ratio_grid_screen_H;
