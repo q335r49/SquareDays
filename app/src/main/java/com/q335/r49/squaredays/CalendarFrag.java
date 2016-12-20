@@ -106,11 +106,12 @@ public class CalendarFrag extends Fragment {
 class CalendarWin {
     static int COLOR_SCALE_TEXT;
     static int COLOR_GRID_BACKGROUND;
+    static int COLOR_NOW_LINE;
 
     private ArrayList<CalendarRect> shapes;
     private CalendarRect curTask;
         String getCurComment() { return curTask.end == -1 ? curTask.comment  : null; }
-        int getCurColor() { return curTask.getColor(); }
+        int getCurColor() { return curTask.paint.getColor(); }
     private long orig;
         long getOrig() { return orig; }
     private float g0x;
@@ -143,7 +144,13 @@ class CalendarWin {
         return (long) (conv_grid_num(gx,gy)*86400) + orig;
     }
 
+    private Paint nowLineStyle;
     CalendarWin(long orig, float gridW, float gridH) {
+        nowLineStyle = new Paint();
+        nowLineStyle.setStyle(Paint.Style.FILL);
+        nowLineStyle.setColor(COLOR_NOW_LINE);
+        nowLineStyle.setStrokeWidth(2);
+
         shapes = new ArrayList<>();
         curTask = new CalendarRect();
         shapes.add(curTask);
@@ -165,8 +172,8 @@ class CalendarWin {
         g0y -= y * ratio_grid_screen_H;
     }
     void reScale(float scale, float x0, float y0) { //TODO: Increase scaling speed?
-        float borderScale = (scale - 1 + CalendarRect.getRectScalingFactorY())/scale/CalendarRect.getRectScalingFactorY();
-        if (borderScale*CalendarRect.getRectScalingFactorY() > 0.7f || borderScale > 1) {
+        float borderScale = (scale - 1 + RECT_SCALING_FACTOR_Y)/scale/RECT_SCALING_FACTOR_Y;
+        if (borderScale*RECT_SCALING_FACTOR_Y > 0.7f || borderScale > 1) {
             float[] newGridOrig = conv_screen_grid(x0 - x0 / scale, y0 - y0 / scale);
             //g0x = newGridOrig[0];
             g0y = newGridOrig[1];
@@ -174,7 +181,7 @@ class CalendarWin {
             gridH /= scale;
             //ratio_grid_screen_W = gridW/screenW;
             ratio_grid_screen_H /= scale;
-            CalendarRect.scaleRectScalingFactor(1, borderScale);
+            RECT_SCALING_FACTOR_Y *= borderScale;
         }
     }
 
@@ -204,22 +211,15 @@ class CalendarWin {
                 if (!args[START_POS].isEmpty()) {
                     if (curTask.end == -1)
                         curTask.end = ts + Long.parseLong(args[START_POS]);
-                    curTask = new CalendarRect();
+                    curTask = new CalendarRect(ts + Long.parseLong(args[START_POS]),-1,args[COLOR_POS],args[COMMENT_POS]);
                     shapes.add(curTask);
-                    curTask.start = ts + Long.parseLong(args[START_POS]);
-                    curTask.setColor(args[COLOR_POS]);
-                    curTask.comment = args[COMMENT_POS];
                 } else
                     Log.d("SquareDays","Empty start and end: "+line);
             } else if (args[START_POS].isEmpty()) {
                 curTask.end = ts + Long.parseLong(args[END_POS]);
                 curTask.comment += args[COMMENT_POS];
             } else {
-                CalendarRect markTD = new CalendarRect();
-                markTD.start = ts + Long.parseLong(args[START_POS]);
-                markTD.end = ts + Long.parseLong(args[END_POS]);
-                markTD.setColor(args[COLOR_POS]);
-                markTD.comment = args[COMMENT_POS];
+                CalendarRect markTD = new CalendarRect(ts + Long.parseLong(args[START_POS]), ts + Long.parseLong(args[END_POS]), args[COLOR_POS], args[COMMENT_POS]);
                 shapes.add(markTD);
             }
         } catch (IllegalArgumentException e) {
@@ -230,32 +230,26 @@ class CalendarWin {
         shapes = new ArrayList<>();
         curTask = new CalendarRect();
         shapes.add(curTask);
-        for (String line : log) {
+        for (String line : log)
             loadEntry(line);
-        }
     }
+
+    private Canvas mCanvas;
+    private static float RECT_SCALING_FACTOR_X = 0.86f;
+    private static float RECT_SCALING_FACTOR_Y = 0.94f;
     void draw(Canvas canvas) {
         int screenH = canvas.getHeight();
         ratio_grid_screen_W = gridW/canvas.getWidth();
         ratio_grid_screen_H = gridH/screenH;
-        float scaleX = 1f - LINE_WIDTH*ratio_grid_screen_W;
-        float scaleY = 1f - LINE_WIDTH*ratio_grid_screen_H;
-        CalendarRect.setCanvas(canvas);
-        CalendarRect.setCv(this);
+        RECT_SCALING_FACTOR_X = 1f - LINE_WIDTH*ratio_grid_screen_W;
+        RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
+        mCanvas = canvas;
 
-        long start = conv_grid_ts(0f,(float) (Math.floor(g0y)-1));
-        long end = conv_grid_ts(7f,(float) (Math.ceil(g0y+gridH)+1));
-        CalendarRect BG = new CalendarRect();
-        BG.start = start;
-        BG.end = end;
-        BG.setColor(COLOR_GRID_BACKGROUND);
+        drawInterval(new CalendarRect(conv_grid_ts(0f,(float) (Math.floor(g0y)-1)), conv_grid_ts(7f,(float) (Math.ceil(g0y+gridH)+1)), COLOR_GRID_BACKGROUND, ""));
 
-        CalendarRect.setRectScalingFactors(scaleX,scaleY);
-        BG.draw();
-
-        CalendarRect.setRectScalingFactors(0.86f,scaleY);
+        RECT_SCALING_FACTOR_X = 0.86f;
         for (CalendarRect s : shapes)
-            s.draw();
+            drawInterval(s);
 
         float gridSize;
         String timeFormat;
@@ -279,100 +273,95 @@ class CalendarWin {
             timeFormat = " h:mm:ss";
         }
         float scaledMark = 0;
-        float startGrid = g0y + (1f - CalendarRect.getRectScalingFactorY()) * (g0y - (float) Math.floor(g0y) - 0.5f);
+        float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
         for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
-            scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * CalendarRect.getRectScalingFactorY() + (float) Math.floor(startGrid) + 0.5f - g0y) / ratio_grid_screen_H;
+            scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / ratio_grid_screen_H;
             if (scaledMark > 0f) {
                 canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, textStyle);
                 canvas.drawText((new SimpleDateFormat(timeFormat).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
             }
         }
 
-        CalendarRect.setRectScalingFactors(0.7f, scaleY);
-        curTask.drawCur();
+        RECT_SCALING_FACTOR_X = 0.7f;
+        long now = System.currentTimeMillis() / 1000L;
+        if (curTask.end == -1) {
+            curTask.end = now;
+            drawInterval(curTask);
+            drawNowLine(now, curTask.paint);
+            curTask.end = -1;
+        } else
+            drawNowLine(now,nowLineStyle);
 
         if (!statusText.isEmpty())
             canvas.drawText(statusText,20,LINE_WIDTH*2,textStyle);
-
-        CalendarRect.setRectScalingFactors(scaleX,scaleY);
-    }
-}
-class CalendarRect {
-    static int COLOR_NOW_LINE;
-    static int COLOR_ERROR;
-
-    private static Canvas canvas;
-        static void setCanvas(Canvas canvas) { CalendarRect.canvas = canvas; }
-    private static CalendarWin cv;
-        static void setCv(CalendarWin cv) { CalendarRect.cv = cv; }
-    private static final float MIN_SCALE = 0.7f;
-    private static float RECT_SCALING_FACTOR_X = 0.86f;
-    private static float RECT_SCALING_FACTOR_Y = 0.94f;
-        static float getRectScalingFactorY() { return RECT_SCALING_FACTOR_Y; }
-    static void scaleRectScalingFactor(float sx, float sy) {
-        float checkX = RECT_SCALING_FACTOR_X*sx;
-        float checkY = RECT_SCALING_FACTOR_Y*sy;
-        RECT_SCALING_FACTOR_X = checkX < MIN_SCALE ? MIN_SCALE : checkX >= 1f ? 1f : checkX;
-        RECT_SCALING_FACTOR_Y = checkY < MIN_SCALE ? MIN_SCALE : checkY >= 1f ? 1f : checkY;
-    }
-    static void setRectScalingFactors(float checkX, float checkY) {
-        RECT_SCALING_FACTOR_X = checkX < MIN_SCALE ? MIN_SCALE : checkX >= 1f ? 1f : checkX;
-        RECT_SCALING_FACTOR_Y = checkY < MIN_SCALE ? MIN_SCALE : checkY >= 1f ? 1f : checkY;
     }
 
-    long start=-1;
-    long end=-1;
-    private Paint paint;
-        public int getColor() { return paint.getColor();}
-        public void setColor(String color) { try {paint.setColor(Color.parseColor(color));} catch (Exception e) {Log.d("SquareDays","Bd color: " + color);} }
-        public void setColor(int color) { try {paint.setColor(color);} catch (Exception e) {Log.d("SquareDays","Bd color: " + color);} }
-    String comment=null;
-
-    CalendarRect() {
-        paint = new Paint();
-            paint.setStyle(Paint.Style.FILL);
-            paint.setColor(COLOR_ERROR);
-            paint.setStrokeWidth(2);
-    }
-    void draw() {
-        if (start == -1 || end == -1 || end <= start)
+    private void drawInterval(CalendarRect iv) { //TODO: Make this simply take start / end argumetns??
+        if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
-        long corner = start;
-        long midn = start - (start - cv.getOrig() + 864000000000000000L) % 86400L + 86399L;
-        for (; midn < end; midn += 86400L) {
-            drawScaledRect(cv.conv_ts_screen(corner, 0),cv.conv_ts_screen(midn, 1f),cv.conv_ts_screen(midn-43199L, 0.5f),paint);
+        long corner = iv.start;
+        long midn = iv.start - (iv.start - getOrig() + 864000000000000000L) % 86400L + 86399L;
+        float[] a, b, c;
+        for (; midn < iv.end; midn += 86400L) {
+            a = conv_ts_screen(corner, 0);
+            b = conv_ts_screen(midn, 1f);
+            c = conv_ts_screen(midn-43199L, 0.5f);
+            mCanvas.drawRect((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                    (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                    (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
             corner = midn+1;
         }
-        drawScaledRect(cv.conv_ts_screen(corner, 0),cv.conv_ts_screen(end, 1f),cv.conv_ts_screen(midn-43199L, 0.5f),paint);
+        a = conv_ts_screen(corner, 0);
+        b = conv_ts_screen(iv.end, 1f);
+        c = conv_ts_screen(midn-43199L, 0.5f);
+        mCanvas.drawRect((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
     }
-    static void drawScaledRect(float[] r0, float[] r1, float[] rC, Paint paint) {
-        canvas.drawRect((r0[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0],
-                (r0[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1],
-                (r1[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0],
-                (r1[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1],paint);
+    private void drawNowLine(long ts, Paint paint) {
+        long noon = ts - (ts - getOrig() + 864000000000000000L) % 86400L + 43200;
+        float[] a = conv_ts_screen(ts,0f);
+        float[] b = conv_ts_screen(ts,1f);
+        float[] c = conv_ts_screen(noon,0.5f);
+        mCanvas.drawLine((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                         (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                         (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                         (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
-    static void drawScaledLine(float[] r0, float[] r1, float[] rC, Paint paint) {
-        canvas.drawLine((r0[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0],
-                (r0[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1],
-                (r1[0]-rC[0])*RECT_SCALING_FACTOR_X+rC[0],
-                (r1[1]-rC[1])*RECT_SCALING_FACTOR_Y+rC[1],paint);
+}
+
+class CalendarRect {
+    static int COLOR_ERROR;
+    long start=-1;
+    long end=-1;
+    String comment=null;
+    Paint paint;
+    CalendarRect() {
+        paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(COLOR_ERROR);
     }
-    void drawCur() {
-        long now = System.currentTimeMillis() / 1000L;
-        if (end == -1) {
-            end = now;
-                draw();
-                drawNowLine(now);
-            end = -1;
-        } else {
-            int tempColor = paint.getColor();
-            paint.setColor(COLOR_NOW_LINE);
-            drawNowLine(now);
-            paint.setColor(tempColor);
+    CalendarRect(long start, long end, String color, String comment) {
+        this.start = start;
+        this.end = end;
+        paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        try {
+            paint.setColor(Color.parseColor(color));
+        } catch (IllegalArgumentException e) {
+            paint.setColor(COLOR_ERROR);
+            Log.d("SquareDays", "Bad color: " + e);
         }
+        this.comment = comment;
     }
-    private void drawNowLine(long ts) {
-        long noon = ts - (ts - cv.getOrig() + 864000000000000000L) % 86400L + 43200;
-        drawScaledLine(cv.conv_ts_screen(ts,0f),cv.conv_ts_screen(ts,1f),cv.conv_ts_screen(noon,0.5f),paint);
+    CalendarRect(long start, long end, int color, String comment) {
+        this.start = start;
+        this.end = end;
+        paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(color);
+        this.comment = comment;
     }
 }
