@@ -164,9 +164,9 @@ class CalendarWin {
         // g0x -= x * ratio_grid_screen_W;
         g0y -= y * ratio_grid_screen_H;
     }
-    void reScale(float scale, float x0, float y0) {
+    void reScale(float scale, float x0, float y0) { //TODO: Increase scaling speed?
         float borderScale = (scale - 1 + CalendarRect.getRectScalingFactorY())/scale/CalendarRect.getRectScalingFactorY();
-        if (CalendarRect.isLegalScaling(1,borderScale)) {
+        if (borderScale*CalendarRect.getRectScalingFactorY() > 0.7f || borderScale > 1) {
             float[] newGridOrig = conv_screen_grid(x0 - x0 / scale, y0 - y0 / scale);
             //g0x = newGridOrig[0];
             g0y = newGridOrig[1];
@@ -298,7 +298,6 @@ class CalendarWin {
     }
 }
 class CalendarRect {
-
     static int COLOR_NOW_LINE;
     static int COLOR_ERROR;
 
@@ -319,16 +318,6 @@ class CalendarRect {
     static void setRectScalingFactors(float checkX, float checkY) {
         RECT_SCALING_FACTOR_X = checkX < MIN_SCALE ? MIN_SCALE : checkX >= 1f ? 1f : checkX;
         RECT_SCALING_FACTOR_Y = checkY < MIN_SCALE ? MIN_SCALE : checkY >= 1f ? 1f : checkY;
-    }
-    static boolean isLegalScaling(float sx, float sy) {
-        float checkX = RECT_SCALING_FACTOR_X*sx;
-        float checkY = RECT_SCALING_FACTOR_Y*sy;
-        return (checkX > MIN_SCALE && checkX <= 1f && checkY > MIN_SCALE && checkY <= 1f);
-    }
-    static float[] convGridScreen(float[] p) {
-        float cx = (float) Math.floor(p[0]) + 0.5f;
-        float cy = (float) Math.floor(p[1]) + 0.5f;
-        return new float[] { (p[0]-cx)*RECT_SCALING_FACTOR_X+cx, (p[1]-cy)*RECT_SCALING_FACTOR_Y+cy};
     }
 
     long start=-1;
