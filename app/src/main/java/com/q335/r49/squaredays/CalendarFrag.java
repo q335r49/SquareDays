@@ -12,10 +12,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.Queue;
+import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 public class CalendarFrag extends Fragment {
     static int COLOR_NO_TASK;
@@ -141,19 +145,18 @@ class CalendarWin {
     private Paint nowLineStyle;
     private Paint statusBarStyle;
     CalendarWin(long orig, float gridW, float gridH) {
-        nowLineStyle = new Paint();
-        nowLineStyle.setStyle(Paint.Style.FILL);
-        nowLineStyle.setColor(COLOR_NOW_LINE);
-        nowLineStyle.setStrokeWidth(2);
-
-        statusBarStyle = new Paint();
-        statusBarStyle.setStyle(Paint.Style.FILL);
-        statusBarStyle.setColor(COLOR_STATUS_BAR);
-        statusBarStyle.setStrokeWidth(2);
-
         shapes = new ArrayList<>();
+        shapeIndex = new TreeSet<>(new Comparator<CalendarRect>() {
+            @Override
+            public int compare(CalendarRect o1, CalendarRect o2) {
+                return o1.start > o2.start ? 1 : o1.start == o2.start ? 0 : -1;
+            }
+        });
+
         curTask = new CalendarRect();
         shapes.add(curTask);
+        shapeIndex.add(curTask);
+
         this.orig = orig;
         g0x = (7f-gridW)*0.8f;
         g0y = -gridH*0.1f;
@@ -167,6 +170,14 @@ class CalendarWin {
             boldtextStyle.setStyle(Paint.Style.FILL);
             boldtextStyle.setColor(COLOR_SCALE_TEXT);
             boldtextStyle.setTypeface(Typeface.DEFAULT_BOLD);
+        nowLineStyle = new Paint();
+            nowLineStyle.setStyle(Paint.Style.FILL);
+            nowLineStyle.setColor(COLOR_NOW_LINE);
+            nowLineStyle.setStrokeWidth(2);
+        statusBarStyle = new Paint();
+            statusBarStyle.setStyle(Paint.Style.FILL);
+            statusBarStyle.setColor(COLOR_STATUS_BAR);
+            statusBarStyle.setTextAlign(Paint.Align.LEFT);
         statusText = "";
     }
     void shiftWindow(float x, float y) {
@@ -183,10 +194,21 @@ class CalendarWin {
         }
     }
     void onTouch(float sx, float sy) {
-        statusText = new SimpleDateFormat("M.d h:mm:ss").format(new Date(conv_screen_ts(sx, sy) * 1000L));
+        long ts = conv_screen_ts(sx, sy);
+        CalendarRect closest = shapeIndex.floor(new CalendarRect(ts));
+        if (closest.end > ts) {
+            long duration = 1000L* (closest.end - closest.start);
+            statusText = closest.comment + ":"
+                    + new SimpleDateFormat(" h:mm-").format(new Date(closest.start*1000L))
+                    + new SimpleDateFormat("h:mm").format(new Date(closest.end*1000L))
+                    + String.format(" (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
+                    TimeUnit.MILLISECONDS.toMinutes(duration) - 60*TimeUnit.MILLISECONDS.toHours(duration));
+        } else
+            statusText = new SimpleDateFormat("M.d h:mm").format(new Date(ts*1000L));
     }
 
     private ArrayList<CalendarRect> shapes;
+    private NavigableSet<CalendarRect> shapeIndex;
     private final static int TIMESTAMP_POS = 0;
     //private final static int READABLE_TIME_POS = 1;
     private final static int COLOR_POS = 2;
@@ -201,6 +223,7 @@ class CalendarWin {
             textStyle.setStrokeWidth(LINE_WIDTH/5f);
             boldtextStyle.setTextSize(LINE_WIDTH*2.5f);
             boldtextStyle.setStrokeWidth(LINE_WIDTH/5f);
+            statusBarStyle.setTextSize(LINE_WIDTH*2f);
         }
     void loadEntry(String line) {
         long ts;
@@ -217,6 +240,7 @@ class CalendarWin {
                         curTask.end = ts + Long.parseLong(args[START_POS]);
                     curTask = new CalendarRect(ts + Long.parseLong(args[START_POS]),-1,args[COLOR_POS],args[COMMENT_POS]);
                     shapes.add(curTask);
+                    shapeIndex.add(curTask);
                 } else
                     Log.d("SquareDays","Empty start and end: "+line);
             } else if (args[START_POS].isEmpty()) {
@@ -225,6 +249,7 @@ class CalendarWin {
             } else {
                 CalendarRect markTD = new CalendarRect(ts + Long.parseLong(args[START_POS]), ts + Long.parseLong(args[END_POS]), args[COLOR_POS], args[COMMENT_POS]);
                 shapes.add(markTD);
+                shapeIndex.add(markTD);
             }
         } catch (IllegalArgumentException e) {
             Log.d("SquareDays","Bad color or number format: "+line);
@@ -232,8 +257,15 @@ class CalendarWin {
     }
     void loadAllEntries(List<String> log) {
         shapes = new ArrayList<>();
+        shapeIndex = new TreeSet<>(new Comparator<CalendarRect>() {
+            @Override
+            public int compare(CalendarRect o1, CalendarRect o2) {
+                return o1.start > o2.start ? 1 : o1.start == o2.start ? 0 : -1;
+            }
+        });
         curTask = new CalendarRect();
         shapes.add(curTask);
+        shapeIndex.add(curTask);
         for (String line : log)
             loadEntry(line);
     }
@@ -350,7 +382,7 @@ class CalendarWin {
             drawNowLine(now,nowLineStyle);
 
         if (!statusText.isEmpty())
-            canvas.drawText(statusText,20,LINE_WIDTH*2,statusBarStyle);
+            canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
     private void drawInterval(CalendarRect iv) {
         if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
@@ -400,6 +432,9 @@ class CalendarRect {
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(COLOR_ERROR);
         comment = null;
+    }
+    CalendarRect(long start) {
+        this.start = start;
     }
     CalendarRect(long start, long end, String color, String comment) {
         this.start = start;
