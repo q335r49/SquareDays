@@ -1,5 +1,4 @@
 package com.q335.r49.squaredays;
-
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -35,9 +34,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     //TODO: **** Display comment on STATUS BAR
     //TODO: Polish the google play store entry
 
-
     private Toolbar AB;
-
     int AB_curColor = 0;
     String AB_curText = "";
     int AB_savedColor = 0;
@@ -94,6 +91,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         CalendarWin.COLOR_SCALE_TEXT = ResourcesCompat.getColor(getResources(), R.color.scale_text, null);
         CalendarWin.COLOR_GRID_BACKGROUND = ResourcesCompat.getColor(getResources(), R.color.grid_background, null);
         CalendarWin.COLOR_NOW_LINE = ResourcesCompat.getColor(getResources(), R.color.now_line, null);
+        CalendarWin.COLOR_STATUS_BAR = ResourcesCompat.getColor(getResources(), R.color.status_bar, null);
         CalendarRect.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         CommandsFrag.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);

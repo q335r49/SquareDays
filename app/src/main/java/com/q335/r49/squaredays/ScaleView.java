@@ -109,8 +109,9 @@ public class ScaleView extends View {
         float y = ev.getY();
         if (ev.getAction() == MotionEvent.ACTION_MOVE && (Math.abs(x-mLastTouchX) + Math.abs(y-mLastTouchY) < 150)) {
             CV.shiftWindow(x-mLastTouchX,y-mLastTouchY);
-            invalidate();
         }
+        CV.onTouch(x,y);
+        invalidate();
         mLastTouchX = x;
         mLastTouchY = y;
         return true;

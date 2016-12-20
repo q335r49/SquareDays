@@ -1,5 +1,4 @@
 package com.q335.r49.squaredays;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -107,49 +106,54 @@ class CalendarWin {
     static int COLOR_SCALE_TEXT;
     static int COLOR_GRID_BACKGROUND;
     static int COLOR_NOW_LINE;
-
-    private ArrayList<CalendarRect> shapes;
+    static int COLOR_STATUS_BAR;
     private CalendarRect curTask;
         String getCurComment() { return curTask.end == -1 ? curTask.comment  : null; }
         int getCurColor() { return curTask.paint.getColor(); }
     private long orig;
-        long getOrig() { return orig; }
-    private float g0x;
-    private float g0y;
-    private float gridW;
-    private float gridH;
-    private float ratio_grid_screen_W;
-    private float ratio_grid_screen_H;
+    private float g0x, g0y;
+    private float gridW, gridH;
+    private float ratio_grid_screen_W, ratio_grid_screen_H;
     private Paint textStyle;
     private String statusText;
-        void setStatusText(String s) { statusText = s; }
-    float[] conv_ts_screen(long ts, float offset) {
+    private float[] conv_ts_screen(long ts, float offset) {
         long days = ts >= orig ? (ts - orig)/86400L : (ts - orig + 1) / 86400L - 1L;
         float dow = (float) ((days + 4611686018427387900L)%7);
         float weeks = (float) (days >= 0? days/7 : (days + 1) / 7 - 1) + ((float) ((ts - orig +4611686018427360000L)%86400) / 86400);
         return new float[] {(dow - g0x)/ ratio_grid_screen_W + offset / ratio_grid_screen_W, (weeks - g0y)/ ratio_grid_screen_H};
     }
-    float[] conv_grid_screen(float gx, float gy) {
-        return new float[] { (gx - g0x)/ ratio_grid_screen_W, (gy - g0y)/ ratio_grid_screen_H};
+    private float[] conv_grid_screen(float gx, float gy) { return new float[] { (gx - g0x)/ ratio_grid_screen_W, (gy - g0y)/ ratio_grid_screen_H}; }
+    private float[] conv_screen_grid_sc(float sx, float sy) {
+        float gx = sx*ratio_grid_screen_W+g0x;
+        float gy = sy*ratio_grid_screen_H+g0y;
+        float cx = (float) Math.floor(gx) + 0.5f;
+        float cy = (float) Math.floor(gy) + 0.5f;
+        gx = (gx-cx)/RECT_SCALING_FACTOR_X;
+        gy = (gy-cy)/RECT_SCALING_FACTOR_Y;
+        return new float[] {gx > 0.5f ? 0.5f + cx : gx < -0.5f? -0.5f + cx : gx + cx,
+                            gy > 0.5f ? 0.5f + cy : gy < -0.5f? -0.5f + cy : gy + cy};
     }
-    float[] conv_screen_grid(float sx, float sy) {
-        return new float[] {sx*ratio_grid_screen_W+g0x, sy*ratio_grid_screen_H+g0y};
-    }
-    float conv_grid_num(float gx, float gy) {
+    private float   conv_grid_num(float gx, float gy) {
         float dow = gx < 0 ?  0 : gx >= 6 ? 6 : gx;
         float weeks = (float) Math.floor(gy)*7;
         return (float) (weeks + dow + (gy-Math.floor(gy)));
     }
-    long conv_grid_ts(float gx, float gy) {
+    private long    conv_grid_ts(float gx, float gy) {
         return (long) (conv_grid_num(gx,gy)*86400) + orig;
     }
 
     private Paint nowLineStyle;
+    private Paint statusBarStyle;
     CalendarWin(long orig, float gridW, float gridH) {
         nowLineStyle = new Paint();
         nowLineStyle.setStyle(Paint.Style.FILL);
         nowLineStyle.setColor(COLOR_NOW_LINE);
         nowLineStyle.setStrokeWidth(2);
+
+        statusBarStyle = new Paint();
+        statusBarStyle.setStyle(Paint.Style.FILL);
+        statusBarStyle.setColor(COLOR_STATUS_BAR);
+        statusBarStyle.setStrokeWidth(2);
 
         shapes = new ArrayList<>();
         curTask = new CalendarRect();
@@ -174,19 +178,26 @@ class CalendarWin {
     void reScale(float scale, float x0, float y0) { //TODO: Increase scaling speed?
         float borderScale = (scale - 1 + RECT_SCALING_FACTOR_Y)/scale/RECT_SCALING_FACTOR_Y;
         if (borderScale*RECT_SCALING_FACTOR_Y > 0.7f || borderScale > 1) {
-            float[] newGridOrig = conv_screen_grid(x0 - x0 / scale, y0 - y0 / scale);
-            //g0x = newGridOrig[0];
-            g0y = newGridOrig[1];
-            //gridW /=scale;
+            g0y = (y0 - y0 / scale) * ratio_grid_screen_H + g0y;;
             gridH /= scale;
-            //ratio_grid_screen_W = gridW/screenW;
             ratio_grid_screen_H /= scale;
             RECT_SCALING_FACTOR_Y *= borderScale;
         }
     }
+    public void onTouch(float sx, float sy) {
+        float[] gridcoords = conv_screen_grid_sc(sx,sy);
+        float x = gridcoords[0];
+        float y = gridcoords[1];
+        int dow = (int)Math.floor(x);
+        int weeks = (int)Math.floor(y);
+        double hours = (y - weeks) * 24;
+        double minutes = (hours - Math.floor(hours))*60;
+        statusText = "["+sx+","+sy+"] dow"+dow+" weeks"+weeks+" time"+(int)Math.floor(hours)+":"+(int)Math.floor(minutes);
+    }
 
-    //TS>READABLE>COLOR>S>E>COMMENT
+    private ArrayList<CalendarRect> shapes;
     private final static int TIMESTAMP_POS = 0;
+    //private final static int READABLE_TIME_POS = 1;
     private final static int COLOR_POS = 2;
     private final static int START_POS = 3;
     private final static int END_POS = 4;
@@ -246,8 +257,6 @@ class CalendarWin {
         mCanvas = canvas;
 
         drawInterval(new CalendarRect(conv_grid_ts(0f,(float) (Math.floor(g0y)-1)), conv_grid_ts(7f,(float) (Math.ceil(g0y+gridH)+1)), COLOR_GRID_BACKGROUND, ""));
-
-        RECT_SCALING_FACTOR_X = 0.86f;
         for (CalendarRect s : shapes)
             drawInterval(s);
 
@@ -293,14 +302,13 @@ class CalendarWin {
             drawNowLine(now,nowLineStyle);
 
         if (!statusText.isEmpty())
-            canvas.drawText(statusText,20,LINE_WIDTH*2,textStyle);
+            canvas.drawText(statusText,20,LINE_WIDTH*2,statusBarStyle);
     }
-
     private void drawInterval(CalendarRect iv) {
         if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
         long corner = iv.start;
-        long midn = iv.start - (iv.start - getOrig() + 864000000000000000L) % 86400L + 86399L;
+        long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
         float[] a, b, c;
         for (; midn < iv.end; midn += 86400L) {
             a = conv_ts_screen(corner, 0);
@@ -321,7 +329,7 @@ class CalendarWin {
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
     }
     private void drawNowLine(long ts, Paint paint) {
-        long noon = ts - (ts - getOrig() + 864000000000000000L) % 86400L + 43200;
+        long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
         float[] a = conv_ts_screen(ts,0f);
         float[] b = conv_ts_screen(ts,1f);
         float[] c = conv_ts_screen(noon,0.5f);

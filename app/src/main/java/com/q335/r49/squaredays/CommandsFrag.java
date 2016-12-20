@@ -1,5 +1,4 @@
 package com.q335.r49.squaredays;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;

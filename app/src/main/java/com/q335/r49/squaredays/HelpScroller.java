@@ -1,31 +1,15 @@
 package com.q335.r49.squaredays;
-
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link HelpScroller.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link HelpScroller#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class HelpScroller extends DialogFragment {
     private static final int NUM_PAGES = 6;
     private ViewPager mPager;
@@ -44,13 +28,10 @@ public class HelpScroller extends DialogFragment {
     private static final String ARG_PARAM2 = "param2";
     private String mParam1;
     private String mParam2;
-
     private OnFragmentInteractionListener mListener;
-
     public HelpScroller() {
         // Required empty public constructor
     }
-
     public static HelpScroller newInstance(String param1, String param2) {
         HelpScroller fragment = new HelpScroller();
         Bundle args = new Bundle();
@@ -60,11 +41,8 @@ public class HelpScroller extends DialogFragment {
         return fragment;
     }
 
-
-
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View mView = inflater.inflate(R.layout.fragment_help_scroller, container, false);
 
@@ -74,8 +52,6 @@ public class HelpScroller extends DialogFragment {
 
         return mView;
     }
-
-
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -86,26 +62,13 @@ public class HelpScroller extends DialogFragment {
 //                    + " must implement OnFragmentInteractionListener");
 //        }
     }
-
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnFragmentInteractionListener {
     }
-
     private class ScreenSlidePagerAdapter extends PagerAdapter {
         int[] Pages = {
                 R.drawable.p1,
