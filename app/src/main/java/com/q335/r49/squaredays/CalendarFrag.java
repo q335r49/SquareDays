@@ -202,9 +202,9 @@ class CalendarWin {
                     + new SimpleDateFormat(" h:mm-").format(new Date(closest.start*1000L))
                     + new SimpleDateFormat("h:mm").format(new Date(closest.end*1000L))
                     + String.format(" (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
-                    TimeUnit.MILLISECONDS.toMinutes(duration) - 60*TimeUnit.MILLISECONDS.toHours(duration));
+                    TimeUnit.MILLISECONDS.toMinutes(duration)%60);
         } else
-            statusText = new SimpleDateFormat("M.d h:mm").format(new Date(ts*1000L));
+            statusText = "";
     }
 
     private ArrayList<CalendarRect> shapes;
