@@ -107,11 +107,18 @@ public class ScaleView extends View {
         mScaleDetector.onTouchEvent(ev);
         float x = ev.getX();
         float y = ev.getY();
-        if (ev.getAction() == MotionEvent.ACTION_MOVE && (Math.abs(x-mLastTouchX) + Math.abs(y-mLastTouchY) < 150)) {
-            CV.shiftWindow(x-mLastTouchX,y-mLastTouchY);
+        switch (ev.getAction()) {
+            case (MotionEvent.ACTION_MOVE):
+                if (Math.abs(x-mLastTouchX) + Math.abs(y-mLastTouchY) < 150) {
+                    CV.shiftWindow(x - mLastTouchX, y - mLastTouchY);
+                    invalidate();
+                }
+                break;
+            case (MotionEvent.ACTION_UP):
+                CV.onTouch(x, y);
+                invalidate();
+                break;
         }
-        CV.onTouch(x,y);
-        invalidate();
         mLastTouchX = x;
         mLastTouchY = y;
         return true;
