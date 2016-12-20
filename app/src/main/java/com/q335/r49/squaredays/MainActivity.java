@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,8 +32,9 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     private static final String EXT_STORAGE_DIR = "tracker";
     Context context;
     SharedPreferences sprefs;
+    //TODO: **** Display comment on STATUS BAR
     //TODO: Polish the google play store entry
-    //TODO: Display comment on selection
+
 
     private Toolbar AB;
 

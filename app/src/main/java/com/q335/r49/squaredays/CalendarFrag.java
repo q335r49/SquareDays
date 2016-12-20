@@ -296,7 +296,7 @@ class CalendarWin {
             canvas.drawText(statusText,20,LINE_WIDTH*2,textStyle);
     }
 
-    private void drawInterval(CalendarRect iv) { //TODO: Make this simply take start / end argumetns??
+    private void drawInterval(CalendarRect iv) {
         if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
         long corner = iv.start;
@@ -331,17 +331,19 @@ class CalendarWin {
                          (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
 }
-
 class CalendarRect {
     static int COLOR_ERROR;
-    long start=-1;
-    long end=-1;
-    String comment=null;
+    long start;
+    long end;
+    String comment;
     Paint paint;
     CalendarRect() {
+        start = -1;
+        end = -1;
         paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(COLOR_ERROR);
+        comment = null;
     }
     CalendarRect(long start, long end, String color, String comment) {
         this.start = start;
