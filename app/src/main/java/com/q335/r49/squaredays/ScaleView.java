@@ -2,12 +2,14 @@ package com.q335.r49.squaredays;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -100,28 +102,52 @@ public class ScaleView extends View {
         super.onDraw(canvas);
         CV.draw(canvas); //XTODO: Investigate why draw is happening multiple times
     }
-    private float mLastTouchX=-1;
-    private float mLastTouchY=-1;
+    private float mLastTouchX;
+    private float mLastTouchY;
+    private boolean has_run;
+    private final Handler handler = new Handler();
+    private Runnable mLongPressed;
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         mScaleDetector.onTouchEvent(ev);
-        float x = ev.getX();
-        float y = ev.getY();
+        final float x = ev.getX();
+        final float y = ev.getY();
         switch (ev.getAction()) {
+            case (MotionEvent.ACTION_DOWN):
+                has_run = false;
+                mLastTouchX = x;
+                mLastTouchY = y;
+                mLongPressed = new Runnable() { public void run() {
+                    has_run = true;
+                    CV.onLongPress(x,y);
+                }};
+                handler.postDelayed(mLongPressed,1200);
+                return true;
             case (MotionEvent.ACTION_MOVE):
-                if (Math.abs(x-mLastTouchX) + Math.abs(y-mLastTouchY) < 150) {
-                    CV.shiftWindow(x - mLastTouchX, y - mLastTouchY);
-                    invalidate();
+                if (has_run) {
+                    return false;
+                } else {
+                    handler.removeCallbacks(mLongPressed);
+                    if (Math.abs(x - mLastTouchX) + Math.abs(y - mLastTouchY) < 150) {
+                        CV.shiftWindow(x - mLastTouchX, y - mLastTouchY);
+                        invalidate();
+                    }
+                    mLastTouchX = x;
+                    mLastTouchY = y;
+                    return true;
                 }
-                break;
             case (MotionEvent.ACTION_UP):
-                CV.onTouch(x, y);
-                invalidate();
-                break;
+                if (has_run) {
+                    return false;
+                } else {
+                    handler.removeCallbacks(mLongPressed);
+                    CV.onClick(x, y);
+                    invalidate();
+                    return false;
+                }
+            default:
+                return true;
         }
-        mLastTouchX = x;
-        mLastTouchY = y;
-        return true;
     }
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override

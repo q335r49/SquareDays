@@ -193,7 +193,7 @@ class CalendarWin {
             RECT_SCALING_FACTOR_Y *= borderScale;
         }
     }
-    void onTouch(float sx, float sy) {
+    void onClick(float sx, float sy) {
         long ts = conv_screen_ts(sx, sy);
         CalendarRect closest = shapeIndex.floor(new CalendarRect(ts));
         if (closest.end > ts) {
@@ -205,6 +205,9 @@ class CalendarWin {
                     TimeUnit.MILLISECONDS.toMinutes(duration)%60);
         } else
             statusText = "";
+    }
+    void onLongPress(float sx, float sy) {
+
     }
 
     private ArrayList<CalendarRect> shapes;

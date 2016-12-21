@@ -31,7 +31,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     private static final String EXT_STORAGE_DIR = "tracker";
     Context context;
     SharedPreferences sprefs;
-    //TODO: **** Display comment on STATUS BAR
     //TODO: Polish the google play store entry
 
     private Toolbar AB;

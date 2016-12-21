@@ -188,7 +188,7 @@ public class CommandsFrag extends Fragment {
                 child.setBackgroundColor(bg_Norm);
 
             child.setOnTouchListener(new View.OnTouchListener() {
-                private float offset_0x, offset_0y;
+                private float actionDownX, actionDownY;
                 private boolean has_run, has_dragged;
                 private final Handler handler = new Handler();
                 private Runnable mLongPressed;
@@ -197,8 +197,8 @@ public class CommandsFrag extends Fragment {
                 public boolean onTouch(View v, MotionEvent event) {
                     switch (event.getActionMasked()) {
                         case MotionEvent.ACTION_DOWN:
-                            offset_0x = event.getX();
-                            offset_0y = event.getY();
+                            actionDownX = event.getX();
+                            actionDownY = event.getY();
                             mListener.procMess(mListener.AB_SAVESTATE,0);
                             v.getParent().requestDisallowInterceptTouchEvent(true);
                             v.setBackgroundColor(bg_Press);
@@ -303,8 +303,8 @@ public class CommandsFrag extends Fragment {
                         case MotionEvent.ACTION_MOVE:
                             if (has_run)
                                 return false;
-                            int delay = (int) Math.abs((event.getX() - offset_0x)*ratio_dp_px);
-                            int duration = (int) Math.abs((event.getY() - offset_0y)*ratio_dp_px);
+                            int delay = (int) Math.abs((event.getX() - actionDownX)*ratio_dp_px);
+                            int duration = (int) Math.abs((event.getY() - actionDownY)*ratio_dp_px);
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
                             String abString = "";
@@ -332,8 +332,8 @@ public class CommandsFrag extends Fragment {
                                 return false;
                             v.setBackgroundColor(bg_Norm);
                             handler.removeCallbacks(mLongPressed);
-                            delay = (int) Math.abs((event.getX() - offset_0x) * ratio_dp_px);
-                            duration = (int) Math.abs((event.getY() - offset_0y) * ratio_dp_px);
+                            delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
+                            duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
                             if (delay != 0 || duration != 0 || !has_dragged) {
