@@ -9,7 +9,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,7 +34,6 @@ import java.util.concurrent.TimeUnit;
 
 public class CalendarFrag extends Fragment {
     static int COLOR_NO_TASK;
-    PaletteRing palette;
 
     private ScaleView calView;
     private View fragView;
@@ -50,11 +48,14 @@ public class CalendarFrag extends Fragment {
             calView.procMess(E);
         }
     }
+
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         if (isVisibleToUser)
             procMess(ScaleView.MESS_REDRAW);
     }
+
+    PaletteRing palette;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -210,7 +211,7 @@ class CalendarWin {
             RECT_SCALING_FACTOR_Y *= borderScale;
         }
     }
-    void onPress(float sx, float sy) {  //TODO: Selection box
+    void onPress(float sx, float sy) {
         long ts = conv_screen_ts(sx, sy);
         CalendarRect closest = shapeIndex.floor(new CalendarRect(ts));
         if (closest.end > ts) {
@@ -223,11 +224,12 @@ class CalendarWin {
         } else
             statusText = "";
     }
-    void onLongPress(float sx, float sy, Context context) {
+    void onLongPress(float sx, float sy, Context context) { //TODO: Long-press zoom
         long ts = conv_screen_ts(sx, sy);
         final CalendarRect closest = shapeIndex.floor(new CalendarRect(ts));
         if (closest.end < ts)
             return;
+        //TODO: Send this to main-activity for processing; so need: (1) Mess(closest); Mess:Rebuild log
         LayoutInflater inflater = LayoutInflater.from(context);
         View promptView = inflater.inflate(R.layout.edit_interval, null);
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
@@ -235,7 +237,7 @@ class CalendarWin {
 
         final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
         commentEntry.setText(closest.comment);
-        final EditText startEntry = (EditText) promptView.findViewById(R.id.startEdit);
+        final EditText startEntry = (EditText) promptView.findViewById(R.id.startEdit); //TODO: Allow editing of "natural" text
         startEntry.setText(Long.toString(closest.start));
         final EditText endEntry = (EditText) promptView.findViewById(R.id.endEdit);
         endEntry.setText(Long.toString(closest.end));
@@ -308,7 +310,7 @@ class CalendarWin {
                                     ((ColorDrawable)  curColorV.getBackground()).getColor(),
                                     commentEntry.getText().toString());
                         List<String> newLogEntries = getRebuiltLog(closest);
-                        File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);    //TODO: eliminate LOG_FILE entries in other classes
+                        File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);
                         try {
                             internalFile.delete();
                             FileOutputStream out = new FileOutputStream(internalFile, true);
@@ -328,7 +330,7 @@ class CalendarWin {
                     public void onClick(DialogInterface dialog, int id) {
                         closest.set(-1,-1,0,"");
                         List<String> newLogEntries = getRebuiltLog(closest);
-                        File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);    //TODO: eliminate LOG_FILE entries in other classes
+                        File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);
                         try {
                             internalFile.delete();
                             FileOutputStream out = new FileOutputStream(internalFile, true);
@@ -342,6 +344,8 @@ class CalendarWin {
                             Toast.makeText(finalContext, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                         }
                         loadAllEntries(newLogEntries);
+                        //TODO: invalidate, redraw (x2)
+                        //TODO: invalidate on import log as well
 
                     }
                 })
@@ -353,7 +357,7 @@ class CalendarWin {
         alertDialogBuilder.create().show();
     }
 
-    List<String> getRebuiltLog(CalendarRect edited) {
+    List<String> getRebuiltLog(CalendarRect edited) {   //TODO: remove unnecessary shapes
         shapes.remove(edited);
         shapes.add(edited);
         List<String> LogList = new ArrayList<>();
@@ -594,32 +598,8 @@ class CalendarRect {
         paint.setColor(color);
         this.comment = comment;
     }
-
-    CalendarRect() {
-        start = -1;
-        end = -1;
-        paint = new Paint();
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(COLOR_ERROR);
-        comment = null;
-    }
-    CalendarRect(long start) {
-        this.start = start;
-    }
-    CalendarRect(long start, long end, String color, String comment) {
-        this.start = start;
-        this.end = end;
-        paint = new Paint();
-        paint.setStyle(Paint.Style.FILL);
-        try {
-            paint.setColor(Color.parseColor(color));
-        } catch (IllegalArgumentException e) {
-            paint.setColor(COLOR_ERROR);
-            Log.d("SquareDays", "Bad color: " + e);
-        }
-        this.comment = comment;
-    }
-    CalendarRect(long start, long end, int color, String comment) {
-        set(start,end,color,comment);
-    }
+    CalendarRect() { set(-1,-1,COLOR_ERROR,null); }
+    CalendarRect(long start) { set(start,-1,0,null); }
+    CalendarRect(long start, long end, String color, String comment) { try { set(start,end,Color.parseColor(color),comment); } catch (IllegalArgumentException e) { set(start,end,COLOR_ERROR,comment); } }
+    CalendarRect(long start, long end, int color, String comment) { set(start,end,color,comment); }
 }

@@ -22,7 +22,6 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 public class ScaleView extends View {
-    private static final String LOG_FILE = "log.txt";
     private CalendarWin CV;
     private ScaleListener SL;
     private ScaleGestureDetector mScaleDetector;
@@ -82,7 +81,9 @@ public class ScaleView extends View {
             return new ArrayList<>();
         }
     }
-    void loadCalendarView(Context context, PaletteRing pal) { //TODO: suspect proc cur entry not doing well on GC
+    void loadCalendarView(Context context, PaletteRing pal) {
+        //TODO: suspect proc cur entry not doing well on GC
+        //TODO: Move to MainActivity
         palette = pal;
         Calendar cal = new GregorianCalendar();
         cal.setTimeInMillis(System.currentTimeMillis());
@@ -92,7 +93,7 @@ public class ScaleView extends View {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         CV = new CalendarWin(cal.getTimeInMillis()/1000,10f,1.5f,palette);
-        CV.loadAllEntries(read_file(context.getApplicationContext(), LOG_FILE));
+        CV.loadAllEntries(read_file(context.getApplicationContext(), MainActivity.LOG_FILE));
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
         CV.setLineWidth(Math.round(6 * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)));
         curTask = CV.getCurComment();
@@ -122,9 +123,10 @@ public class ScaleView extends View {
                 handler.postDelayed(mLongPressed,1200);
                 mLastTouchX = x;
                 mLastTouchY = y;
+                //TODO: Selection box
                 return true;
             case (MotionEvent.ACTION_MOVE):
-                if (has_run) {
+                if (has_run) {  //TODO: need a buffer zone for move detection
                     return false;
                 } else {
                     handler.removeCallbacks(mLongPressed);
@@ -157,4 +159,5 @@ public class ScaleView extends View {
         }
     }
 }
-
+//TODO: Bug on startup: when there is an active task running, and the app is closed then opened
+//TODO: ERROR now-line or ERROR task??

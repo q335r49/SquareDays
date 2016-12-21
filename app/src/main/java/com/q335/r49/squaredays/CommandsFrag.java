@@ -42,7 +42,6 @@ public class CommandsFrag extends Fragment {
     private OnFragmentInteractionListener mListener;
     private FlexboxLayout gridV;
     private List<String[]> commands = new ArrayList<>();
-    private static final String LOG_FILE = "log.txt";
     private final static int COMMENT_IX = 0;
     private final static int COLOR_IX = 1;
     private LayoutInflater inflater;
@@ -318,7 +317,7 @@ public class CommandsFrag extends Fragment {
                                     mListener.procMess(mListener.AB_RESTORESTATE, 0);
                                 }
                                 String entry = Long.toString(now) + ">" + (new Date()).toString() + ">" + comF[COLOR_IX] + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Integer.toString((-delay + duration) * 60)) + ">" + comF[COMMENT_IX];
-                                File internalFile = new File(context.getFilesDir(), LOG_FILE);
+                                File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
                                 try {
                                     FileOutputStream out = new FileOutputStream(internalFile, true);
                                     out.write(entry.getBytes());
@@ -506,7 +505,7 @@ public class CommandsFrag extends Fragment {
                                     .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
                                             String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (finalDelay == 0 ? "0" : Integer.toString(-finalDelay * 60)) + ">" + commentEntry.getText().toString();
-                                            File internalFile = new File(context.getFilesDir(), LOG_FILE);
+                                            File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
                                             try {
                                                 FileOutputStream out = new FileOutputStream(internalFile, true);
                                                 out.write(entry.getBytes());
@@ -529,7 +528,7 @@ public class CommandsFrag extends Fragment {
                                     .create().show();
                         } else if (delay != 0 || !has_dragged) {
                             String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Integer.toString(-delay * 60)) + ">";
-                            File internalFile = new File(context.getFilesDir(), LOG_FILE);
+                            File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
                             try {
                                 FileOutputStream out = new FileOutputStream(internalFile, true);
                                 out.write(entry.getBytes());

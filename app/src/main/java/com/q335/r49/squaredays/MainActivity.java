@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     Context context;
     SharedPreferences sprefs;
     //TODO: Polish the google play store entry
+    //TODO: Investigate "null entry" bug in Calendar
 
     PaletteRing palette;
     static final int PALETTE_LENGTH = 24;
