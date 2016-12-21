@@ -1,34 +1,48 @@
 package com.q335.r49.squaredays;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.Toast;
+
+import com.google.android.flexbox.FlexboxLayout;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ScaleView extends View {
-    private CalendarWin CV;
+    private CalendarWin CW;
     private ScaleListener SL;
     private ScaleGestureDetector mScaleDetector;
     private Context appContext;
 
     private PaletteRing palette;
-        void setPalette(PaletteRing palette) { this.palette = palette; }
 
     private String curTask;
         public String getCurTask() { return curTask; }
@@ -43,7 +57,7 @@ public class ScaleView extends View {
         } else if (s == MESS_REDRAW) {
             invalidate();
         } else {
-            CV.loadEntry(s);
+            CW.addShape(s);
             invalidate();
         }
     }
@@ -92,26 +106,153 @@ public class ScaleView extends View {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        CV = new CalendarWin(cal.getTimeInMillis()/1000,10f,1.5f,palette);
-        CV.loadAllEntries(read_file(context.getApplicationContext(), MainActivity.LOG_FILE));
-        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        CV.setLineWidth(Math.round(6 * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)));
-        curTask = CV.getCurComment();
-        curTaskColor = CV.getCurColor();
+        CW = new CalendarWin(cal.getTimeInMillis()/1000,10f,1.5f);
+        CW.setLog(read_file(context.getApplicationContext(), MainActivity.LOG_FILE));
+        CW.setLineWidth(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
+        curTask = CW.getCurComment();
+        curTaskColor = CW.getCurColor();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        CV.draw(canvas); //XTODO: Investigate why draw is happening multiple times
+        CW.draw(canvas); //XTODO: Investigate why draw is happening multiple times
     }
     private float mLastTouchX, mLastTouchY;
     private boolean has_run;
     private final Handler handler = new Handler();
     private Runnable mLongPressed = new Runnable() { public void run() {
         has_run = true;
-        CV.onLongPress(mLastTouchX,mLastTouchY,appContext);
-    }};;
+        final CalendarRect selection = CW.getShape(mLastTouchX,mLastTouchY);
+        if (selection != null) {
+            LayoutInflater inflater = LayoutInflater.from(appContext);
+            View promptView = inflater.inflate(R.layout.edit_interval, null);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(appContext);
+            alertDialogBuilder.setView(promptView); //TODO: Move this out?
+
+            final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
+            commentEntry.setText(selection.comment);
+            final EditText startEntry = (EditText) promptView.findViewById(R.id.startEdit); //TODO: Allow editing of "natural" text
+            startEntry.setText(Long.toString(selection.start));
+            final EditText endEntry = (EditText) promptView.findViewById(R.id.endEdit);
+            endEntry.setText(Long.toString(selection.end));
+
+            final View curColorV = promptView.findViewById(R.id.CurColor);
+            try { curColorV.setBackgroundColor(selection.paint.getColor());
+            } catch (Exception e) { curColorV.setBackgroundColor(CalendarRect.COLOR_ERROR); }
+
+            final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
+            final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
+            final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
+            final SeekBar seekBlue = (SeekBar) promptView.findViewById(R.id.seekBlue);
+            seekRed.setProgress(Color.red(curColor));
+            seekRed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    curColorV.setBackgroundColor(Color.rgb(progress,seekGreen.getProgress(),seekBlue.getProgress()));
+                }
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) { }
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) { }
+            });
+            seekGreen.setProgress(Color.green(curColor));
+            seekGreen.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),progress,seekBlue.getProgress()));
+                }
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) { }
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) { }
+            });
+            seekBlue.setProgress(Color.blue(curColor));
+            seekBlue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),seekGreen.getProgress(),progress));
+                }
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) { }
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) { }
+            });
+
+            final Context finalContext = appContext;
+            final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
+            final int childCount = paletteView.getChildCount();
+            for (int i = 0; i < childCount ; i++) {
+                View v = paletteView.getChildAt(i);
+                v.setBackgroundColor(palette.get(i));
+                final int bg = ((ColorDrawable) v.getBackground()).getColor();
+                v.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        seekRed.setProgress(Color.red(bg));
+                        seekGreen.setProgress(Color.green(bg));
+                        seekBlue.setProgress(Color.blue(bg));
+                        curColorV.setBackgroundColor(bg);
+                    }
+                });
+            }
+            alertDialogBuilder
+                    .setCancelable(true)
+                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            selection.set(Long.parseLong(startEntry.getText().toString()),
+                                    Long.parseLong(endEntry.getText().toString()),
+                                    ((ColorDrawable)  curColorV.getBackground()).getColor(),
+                                    commentEntry.getText().toString());
+                            List<String> newLogEntries = CW.getLog(selection);
+                            File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);
+                            try {
+                                internalFile.delete();
+                                FileOutputStream out = new FileOutputStream(internalFile, true);
+                                for (String s : newLogEntries) {
+                                    out.write(s.getBytes());
+                                    out.write(System.getProperty("line.separator").getBytes());
+                                }
+                                out.close();
+                            } catch (Exception e) {
+                                Log.d("SquareDays", e.toString());
+                                Toast.makeText(finalContext, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+                            }
+                            CW.setLog(newLogEntries);
+                            invalidate();
+                        }
+                    })
+                    .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            selection.set(-1,-1,0,"");
+                            List<String> newLogEntries = CW.getLog(selection);
+                            File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);
+                            try {
+                                internalFile.delete();
+                                FileOutputStream out = new FileOutputStream(internalFile, true);
+                                for (String s : newLogEntries) {
+                                    out.write(s.getBytes());
+                                    out.write(System.getProperty("line.separator").getBytes());
+                                }
+                                out.close();
+                            } catch (Exception e) {
+                                Log.d("SquareDays", e.toString());
+                                Toast.makeText(finalContext, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+                            }
+                            CW.setLog(newLogEntries);
+                            invalidate();
+                            //TODO: invalidate on import log as well
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            alertDialogBuilder.create().show();
+        }
+
+    }};
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         mScaleDetector.onTouchEvent(ev);
@@ -131,7 +272,7 @@ public class ScaleView extends View {
                 } else {
                     handler.removeCallbacks(mLongPressed);
                     if (Math.abs(x - mLastTouchX) + Math.abs(y - mLastTouchY) < 150) {
-                        CV.onMove(x - mLastTouchX, y - mLastTouchY);
+                        CW.shift(x - mLastTouchX, y - mLastTouchY);
                         invalidate();
                     }
                     mLastTouchX = x;
@@ -143,10 +284,19 @@ public class ScaleView extends View {
                     return false;
                 } else {
                     handler.removeCallbacks(mLongPressed);
-                    CV.onPress(x, y);
-                    invalidate();
-                    return false;
+                    CalendarRect selection = CW.getShape(x,y);
+                    if (selection != null) {
+                        long duration = 1000L* (selection.end - selection.start);
+                        CW.setStatusText(selection.comment + ":"
+                                + new SimpleDateFormat(" h:mm-").format(new Date(selection.start*1000L))
+                                + new SimpleDateFormat("h:mm").format(new Date(selection.end*1000L))
+                                + String.format(" (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
+                                TimeUnit.MILLISECONDS.toMinutes(duration)%60));
+                    } else
+                        CW.setStatusText("");
                 }
+                invalidate();
+                return false;
             default:
                 return true;
         }
@@ -154,7 +304,7 @@ public class ScaleView extends View {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            CV.onScale(detector.getScaleFactor(),detector.getFocusX(),detector.getFocusY());
+            CW.scale(detector.getScaleFactor(),detector.getFocusX(),detector.getFocusY());
             return true;
         }
     }
