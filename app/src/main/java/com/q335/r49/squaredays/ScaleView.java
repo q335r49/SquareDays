@@ -54,6 +54,7 @@ public class ScaleView extends View {
     public void procMess(String s) {
         if (s == MESS_RELOAD_LOG) {
             loadCalendarView(appContext, palette);
+            invalidate();
         } else if (s == MESS_REDRAW) {
             invalidate();
         } else {
@@ -267,9 +268,7 @@ public class ScaleView extends View {
                 //TODO: Selection box
                 return true;
             case (MotionEvent.ACTION_MOVE):
-                if (has_run) {  //TODO: need a buffer zone for move detection
-                    return false;
-                } else {
+                if (!has_run) {
                     if (!has_dragged && (Math.abs(lastTouchX-firstTouchX)+Math.abs(lastTouchY-firstTouchY) > 15)) {
                         has_dragged = true;
                         handler.removeCallbacks(mLongPressed);
@@ -282,6 +281,7 @@ public class ScaleView extends View {
                     lastTouchY = y;
                     return true;
                 }
+                return false;
             case (MotionEvent.ACTION_UP):
                 if (has_run) {
                     return false;
@@ -312,5 +312,5 @@ public class ScaleView extends View {
         }
     }
 }
-//TODO: Bug on startup: when there is an active task running, and the app is closed then opened
-//TODO: ERROR now-line or ERROR task??
+//TODO: Bug: On startup: when there is an active task running, and the app is closed then opened
+//TODO: Bug: ERROR now-line or ERROR task??
