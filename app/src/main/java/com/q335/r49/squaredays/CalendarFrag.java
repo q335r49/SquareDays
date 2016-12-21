@@ -52,12 +52,12 @@ public class CalendarFrag extends Fragment {
         calView = (ScaleView) (fragView.findViewById(R.id.drawing));
         String Task = calView.getCurTask();
         if (Task != null) {
-            mListener.procMess(OnFragmentInteractionListener.AB_SETTEXT,Task);
+            mListener.procMess(MainActivity.AB_SETTEXT,Task);
             int color = calView.getCurTaskColor();
-            mListener.procMess(OnFragmentInteractionListener.AB_SETCOLOR,color);
+            mListener.procMess(MainActivity.AB_SETCOLOR,color);
         } else {
-            mListener.procMess(OnFragmentInteractionListener.AB_SETTEXT,"No active task");
-            mListener.procMess(OnFragmentInteractionListener.AB_SETCOLOR, COLOR_NO_TASK);
+            mListener.procMess(MainActivity.AB_SETTEXT,"No active task");
+            mListener.procMess(MainActivity.AB_SETCOLOR, COLOR_NO_TASK);
         }
         mListener.setGF(this);
         palette = mListener.getPalette();
@@ -93,11 +93,6 @@ public class CalendarFrag extends Fragment {
         mListener = null;
     }
     public interface OnFragmentInteractionListener {
-        int PROC_ENTRY = 9;
-        int AB_SETCOLOR = 10;
-        int AB_SETTEXT = 11;
-        int AB_SAVESTATE = 13;
-        int AB_RESTORESTATE = 14;
         void procMess(int code, int arg);
         void procMess(int code, String arg);
         void setGF(CalendarFrag cf);

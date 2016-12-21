@@ -168,7 +168,7 @@ public class CommandsFrag extends Fragment {
                         case MotionEvent.ACTION_DOWN:
                             actionDownX = event.getX();
                             actionDownY = event.getY();
-                            mListener.procMess(mListener.AB_SAVESTATE,0);
+                            mListener.procMess(MainActivity.AB_SAVESTATE,0);
                             v.getParent().requestDisallowInterceptTouchEvent(true);
                             v.setBackgroundColor(bg_Press);
                             final View finalView = v;
@@ -177,6 +177,7 @@ public class CommandsFrag extends Fragment {
                                 public void run() {
                                     has_run = true;
                                     finalView.setBackgroundColor(bg_Norm);
+
                                     Context context = getContext();
                                     View promptView = inflater.inflate(R.layout.prompts, null);
                                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
@@ -276,15 +277,15 @@ public class CommandsFrag extends Fragment {
                             int duration = (int) Math.abs((event.getY() - actionDownY)*ratio_dp_px);
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
-                            String abString = "";
+                            String abString;
                             if (duration == 0 && delay  == 0) { //Canceled
-                                mListener.procMess(mListener.AB_RESTORESTATE,0);
+                                mListener.procMess(MainActivity.AB_RESTORESTATE,0);
                             } else {
                                 if (!has_dragged) {
                                     handler.removeCallbacks(mLongPressed);
                                     has_dragged = true;
                                 }
-                                mListener.procMess(mListener.AB_SETCOLOR,bg_Norm);
+                                mListener.procMess(MainActivity.AB_SETCOLOR,bg_Norm);
                                 abString = "..";
                                 long now = System.currentTimeMillis()/1000L;
                                 if (delay != 0)
@@ -293,7 +294,7 @@ public class CommandsFrag extends Fragment {
                                 if (duration != 0)
                                     abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60)
                                             + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
-                                mListener.procMess(mListener.AB_SETTEXT, abString.isEmpty()? comF[COMMENT_IX] : abString);
+                                mListener.procMess(MainActivity.AB_SETTEXT, abString.isEmpty()? comF[COMMENT_IX] : abString);
                             }
                             return true;
                         case MotionEvent.ACTION_UP:
@@ -308,13 +309,13 @@ public class CommandsFrag extends Fragment {
                             if (delay != 0 || duration != 0 || !has_dragged) {
                                 long now = System.currentTimeMillis() / 1000L;
                                 if (duration == 0) {
-                                    mListener.procMess(mListener.AB_SETCOLOR, bg_Norm);
-                                    mListener.procMess(mListener.AB_SETTEXT, comF[COMMENT_IX] + " @" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))));
+                                    mListener.procMess(MainActivity.AB_SETCOLOR, bg_Norm);
+                                    mListener.procMess(MainActivity.AB_SETTEXT, comF[COMMENT_IX] + " @" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))));
                                 } else {
                                     Toast.makeText(context, comF[COMMENT_IX]
                                             + "\n" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))) + " > " + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay + 60 * duration)))
                                             + "\n" + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60) + " min", Toast.LENGTH_LONG).show();
-                                    mListener.procMess(mListener.AB_RESTORESTATE, 0);
+                                    mListener.procMess(MainActivity.AB_RESTORESTATE, 0);
                                 }
                                 String entry = Long.toString(now) + ">" + (new Date()).toString() + ">" + comF[COLOR_IX] + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Integer.toString((-delay + duration) * 60)) + ">" + comF[COMMENT_IX];
                                 File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
@@ -327,9 +328,9 @@ public class CommandsFrag extends Fragment {
                                     Log.d("SquareDays", e.toString());
                                     Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                                 }
-                                mListener.procMess(mListener.PROC_ENTRY, entry);
+                                mListener.procMess(MainActivity.PROC_ENTRY, entry);
                             } else
-                                mListener.procMess(mListener.AB_RESTORESTATE, 0);
+                                mListener.procMess(MainActivity.AB_RESTORESTATE, 0);
                             return false;
                         case MotionEvent.ACTION_CANCEL:
                             handler.removeCallbacks(mLongPressed);
@@ -364,7 +365,7 @@ public class CommandsFrag extends Fragment {
                     case MotionEvent.ACTION_DOWN:
                         offset_0x = event.getX();
                         offset_0y = event.getY();
-                        mListener.procMess(mListener.AB_SAVESTATE,0);
+                        mListener.procMess(MainActivity.AB_SAVESTATE,0);
                         v.getParent().requestDisallowInterceptTouchEvent(true);
                         v.setBackgroundColor(bg_Press);
                         has_run = false;
@@ -464,13 +465,13 @@ public class CommandsFrag extends Fragment {
                         duration = duration > 50 ? duration - 50 : 0;
                         String abString = "";
                         if (duration == 0 && delay  == 0) {
-                            mListener.procMess(mListener.AB_RESTORESTATE,0);
+                            mListener.procMess(MainActivity.AB_RESTORESTATE,0);
                         } else {
                             if (!has_dragged) {
                                 handler.removeCallbacks(mLongPressed);
                                 has_dragged = true;
                             }
-                            mListener.procMess(mListener.AB_SETCOLOR,bg_Norm);
+                            mListener.procMess(MainActivity.AB_SETCOLOR,bg_Norm);
                             abString = "..";
                             long now = System.currentTimeMillis()/1000L;
                             if (duration != 0)
@@ -478,7 +479,7 @@ public class CommandsFrag extends Fragment {
                             if (delay != 0)
                                 abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
                                         + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + ")";
-                            mListener.procMess(mListener.AB_SETTEXT,abString.isEmpty()? "End Task" : abString);
+                            mListener.procMess(MainActivity.AB_SETTEXT,abString.isEmpty()? "End Task" : abString);
                         }
                         return true;
                     case MotionEvent.ACTION_UP:
@@ -490,7 +491,7 @@ public class CommandsFrag extends Fragment {
                         duration = (int) Math.abs((event.getY() - offset_0y) * ratio_dp_px);
                         delay = delay > 50 ? delay - 50 : 0;
                         duration = duration > 50 ? duration - 50 : 0;
-                        mListener.procMess(mListener.AB_RESTORESTATE,0);
+                        mListener.procMess(MainActivity.AB_RESTORESTATE,0);
                         if (duration != 0) {
                             LayoutInflater inflater = LayoutInflater.from(getContext());
                             View commentView = inflater.inflate(R.layout.comment_prompt, null);
@@ -515,9 +516,9 @@ public class CommandsFrag extends Fragment {
                                                 Log.d("SquareDays", e.toString());
                                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                                             }
-                                            mListener.procMess(mListener.AB_SETCOLOR,COLOR_NO_TASK);
-                                            mListener.procMess(mListener.AB_SETTEXT, "No active task");
-                                            mListener.procMess(mListener.PROC_ENTRY, entry);
+                                            mListener.procMess(MainActivity.AB_SETCOLOR,COLOR_NO_TASK);
+                                            mListener.procMess(MainActivity.AB_SETTEXT, "No active task");
+                                            mListener.procMess(MainActivity.PROC_ENTRY, entry);
                                         }
                                     })
                                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -538,9 +539,9 @@ public class CommandsFrag extends Fragment {
                                 Log.d("SquareDays", e.toString());
                                 Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
                             }
-                            mListener.procMess(mListener.AB_SETCOLOR,COLOR_NO_TASK);
-                            mListener.procMess(mListener.AB_SETTEXT, "No active task");
-                            mListener.procMess(mListener.PROC_ENTRY, entry);
+                            mListener.procMess(MainActivity.AB_SETCOLOR,COLOR_NO_TASK);
+                            mListener.procMess(MainActivity.AB_SETTEXT, "No active task");
+                            mListener.procMess(MainActivity.PROC_ENTRY, entry);
                         }
                         return false;
                     case MotionEvent.ACTION_CANCEL:
@@ -587,12 +588,8 @@ public class CommandsFrag extends Fragment {
         mListener = null;
     }
 
+
     public interface OnFragmentInteractionListener {
-        int PROC_ENTRY = 9;
-        int AB_SETCOLOR = 10;
-        int AB_SETTEXT = 11;
-        int AB_SAVESTATE = 13;
-        int AB_RESTORESTATE = 14;
         void procMess(int code, int arg);
         void procMess(int code, String arg);
         void setBF(CommandsFrag bf);

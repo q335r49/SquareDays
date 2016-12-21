@@ -45,11 +45,12 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     String AB_curText = "";
     int AB_savedColor = 0;
     String AB_savedText = "";
-    public static final int PROC_ENTRY = 9;
-    public static final int AB_SETCOLOR = 10;
-    public static final int AB_SETTEXT = 11;
-    public static final int AB_SAVESTATE = 13;
-    public static final int AB_RESTORESTATE = 14;
+
+    final static int PROC_ENTRY = 9;
+    final static int AB_SETCOLOR = 10;
+    final static int AB_SETTEXT = 11;
+    final static int AB_SAVESTATE = 13;
+    final static int AB_RESTORESTATE = 14;
     public void procMess(int code, int arg) {
         switch (code) {
             case AB_SETCOLOR:
