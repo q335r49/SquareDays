@@ -1,15 +1,27 @@
 package com.q335.r49.squaredays;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.SeekBar;
+import android.widget.Toast;
+
+import com.google.android.flexbox.FlexboxLayout;
+
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -23,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 public class CalendarFrag extends Fragment {
     static int COLOR_NO_TASK;
+    PaletteRing palette;
 
     private ScaleView calView;
     private View fragView;
@@ -57,6 +70,8 @@ public class CalendarFrag extends Fragment {
             mListener.procMess(OnFragmentInteractionListener.AB_SETCOLOR, COLOR_NO_TASK);
         }
         mListener.setGF(this);
+        palette = mListener.getPalette();
+        calView.loadCalendarView(getContext(),palette);
         return fragView;
     }
 
@@ -104,6 +119,7 @@ public class CalendarFrag extends Fragment {
         void procMess(int code, int arg);
         void procMess(int code, String arg);
         void setGF(CalendarFrag cf);
+        PaletteRing getPalette();
     }
 }
 class CalendarWin {
@@ -144,7 +160,9 @@ class CalendarWin {
 
     private Paint nowLineStyle;
     private Paint statusBarStyle;
-    CalendarWin(long orig, float gridW, float gridH) {
+    private PaletteRing palette;
+    CalendarWin(long orig, float gridW, float gridH, PaletteRing pal) {
+        palette = pal;
         shapes = new ArrayList<>();
         shapeIndex = new TreeSet<>(new Comparator<CalendarRect>() {
             @Override
@@ -180,11 +198,10 @@ class CalendarWin {
             statusBarStyle.setTextAlign(Paint.Align.LEFT);
         statusText = "";
     }
-    void shiftWindow(float x, float y) {
-        // g0x -= x * ratio_grid_screen_W;
+    void onMove(float x, float y) {
         g0y -= y * ratio_grid_screen_H;
     }
-    void reScale(float scale, float x0, float y0) { //TODO: Increase scaling speed?
+    void onScale(float scale, float x0, float y0) { //TODO: Increase scaling speed?
         float borderScale = (scale - 1 + RECT_SCALING_FACTOR_Y)/scale/RECT_SCALING_FACTOR_Y;
         if (borderScale*RECT_SCALING_FACTOR_Y > 0.7f || borderScale > 1) {
             g0y = (y0 - y0 / scale) * ratio_grid_screen_H + g0y;;
@@ -193,7 +210,7 @@ class CalendarWin {
             RECT_SCALING_FACTOR_Y *= borderScale;
         }
     }
-    void onClick(float sx, float sy) {
+    void onPress(float sx, float sy) {  //TODO: Selection box
         long ts = conv_screen_ts(sx, sy);
         CalendarRect closest = shapeIndex.floor(new CalendarRect(ts));
         if (closest.end > ts) {
@@ -206,8 +223,147 @@ class CalendarWin {
         } else
             statusText = "";
     }
-    void onLongPress(float sx, float sy) {
+    void onLongPress(float sx, float sy, Context context) {
+        long ts = conv_screen_ts(sx, sy);
+        final CalendarRect closest = shapeIndex.floor(new CalendarRect(ts));
+        if (closest.end < ts)
+            return;
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View promptView = inflater.inflate(R.layout.edit_interval, null);
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
+        alertDialogBuilder.setView(promptView);
 
+        final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
+        commentEntry.setText(closest.comment);
+        final EditText startEntry = (EditText) promptView.findViewById(R.id.startEdit);
+        startEntry.setText(Long.toString(closest.start));
+        final EditText endEntry = (EditText) promptView.findViewById(R.id.endEdit);
+        endEntry.setText(Long.toString(closest.end));
+
+        final View curColorV = promptView.findViewById(R.id.CurColor);
+        try { curColorV.setBackgroundColor(closest.paint.getColor());
+        } catch (Exception e) { curColorV.setBackgroundColor(CalendarRect.COLOR_ERROR); }
+
+        final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
+        final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
+        final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
+        final SeekBar seekBlue = (SeekBar) promptView.findViewById(R.id.seekBlue);
+        seekRed.setProgress(Color.red(curColor));
+        seekRed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                curColorV.setBackgroundColor(Color.rgb(progress,seekGreen.getProgress(),seekBlue.getProgress()));
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) { }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) { }
+        });
+        seekGreen.setProgress(Color.green(curColor));
+        seekGreen.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),progress,seekBlue.getProgress()));
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) { }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) { }
+        });
+        seekBlue.setProgress(Color.blue(curColor));
+        seekBlue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),seekGreen.getProgress(),progress));
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) { }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) { }
+        });
+
+        final Context finalContext = context;
+        final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
+        final int childCount = paletteView.getChildCount();
+        for (int i = 0; i < childCount ; i++) {
+            View v = paletteView.getChildAt(i);
+            v.setBackgroundColor(palette.get(i));
+            final int bg = ((ColorDrawable) v.getBackground()).getColor();
+            v.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    seekRed.setProgress(Color.red(bg));
+                    seekGreen.setProgress(Color.green(bg));
+                    seekBlue.setProgress(Color.blue(bg));
+                    curColorV.setBackgroundColor(bg);
+                }
+            });
+        }
+        alertDialogBuilder
+                .setCancelable(true)
+                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        closest.set(Long.parseLong(startEntry.getText().toString()),
+                                    Long.parseLong(endEntry.getText().toString()),
+                                    ((ColorDrawable)  curColorV.getBackground()).getColor(),
+                                    commentEntry.getText().toString());
+                        List<String> newLogEntries = getRebuiltLog(closest);
+                        File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);    //TODO: eliminate LOG_FILE entries in other classes
+                        try {
+                            FileOutputStream out = new FileOutputStream(internalFile, true);
+                            for (String s : newLogEntries) {
+                                out.write(s.getBytes());
+                                out.write(System.getProperty("line.separator").getBytes());
+                            }
+                            out.close();
+                        } catch (Exception e) {
+                            Log.d("SquareDays", e.toString());
+                            Toast.makeText(finalContext, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+                        }
+                        loadAllEntries(newLogEntries);
+                    }
+                })
+                .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        closest.set(-1,-1,0,"");
+                        List<String> newLogEntries = getRebuiltLog(closest);
+                        File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);    //TODO: eliminate LOG_FILE entries in other classes
+                        try {
+                            FileOutputStream out = new FileOutputStream(internalFile, true);
+                            for (String s : newLogEntries) {
+                                out.write(s.getBytes());
+                                out.write(System.getProperty("line.separator").getBytes());
+                            }
+                            out.close();
+                        } catch (Exception e) {
+                            Log.d("SquareDays", e.toString());
+                            Toast.makeText(finalContext, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+                        }
+                        loadAllEntries(newLogEntries);
+
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+        alertDialogBuilder.create().show();
+    }
+
+    List<String> getRebuiltLog(CalendarRect edited) {
+        shapes.remove(edited);
+        shapes.add(edited);
+        List<String> LogList = new ArrayList<>();
+        for (CalendarRect r : shapes) {
+            if (r.start != -1 && r.end != -1)
+                LogList.add(Long.toString(r.start) + ">" + (new Date(r.start*1000L)).toString()
+                    + ">" + r.paint.getColor() + ">0>" + Long.toString(r.end-r.start) + ">" + r.comment);
+        }
+        if (curTask.end == -1L)
+            LogList.add(Long.toString(curTask.start) + ">" + (new Date(curTask.start*1000L)).toString()
+                    + ">" + curTask.paint.getColor() + ">0>" + Long.toString(curTask.end-curTask.start) + ">" + curTask.comment);
+        return LogList;
     }
 
     private ArrayList<CalendarRect> shapes;
@@ -428,6 +584,15 @@ class CalendarRect {
     long end;
     String comment;
     Paint paint;
+    void set(long start, long end, int color, String comment) {
+        this.start = start;
+        this.end = end;
+        paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(color);
+        this.comment = comment;
+    }
+
     CalendarRect() {
         start = -1;
         end = -1;
@@ -453,11 +618,6 @@ class CalendarRect {
         this.comment = comment;
     }
     CalendarRect(long start, long end, int color, String comment) {
-        this.start = start;
-        this.end = end;
-        paint = new Paint();
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(color);
-        this.comment = comment;
+        set(start,end,color,comment);
     }
 }

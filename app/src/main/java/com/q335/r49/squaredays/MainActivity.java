@@ -26,12 +26,18 @@ import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
 
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener {
-    private static final String LOG_FILE = "log.txt";
-    private static final String COMMANDS_FILE = "commands.json";
-    private static final String EXT_STORAGE_DIR = "tracker";
+    static final String LOG_FILE = "log.txt";
+    static final String COMMANDS_FILE = "commands.json";
+    static final String EXT_STORAGE_DIR = "tracker";
     Context context;
     SharedPreferences sprefs;
     //TODO: Polish the google play store entry
+
+    PaletteRing palette;
+    static final int PALETTE_LENGTH = 24;
+    public PaletteRing getPalette() {
+        return palette;
+    }
 
     private Toolbar AB;
     int AB_curColor = 0;
@@ -95,6 +101,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         CommandsFrag.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
         CommandsFrag.COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);
+
+        palette = new PaletteRing(PALETTE_LENGTH);
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);

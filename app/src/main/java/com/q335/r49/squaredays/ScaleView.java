@@ -28,6 +28,9 @@ public class ScaleView extends View {
     private ScaleGestureDetector mScaleDetector;
     private Context appContext;
 
+    private PaletteRing palette;
+        void setPalette(PaletteRing palette) { this.palette = palette; }
+
     private String curTask;
         public String getCurTask() { return curTask; }
     private int curTaskColor;
@@ -37,7 +40,7 @@ public class ScaleView extends View {
     public static String MESS_REDRAW = "##MESS REDRAW";
     public void procMess(String s) {
         if (s == MESS_RELOAD_LOG) {
-            loadCalendarView(appContext);
+            loadCalendarView(appContext, palette);
         } else if (s == MESS_REDRAW) {
             invalidate();
         } else {
@@ -50,14 +53,12 @@ public class ScaleView extends View {
         SL = new ScaleListener();
         mScaleDetector = new ScaleGestureDetector(context, SL);
         appContext = context;
-        loadCalendarView(context);
     }
     public ScaleView(Context context, AttributeSet attrs) {
         super(context, attrs);
         SL = new ScaleListener();
         mScaleDetector = new ScaleGestureDetector(context, SL);
         appContext = context;
-        loadCalendarView(context);
     }
     public static List<String> read_file(Context context, String filename) {
         try {
@@ -81,7 +82,8 @@ public class ScaleView extends View {
             return new ArrayList<>();
         }
     }
-    private void loadCalendarView(Context context) {
+    void loadCalendarView(Context context, PaletteRing pal) { //TODO: suspect proc cur entry not doing well on GC
+        palette = pal;
         Calendar cal = new GregorianCalendar();
         cal.setTimeInMillis(System.currentTimeMillis());
         cal.set(Calendar.DAY_OF_WEEK,1);
@@ -89,7 +91,7 @@ public class ScaleView extends View {
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        CV = new CalendarWin(cal.getTimeInMillis()/1000,10f,1.5f);
+        CV = new CalendarWin(cal.getTimeInMillis()/1000,10f,1.5f,palette);
         CV.loadAllEntries(read_file(context.getApplicationContext(), LOG_FILE));
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
         CV.setLineWidth(Math.round(6 * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)));
@@ -102,11 +104,13 @@ public class ScaleView extends View {
         super.onDraw(canvas);
         CV.draw(canvas); //XTODO: Investigate why draw is happening multiple times
     }
-    private float mLastTouchX;
-    private float mLastTouchY;
+    private float mLastTouchX, mLastTouchY;
     private boolean has_run;
     private final Handler handler = new Handler();
-    private Runnable mLongPressed;
+    private Runnable mLongPressed = new Runnable() { public void run() {
+        has_run = true;
+        CV.onLongPress(mLastTouchX,mLastTouchY,appContext);
+    }};;
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         mScaleDetector.onTouchEvent(ev);
@@ -115,13 +119,9 @@ public class ScaleView extends View {
         switch (ev.getAction()) {
             case (MotionEvent.ACTION_DOWN):
                 has_run = false;
+                handler.postDelayed(mLongPressed,1200);
                 mLastTouchX = x;
                 mLastTouchY = y;
-                mLongPressed = new Runnable() { public void run() {
-                    has_run = true;
-                    CV.onLongPress(x,y);
-                }};
-                handler.postDelayed(mLongPressed,1200);
                 return true;
             case (MotionEvent.ACTION_MOVE):
                 if (has_run) {
@@ -129,7 +129,7 @@ public class ScaleView extends View {
                 } else {
                     handler.removeCallbacks(mLongPressed);
                     if (Math.abs(x - mLastTouchX) + Math.abs(y - mLastTouchY) < 150) {
-                        CV.shiftWindow(x - mLastTouchX, y - mLastTouchY);
+                        CV.onMove(x - mLastTouchX, y - mLastTouchY);
                         invalidate();
                     }
                     mLastTouchX = x;
@@ -141,7 +141,7 @@ public class ScaleView extends View {
                     return false;
                 } else {
                     handler.removeCallbacks(mLongPressed);
-                    CV.onClick(x, y);
+                    CV.onPress(x, y);
                     invalidate();
                     return false;
                 }
@@ -152,7 +152,7 @@ public class ScaleView extends View {
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
-            CV.reScale(detector.getScaleFactor(),detector.getFocusX(),detector.getFocusY());
+            CV.onScale(detector.getScaleFactor(),detector.getFocusX(),detector.getFocusY());
             return true;
         }
     }

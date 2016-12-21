@@ -48,38 +48,7 @@ public class CommandsFrag extends Fragment {
     private LayoutInflater inflater;
     Context context;
 
-    private final static int PALETTE_LEN = 24;
-    class PaletteRing {
-        private int length;
-        private int size;
-        private int[] ring;
-        private int pos;
-        PaletteRing(int length) {
-            this.length = length;
-            ring = new int[length];
-            pos = 0;
-            size = 0;
-        }
-        public void add(int c) {
-            for (int i = 0; i < length; i++) {
-                if (ring[(pos + i) % length] ==  c) {
-                    if (i != 0) {
-                        for (int j = pos + i; j > pos; j--)
-                            ring[j % length] = ring[(j - 1) % length];
-                        size = size > 0 ? size - 1 : 0;
-                    }
-                    break;
-                }
-            }
-            ring[pos] = c;
-            pos = (pos + 1) % length;
-            size++;
-        }
-        int get(int i) {
-            return ring[(pos - 1 - i + 10*length) % length];
-        }
-    }
-    private PaletteRing palette = new PaletteRing(PALETTE_LEN);
+    private PaletteRing palette;
 
     private int dpToPx(int dp) {
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
@@ -108,6 +77,7 @@ public class CommandsFrag extends Fragment {
         return view;
     }
     public void loadCommands(String s) {
+        palette = mListener.getPalette();
         if (s.isEmpty()) {
             commands.add(new String[]{"01 This is a task...", "red", "0", ""});
             commands.add(new String[]{"02 Long press a task to edit...", "blue", "0", ""});
@@ -627,5 +597,6 @@ public class CommandsFrag extends Fragment {
         void procMess(int code, int arg);
         void procMess(int code, String arg);
         void setBF(CommandsFrag bf);
+        PaletteRing getPalette();
     }
 }
