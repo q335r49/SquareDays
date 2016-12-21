@@ -14,7 +14,6 @@ public class HelpScroller extends DialogFragment {
     private static final int NUM_PAGES = 6;
     private ViewPager mPager;
     private PagerAdapter mPagerAdapter;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,12 +22,10 @@ public class HelpScroller extends DialogFragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
-
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
     private String mParam1;
     private String mParam2;
-    private OnFragmentInteractionListener mListener;
     public HelpScroller() {
         // Required empty public constructor
     }
@@ -40,35 +37,20 @@ public class HelpScroller extends DialogFragment {
         fragment.setArguments(args);
         return fragment;
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         View mView = inflater.inflate(R.layout.fragment_help_scroller, container, false);
-
         mPager = (ViewPager) mView.findViewById(R.id.pager);
         mPagerAdapter = new ScreenSlidePagerAdapter(getContext());
         mPager.setAdapter(mPagerAdapter);
-
         return mView;
     }
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
     }
     @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-    public interface OnFragmentInteractionListener {
-    }
+    public void onDetach() { super.onDetach(); }
     private class ScreenSlidePagerAdapter extends PagerAdapter {
         int[] Pages = {
                 R.drawable.p1,
@@ -80,37 +62,23 @@ public class HelpScroller extends DialogFragment {
         };
         Context mContext;
         LayoutInflater mInflater;
-
         public ScreenSlidePagerAdapter(Context context) {
             mContext = context;
             mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
-
         @Override
-        public int getCount() {
-            return NUM_PAGES;
-        }
-
+        public int getCount() { return NUM_PAGES; }
         @Override
-        public boolean isViewFromObject(View view, Object object) {
-            return view == ((LinearLayout) object);
-        }
-
+        public boolean isViewFromObject(View view, Object object) { return view == ((LinearLayout) object); }
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             View itemView = mInflater.inflate(R.layout.pager_item, container, false);
-
             ImageView imageView = (ImageView) itemView.findViewById(R.id.imageView);
             imageView.setImageResource(Pages[position]);
-
             container.addView(itemView);
-
             return itemView;
         }
-
         @Override
-        public void destroyItem(ViewGroup container, int position, Object object) {
-            container.removeView((LinearLayout) object);
-        }
+        public void destroyItem(ViewGroup container, int position, Object object) { container.removeView((LinearLayout) object); }
     }
 }

@@ -96,9 +96,7 @@ public class ScaleView extends View {
             return new ArrayList<>();
         }
     }
-    void loadCalendarView(Context context, PaletteRing pal) {
-        //TODO: suspect proc cur entry not doing well on GC
-        //TODO: Move to MainActivity
+    void loadCalendarView(Context context, PaletteRing pal) { //TODO: Move to MainActivity; use "selectedShape"
         palette = pal;
         Calendar cal = new GregorianCalendar();
         cal.setTimeInMillis(System.currentTimeMillis());
@@ -242,7 +240,6 @@ public class ScaleView extends View {
                             }
                             CW.setLog(newLogEntries);
                             invalidate();
-                            //TODO: invalidate on import log as well
                         }
                     })
                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -314,3 +311,4 @@ public class ScaleView extends View {
 }
 //TODO: Bug: On startup: when there is an active task running, and the app is closed then opened
 //TODO: Bug: ERROR now-line or ERROR task??
+//TODO: suspect proc cur entry not doing well on GC
