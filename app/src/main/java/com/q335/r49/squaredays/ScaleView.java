@@ -118,12 +118,12 @@ public class ScaleView extends View {
         super.onDraw(canvas);
         CW.draw(canvas); //XTODO: Investigate why draw is happening multiple times
     }
-    private float mLastTouchX, mLastTouchY;
-    private boolean has_run;
+    private float lastTouchX, lastTouchY, firstTouchX, firstTouchY;
+    private boolean has_run, has_dragged;
     private final Handler handler = new Handler();
     private Runnable mLongPressed = new Runnable() { public void run() {
         has_run = true;
-        final CalendarRect selection = CW.getShape(mLastTouchX,mLastTouchY);
+        final CalendarRect selection = CW.getShape(lastTouchX, lastTouchY);
         if (selection != null) {
             LayoutInflater inflater = LayoutInflater.from(appContext);
             View promptView = inflater.inflate(R.layout.edit_interval, null);
@@ -260,23 +260,26 @@ public class ScaleView extends View {
         final float y = ev.getY();
         switch (ev.getAction()) {
             case (MotionEvent.ACTION_DOWN):
-                has_run = false;
+                has_run = has_dragged = false;
                 handler.postDelayed(mLongPressed,1200);
-                mLastTouchX = x;
-                mLastTouchY = y;
+                firstTouchX = lastTouchX = x;
+                firstTouchY = lastTouchY = y;
                 //TODO: Selection box
                 return true;
             case (MotionEvent.ACTION_MOVE):
                 if (has_run) {  //TODO: need a buffer zone for move detection
                     return false;
                 } else {
-                    handler.removeCallbacks(mLongPressed);
-                    if (Math.abs(x - mLastTouchX) + Math.abs(y - mLastTouchY) < 150) {
-                        CW.shift(x - mLastTouchX, y - mLastTouchY);
+                    if (!has_dragged && (Math.abs(lastTouchX-firstTouchX)+Math.abs(lastTouchY-firstTouchY) > 15)) {
+                        has_dragged = true;
+                        handler.removeCallbacks(mLongPressed);
+                    }
+                    if (Math.abs(x - lastTouchX) + Math.abs(y - lastTouchY) < 150) {
+                        CW.shift(x - lastTouchX, y - lastTouchY);
                         invalidate();
                     }
-                    mLastTouchX = x;
-                    mLastTouchY = y;
+                    lastTouchX = x;
+                    lastTouchY = y;
                     return true;
                 }
             case (MotionEvent.ACTION_UP):
