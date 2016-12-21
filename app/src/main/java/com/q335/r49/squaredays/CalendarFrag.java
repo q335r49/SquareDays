@@ -310,6 +310,7 @@ class CalendarWin {
                         List<String> newLogEntries = getRebuiltLog(closest);
                         File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);    //TODO: eliminate LOG_FILE entries in other classes
                         try {
+                            internalFile.delete();
                             FileOutputStream out = new FileOutputStream(internalFile, true);
                             for (String s : newLogEntries) {
                                 out.write(s.getBytes());
@@ -329,6 +330,7 @@ class CalendarWin {
                         List<String> newLogEntries = getRebuiltLog(closest);
                         File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);    //TODO: eliminate LOG_FILE entries in other classes
                         try {
+                            internalFile.delete();
                             FileOutputStream out = new FileOutputStream(internalFile, true);
                             for (String s : newLogEntries) {
                                 out.write(s.getBytes());
@@ -358,11 +360,11 @@ class CalendarWin {
         for (CalendarRect r : shapes) {
             if (r.start != -1 && r.end != -1)
                 LogList.add(Long.toString(r.start) + ">" + (new Date(r.start*1000L)).toString()
-                    + ">" + r.paint.getColor() + ">0>" + Long.toString(r.end-r.start) + ">" + r.comment);
+                    + ">" + String.format("#%06X", 0xFFFFFF & r.paint.getColor()) + ">0>" + Long.toString(r.end-r.start) + ">" + r.comment);
         }
-        if (curTask.end == -1L)
+        if (curTask.end == -1L && curTask.start!= -1)
             LogList.add(Long.toString(curTask.start) + ">" + (new Date(curTask.start*1000L)).toString()
-                    + ">" + curTask.paint.getColor() + ">0>" + Long.toString(curTask.end-curTask.start) + ">" + curTask.comment);
+                    + ">" + String.format("#%06X", 0xFFFFFF & curTask.paint.getColor()) + ">0>-1>" + curTask.comment);
         return LogList;
     }
 
