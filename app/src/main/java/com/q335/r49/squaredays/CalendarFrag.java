@@ -311,10 +311,10 @@ class CalendarWin {
         if (curTask.end == -1) {
             curTask.end = now;
             drawInterval(curTask);
-            drawNowLine(now, curTask.paint);
+            drawNowLine(now, curTask.paint.getColor());
             curTask.end = -1;
         } else
-            drawNowLine(now,nowLineStyle);
+            drawNowLine(now);
 
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
@@ -367,7 +367,8 @@ class CalendarWin {
                 (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
-    private void drawNowLine(long ts, Paint paint) {
+    private void drawNowLine(long ts) {
+        nowLineStyle.setColor(COLOR_NOW_LINE);
         long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
         float[] a = conv_ts_screen(ts,0f);
         float[] b = conv_ts_screen(ts,1f);
@@ -375,7 +376,18 @@ class CalendarWin {
         mCanvas.drawLine((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
                 (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                 (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
-                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
+                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
+    }
+    private void drawNowLine(long ts, int color) {
+        nowLineStyle.setColor(color);
+        long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
+        float[] a = conv_ts_screen(ts,0f);
+        float[] b = conv_ts_screen(ts,1f);
+        float[] c = conv_ts_screen(noon,0.5f);
+        mCanvas.drawLine((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
     }
 
     private CalendarRect curTask;
