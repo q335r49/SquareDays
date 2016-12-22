@@ -112,6 +112,22 @@ public class ScaleView extends View {
         curTaskColor = CW.getCurColor();
     }
 
+    public static long dateToTs(String s) {
+        int minPos = s.indexOf(':');
+        int monthPos = s.indexOf(' ', minPos+1);
+        int dayPos = s.indexOf('/', monthPos+1);
+        int yearPos = s.indexOf('/', dayPos+1);
+        if (minPos == -1 || monthPos == -1 || dayPos == -1 || yearPos == -1)
+            return -1;
+        Calendar cal = new GregorianCalendar();
+        cal.set(Calendar.YEAR,Integer.parseInt(s.substring(yearPos+1,s.length())));
+        cal.set(Calendar.MONTH,Integer.parseInt(s.substring(monthPos+1,dayPos))-1);
+        cal.set(Calendar.DAY_OF_MONTH,Integer.parseInt(s.substring(dayPos+1,yearPos)));
+        cal.set(Calendar.HOUR_OF_DAY,Integer.parseInt(s.substring(0,minPos)));
+        cal.set(Calendar.MINUTE,Integer.parseInt(s.substring(minPos+1,monthPos)));
+        return cal.getTimeInMillis()/1000L;
+    }
+    public static String tsToDate(long ts) { return new SimpleDateFormat("k:mm M/d/YYYY").format(new Date(ts*1000L)); }
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -131,11 +147,10 @@ public class ScaleView extends View {
 
             final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
             commentEntry.setText(selection.comment);
-            final EditText startEntry = (EditText) promptView.findViewById(R.id.startEdit); //TODO: Allow editing of "natural" text
-            startEntry.setText(Long.toString(selection.start));
+            final EditText startEntry = (EditText) promptView.findViewById(R.id.startEdit);
+            startEntry.setText(tsToDate(selection.start));
             final EditText endEntry = (EditText) promptView.findViewById(R.id.endEdit);
-            endEntry.setText(Long.toString(selection.end));
-
+            endEntry.setText(tsToDate(selection.end));
             final View curColorV = promptView.findViewById(R.id.CurColor);
             try { curColorV.setBackgroundColor(selection.paint.getColor());
             } catch (Exception e) { curColorV.setBackgroundColor(CalendarRect.COLOR_ERROR); }
@@ -199,13 +214,16 @@ public class ScaleView extends View {
                     .setCancelable(true)
                     .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            selection.set(Long.parseLong(startEntry.getText().toString()),
-                                    Long.parseLong(endEntry.getText().toString()),
-                                    ((ColorDrawable)  curColorV.getBackground()).getColor(),
-                                    commentEntry.getText().toString());
+                            long newstart = dateToTs(startEntry.getText().toString());
+                            long newend = dateToTs(endEntry.getText().toString());
+                            if (newstart == -1 || newend == -1) {
+                                Toast.makeText(finalContext, "Bad date format", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            selection.set(newstart,newend,((ColorDrawable)  curColorV.getBackground()).getColor(),commentEntry.getText().toString());
                             List<String> newLogEntries = CW.getLog(selection);
                             File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);
-                            try {
+                            try {   //TODO: centralize logging, eliminate blank "end activity" entries
                                 internalFile.delete();
                                 FileOutputStream out = new FileOutputStream(internalFile, true);
                                 for (String s : newLogEntries) {
@@ -291,6 +309,7 @@ public class ScaleView extends View {
                 }
                 return false;
             case (MotionEvent.ACTION_UP):
+            case (MotionEvent.ACTION_CANCEL):
                 if (!has_run)
                     handler.removeCallbacks(mLongPressed);
                 return false;

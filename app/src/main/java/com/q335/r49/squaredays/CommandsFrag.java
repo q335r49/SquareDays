@@ -527,7 +527,7 @@ public class CommandsFrag extends Fragment {
                                         }
                                     })
                                     .create().show();
-                        } else if (delay != 0 || !has_dragged) {
+                        } else if (delay != 0 || !has_dragged) { //TODO: *** Stop writing empty messages to log
                             String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Integer.toString(-delay * 60)) + ">";
                             File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
                             try {
