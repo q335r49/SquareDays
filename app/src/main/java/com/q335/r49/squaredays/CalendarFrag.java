@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.NavigableSet;
 import java.util.Queue;
 import java.util.TreeSet;
@@ -146,7 +147,7 @@ class CalendarWin {
         statusText = "";
     }
     private static float LINE_WIDTH = 10;
-    public void setLineWidth(float f) {
+    void setLineWidth(float f) {
         LINE_WIDTH = f;
         textStyle.setTextSize(LINE_WIDTH*2f);
         textStyle.setStrokeWidth(LINE_WIDTH/5f);
@@ -192,7 +193,7 @@ class CalendarWin {
     void scale(float scale, float x0, float y0) { //TODO: Increase scaling speed?
         float borderScale = (scale - 1 + RECT_SCALING_FACTOR_Y)/scale/RECT_SCALING_FACTOR_Y;
         if (borderScale*RECT_SCALING_FACTOR_Y > 0.7f || borderScale > 1) {
-            g0y = (y0 - y0 / scale) * ratio_grid_screen_H + g0y;;
+            g0y = (y0 - y0 / scale) * ratio_grid_screen_H + g0y;
             gridH /= scale;
             ratio_grid_screen_H /= scale;
             RECT_SCALING_FACTOR_Y *= borderScale;
@@ -230,7 +231,7 @@ class CalendarWin {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / ratio_grid_screen_H;
                 if (scaledMark > 0f) {
                     canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, textStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.6f, boldtextStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.6f, boldtextStyle);
                 }
             }
         } else if (gridH > 1f) {
@@ -242,13 +243,13 @@ class CalendarWin {
                     scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / ratio_grid_screen_H;
                     if (scaledMark > 0f) {
                         canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, textStyle);
-                        canvas.drawText((new SimpleDateFormat("M.d").format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.6f, boldtextStyle);
+                        canvas.drawText((new SimpleDateFormat("M.d",Locale.US).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.6f, boldtextStyle);
                     }
                 } else {
                     scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / ratio_grid_screen_H;
                     if (scaledMark > 0f) {
                         canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, textStyle);
-                        canvas.drawText((new SimpleDateFormat(" h:mm").format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
+                        canvas.drawText((new SimpleDateFormat(" h:mm",Locale.US).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
                     }
                 }
             }
@@ -261,7 +262,7 @@ class CalendarWin {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / ratio_grid_screen_H;
                 if (scaledMark > 0f) {
                     canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, textStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
                 }
             }
         } else if (gridH > 1f/24f) {
@@ -273,7 +274,7 @@ class CalendarWin {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / ratio_grid_screen_H;
                 if (scaledMark > 0f) {
                     canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, textStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
                 }
             }
         } else if (gridH > 1f/144f) {
@@ -285,7 +286,7 @@ class CalendarWin {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / ratio_grid_screen_H;
                 if (scaledMark > 0f) {
                     canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, textStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
                 }
             }
         } else {
@@ -297,7 +298,7 @@ class CalendarWin {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / ratio_grid_screen_H;
                 if (scaledMark > 0f) {
                     canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, textStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(conv_grid_ts(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, textStyle);
                 }
             }
         }
@@ -450,7 +451,7 @@ class CalendarWin {
     }
 
     private CalendarRect selection;
-    public void setSelected(CalendarRect selection) {
+    void setSelected(CalendarRect selection) {
         this.selection = selection;
     }
 }

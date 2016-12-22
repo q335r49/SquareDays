@@ -34,6 +34,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class ScaleView extends View {
@@ -52,10 +53,10 @@ public class ScaleView extends View {
     public static String MESS_RELOAD_LOG = "##MESS RELOAD LOG";
     public static String MESS_REDRAW = "##MESS REDRAW";
     public void procMess(String s) {
-        if (s == MESS_RELOAD_LOG) {
+        if (s.equals(MESS_RELOAD_LOG)) {
             loadCalendarView(appContext, palette);
             invalidate();
-        } else if (s == MESS_REDRAW) {
+        } else if (s.equals(MESS_REDRAW)) {
             invalidate();
         } else {
             CW.addShape(s);
@@ -127,7 +128,7 @@ public class ScaleView extends View {
         cal.set(Calendar.MINUTE,Integer.parseInt(s.substring(minPos+1,monthPos)));
         return cal.getTimeInMillis()/1000L;
     }
-    public static String tsToDate(long ts) { return new SimpleDateFormat("k:mm M/d/YYYY").format(new Date(ts*1000L)); }
+    public static String tsToDate(long ts) { return new SimpleDateFormat("k:mm M/d/yyyy", Locale.US).format(new Date(ts*1000L)); }
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -284,9 +285,9 @@ public class ScaleView extends View {
                 if (selection != null && selection.start != -1) {
                     long duration = 1000L* (selection.end - selection.start);
                     CW.setStatusText(selection.comment + ":"
-                            + new SimpleDateFormat(" h:mm-").format(new Date(selection.start*1000L))
-                            + new SimpleDateFormat("h:mm").format(new Date(selection.end*1000L))
-                            + String.format(" (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
+                            + new SimpleDateFormat(" h:mm-", Locale.US).format(new Date(selection.start*1000L))
+                            + new SimpleDateFormat("h:mm", Locale.US).format(new Date(selection.end*1000L))
+                            + String.format(Locale.US, " (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
                             TimeUnit.MILLISECONDS.toMinutes(duration)%60));
                 } else
                     CW.setStatusText("");
