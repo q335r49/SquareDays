@@ -1,6 +1,7 @@
 package com.q335.r49.squaredays;
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -25,14 +26,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
 
-public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener, TaskEditor.OnFragmentInteractionListener {
     static final String LOG_FILE = "log.txt";
     static final String COMMANDS_FILE = "commands.json";
     static final String EXT_STORAGE_DIR = "tracker";
     Context context;
     SharedPreferences sprefs;
     //TODO: Polish the google play store entry
-    //TODO: Investigate "null entry" bug in Calendar
 
     PaletteRing palette;
     static final int PALETTE_LENGTH = 24;
@@ -89,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         public void setGF(CalendarFrag GF) { this.GF = GF; }
     CommandsFrag BF;
         public void setBF(CommandsFrag BF) { this.BF = BF; }
+    FragmentManager FM;
+    TaskEditor TE;
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
@@ -103,6 +105,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         CommandsFrag.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
         CommandsFrag.COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);
+        CalendarWin.COLOR_SELECTION = ResourcesCompat.getColor(getResources(), R.color.selection, null);
 
         palette = new PaletteRing(PALETTE_LENGTH);
 
@@ -117,7 +120,9 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
 
         BF = new CommandsFrag();
         GF = new CalendarFrag();
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager(),BF,GF);
+        TE = new TaskEditor();
+        FM = getSupportFragmentManager();
+        mSectionsPagerAdapter = new SectionsPagerAdapter(FM,BF,GF);
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
     }
@@ -287,6 +292,10 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                 return true;
             }
             case R.id.menuItemHelp: {
+//                FragmentManager fm = getSupportFragmentManager();
+//                TaskEditor newFragment = new TaskEditor();
+//                newFragment.setFields("blah","red",palette);
+//                newFragment.show(fm, "dialog");
                 FragmentManager fm = getSupportFragmentManager();
                 HelpScroller helpV = HelpScroller.newInstance("","");
                 helpV.show(fm, "fragment_edit_name");
@@ -295,6 +304,10 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    public void onResult(int code, String comment, int color) {
+        //XTODO: Respond to results
     }
 
     public static void writeString(File file, String data) throws Exception {

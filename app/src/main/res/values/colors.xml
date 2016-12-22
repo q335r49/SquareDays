@@ -11,4 +11,5 @@
     <color name="status_bar">#ffffff</color>
     <color name="error">#ff0000</color>
     <color name="end_box">#424242</color>
+    <color name="selection">#ffffff</color>
 </resources>

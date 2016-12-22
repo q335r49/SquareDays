@@ -96,7 +96,7 @@ public class ScaleView extends View {
             return new ArrayList<>();
         }
     }
-    void loadCalendarView(Context context, PaletteRing pal) { //TODO: Move to MainActivity; use "selectedShape"
+    void loadCalendarView(Context context, PaletteRing pal) {
         palette = pal;
         Calendar cal = new GregorianCalendar();
         cal.setTimeInMillis(System.currentTimeMillis());
@@ -262,7 +262,18 @@ public class ScaleView extends View {
                 handler.postDelayed(mLongPressed,1200);
                 firstTouchX = lastTouchX = x;
                 firstTouchY = lastTouchY = y;
-                //TODO: Selection box
+                CalendarRect selection = CW.getShape(x,y);
+                if (selection != null && selection.start != -1) {
+                    long duration = 1000L* (selection.end - selection.start);
+                    CW.setStatusText(selection.comment + ":"
+                            + new SimpleDateFormat(" h:mm-").format(new Date(selection.start*1000L))
+                            + new SimpleDateFormat("h:mm").format(new Date(selection.end*1000L))
+                            + String.format(" (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
+                            TimeUnit.MILLISECONDS.toMinutes(duration)%60));
+                } else
+                    CW.setStatusText("");
+                CW.setSelected(selection);
+                invalidate();
                 return true;
             case (MotionEvent.ACTION_MOVE):
                 if (!has_run) {
@@ -280,22 +291,8 @@ public class ScaleView extends View {
                 }
                 return false;
             case (MotionEvent.ACTION_UP):
-                if (has_run) {
-                    return false;
-                } else {
+                if (!has_run)
                     handler.removeCallbacks(mLongPressed);
-                    CalendarRect selection = CW.getShape(x,y);
-                    if (selection != null) {
-                        long duration = 1000L* (selection.end - selection.start);
-                        CW.setStatusText(selection.comment + ":"
-                                + new SimpleDateFormat(" h:mm-").format(new Date(selection.start*1000L))
-                                + new SimpleDateFormat("h:mm").format(new Date(selection.end*1000L))
-                                + String.format(" (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
-                                TimeUnit.MILLISECONDS.toMinutes(duration)%60));
-                    } else
-                        CW.setStatusText("");
-                }
-                invalidate();
                 return false;
             default:
                 return true;

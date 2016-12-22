@@ -92,6 +92,7 @@ public class CalendarFrag extends Fragment {
         super.onDetach();
         mListener = null;
     }
+
     public interface OnFragmentInteractionListener {
         void procMess(int code, int arg);
         void procMess(int code, String arg);
@@ -104,7 +105,8 @@ class CalendarWin {
     static int COLOR_GRID_BACKGROUND;
     static int COLOR_NOW_LINE;
     static int COLOR_STATUS_BAR;
-    private Paint textStyle, boldtextStyle, nowLineStyle, statusBarStyle;
+    static int COLOR_SELECTION;
+    private Paint textStyle, boldtextStyle, nowLineStyle, statusBarStyle, selectionStyle;
     CalendarWin(long orig, float gridW, float gridH) {
         shapes = new ArrayList<>();
         shapeIndex = new TreeSet<>(new Comparator<CalendarRect>() {
@@ -134,12 +136,25 @@ class CalendarWin {
         nowLineStyle = new Paint();
         nowLineStyle.setStyle(Paint.Style.FILL);
         nowLineStyle.setColor(COLOR_NOW_LINE);
-        nowLineStyle.setStrokeWidth(2);
         statusBarStyle = new Paint();
         statusBarStyle.setStyle(Paint.Style.FILL);
         statusBarStyle.setColor(COLOR_STATUS_BAR);
         statusBarStyle.setTextAlign(Paint.Align.LEFT);
+        selectionStyle = new Paint();
+        selectionStyle.setStyle(Paint.Style.STROKE);
+        selectionStyle.setColor(COLOR_SELECTION);
         statusText = "";
+    }
+    private static float LINE_WIDTH = 10;
+    public void setLineWidth(float f) {
+        LINE_WIDTH = f;
+        textStyle.setTextSize(LINE_WIDTH*2f);
+        textStyle.setStrokeWidth(LINE_WIDTH/5f);
+        boldtextStyle.setTextSize(LINE_WIDTH*2.5f);
+        boldtextStyle.setStrokeWidth(LINE_WIDTH/5f);
+        statusBarStyle.setTextSize(LINE_WIDTH*2f);
+        selectionStyle.setStrokeWidth(LINE_WIDTH/4f);
+        nowLineStyle.setStrokeWidth(LINE_WIDTH/4f);
     }
 
     private long orig;
@@ -287,6 +302,9 @@ class CalendarWin {
             }
         }
 
+        if (selection!=null)
+            drawInterval(selection,selectionStyle);
+
         RECT_SCALING_FACTOR_X = 0.7f;
         long now = System.currentTimeMillis() / 1000L;
         if (curTask.end == -1) {
@@ -324,6 +342,30 @@ class CalendarWin {
                 (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
     }
+    private void drawInterval(CalendarRect iv, Paint paint) {
+        if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
+            return;
+        long corner = iv.start;
+        long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
+        float[] a, b, c;
+        for (; midn < iv.end; midn += 86400L) {
+            a = conv_ts_screen(corner, 0);
+            b = conv_ts_screen(midn, 1f);
+            c = conv_ts_screen(midn-43199L, 0.5f);
+            mCanvas.drawRect((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                    (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                    (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
+            corner = midn+1;
+        }
+        a = conv_ts_screen(corner, 0);
+        b = conv_ts_screen(iv.end, 1f);
+        c = conv_ts_screen(midn-43199L, 0.5f);
+        mCanvas.drawRect((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
+    }
     private void drawNowLine(long ts, Paint paint) {
         long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
         float[] a = conv_ts_screen(ts,0f);
@@ -347,15 +389,7 @@ class CalendarWin {
     private final static int END_POS = 4;
     private final static int COMMENT_POS = 5;
     private final static int ARG_LEN = 6;
-    private static float LINE_WIDTH = 10;
-        public void setLineWidth(float f) {
-            LINE_WIDTH = f;
-            textStyle.setTextSize(LINE_WIDTH*2f);
-            textStyle.setStrokeWidth(LINE_WIDTH/5f);
-            boldtextStyle.setTextSize(LINE_WIDTH*2.5f);
-            boldtextStyle.setStrokeWidth(LINE_WIDTH/5f);
-            statusBarStyle.setTextSize(LINE_WIDTH*2f);
-        }
+
     void addShape(String line) {
         long ts;
         String[] args = line.split(">",-1);
@@ -413,6 +447,11 @@ class CalendarWin {
             LogList.add(Long.toString(curTask.start) + ">" + (new Date(curTask.start*1000L)).toString()
                     + ">" + String.format("#%06X", 0xFFFFFF & curTask.paint.getColor()) + ">0>-1>" + curTask.comment);
         return LogList;
+    }
+
+    private CalendarRect selection;
+    public void setSelected(CalendarRect selection) {
+        this.selection = selection;
     }
 }
 class CalendarRect {
