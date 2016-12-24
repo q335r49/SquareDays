@@ -143,6 +143,7 @@ public class CommandsFrag extends Fragment {
                             mLongPressed = new Runnable() {
                                 public void run() {
                                     has_run = true;
+                                    mListener.restoreABState();
                                     finalView.setBackgroundColor(bg_Norm);
 
                                     Context context = getContext();
@@ -242,13 +243,12 @@ public class CommandsFrag extends Fragment {
                             int duration = (int) Math.abs((event.getY() - actionDownY)*ratio_dp_px);
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
-                            String abString = "(Cancel)";
                             if (duration != 0 || delay != 0) {
                                 if (!has_dragged) {
                                     handler.removeCallbacks(mLongPressed);
                                     has_dragged = true;
                                 }
-                                abString = "..";
+                                String abString = "..";
                                 long now = System.currentTimeMillis()/1000L;
                                 if (delay != 0)
                                     abString += " already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
@@ -256,8 +256,9 @@ public class CommandsFrag extends Fragment {
                                 if (duration != 0)
                                     abString += " for " + Integer.toString(duration / 60) + ":" + String.format(Locale.US, "%02d", duration % 60)
                                             + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
-                            }
-                            mListener.setABState(bg_Norm, abString.isEmpty()? comF[COMMENT_IX] : abString);
+                                mListener.setABState(bg_Norm, abString.isEmpty()? comF[COMMENT_IX] : abString);
+                            } else if (has_dragged)
+                                mListener.setABState(bg_Norm, "Cancel");
                             return true;
                         case MotionEvent.ACTION_UP:
                             if (has_run)
@@ -313,6 +314,7 @@ public class CommandsFrag extends Fragment {
                         mLongPressed = new Runnable() {
                             public void run() {
                                 has_run = true;
+                                mListener.restoreABState();
                                 LayoutInflater layoutInflater = LayoutInflater.from(getContext());
                                 View promptView = layoutInflater.inflate(R.layout.prompts, null);
                                 final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
@@ -403,21 +405,21 @@ public class CommandsFrag extends Fragment {
                         int duration = (int) Math.abs((event.getY() - offset_0y)*ratio_dp_px);
                         delay = delay > 50 ? delay - 50 : 0;
                         duration = duration > 50 ? duration - 50 : 0;
-                        String abString = "Cancel";
                         if (duration != 0 || delay  != 0) {
                             if (!has_dragged) {
                                 handler.removeCallbacks(mLongPressed);
                                 has_dragged = true;
                             }
-                            abString = "..";
+                            String abString = "..";
                             long now = System.currentTimeMillis()/1000L;
                             if (duration != 0)
                                 abString += " + COMMENT..";
                             if (delay != 0)
                                 abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
                                         + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay))) + ")";
-                        }
-                        mListener.setABState(bg_Norm, abString.isEmpty()? "End Task" : abString);
+                            mListener.setABState(bg_Norm, abString.isEmpty()? "End Task" : abString);
+                        } else if (has_dragged)
+                            mListener.setABState(bg_Norm, "Cancel");
                         return true;
                     case MotionEvent.ACTION_UP:
                         if (has_run)

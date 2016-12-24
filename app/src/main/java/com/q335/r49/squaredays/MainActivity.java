@@ -29,6 +29,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+//TODO: DO all the file writing using CalendarFrag, and especially onPause(); hence, all logs are "clean".
+//TODO: Write a clean log on "export" and "onDestroy"
+//TODO: Have CalendarFrag then call to update the AB
+
+//TODO: TYPOGRAPHY: Use one letter for all
+//TODO: *** Still: Startup bug: the AB isn't being updated even though there is a "current task"
+
+
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener, TaskEditor.OnFragmentInteractionListener {
     static int COLOR_NO_TASK;
     static int COLOR_ERROR;
