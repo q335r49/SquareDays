@@ -134,7 +134,6 @@ public class CommandsFrag extends Fragment {
             final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
                 child.setBackgroundColor(bg_Norm);
 
-
             child.setOnTouchListener(new View.OnTouchListener() {
                 private float actionDownX, actionDownY;
                 private boolean has_run, has_dragged;
@@ -147,7 +146,6 @@ public class CommandsFrag extends Fragment {
                         case MotionEvent.ACTION_DOWN:
                             actionDownX = event.getX();
                             actionDownY = event.getY();
-                            mListener.procMess(MainActivity.AB_SAVESTATE,0);
                             v.getParent().requestDisallowInterceptTouchEvent(true);
                             v.setBackgroundColor(bg_Press);
                             final View finalView = v;
@@ -256,15 +254,12 @@ public class CommandsFrag extends Fragment {
                             int duration = (int) Math.abs((event.getY() - actionDownY)*ratio_dp_px);
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
-                            String abString;
-                            if (duration == 0 && delay  == 0) { //Canceled
-                                mListener.procMess(MainActivity.AB_RESTORESTATE,0);
-                            } else {
+                            String abString = "";
+                            if (duration != 0 || delay != 0) {
                                 if (!has_dragged) {
                                     handler.removeCallbacks(mLongPressed);
                                     has_dragged = true;
                                 }
-                                mListener.procMess(MainActivity.AB_SETCOLOR,bg_Norm);
                                 abString = "..";
                                 long now = System.currentTimeMillis()/1000L;
                                 if (delay != 0)
@@ -273,8 +268,8 @@ public class CommandsFrag extends Fragment {
                                 if (duration != 0)
                                     abString += " for " + Integer.toString(duration / 60) + ":" + String.format(Locale.US, "%02d", duration % 60)
                                             + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
-                                mListener.procMess(MainActivity.AB_SETTEXT, abString.isEmpty()? comF[COMMENT_IX] : abString);
                             }
+                            mListener.setTempABState(bg_Norm, abString.isEmpty()? comF[COMMENT_IX] : abString);
                             return true;
                         case MotionEvent.ACTION_UP:
                             if (has_run)
@@ -286,9 +281,9 @@ public class CommandsFrag extends Fragment {
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
                             if (delay != 0 || duration != 0 || !has_dragged) {
-                                mListener.newTask(comF[COLOR_IX],delay,duration,comF[COMMENT_IX]);
+                                mListener.logNewTask(comF[COLOR_IX],delay,duration,comF[COMMENT_IX]);
                             } else
-                                mListener.procMess(MainActivity.AB_RESTORESTATE, 0);
+                                mListener.restoreABState();
                             return false;
                         case MotionEvent.ACTION_CANCEL:
                             handler.removeCallbacks(mLongPressed);
@@ -323,7 +318,6 @@ public class CommandsFrag extends Fragment {
                     case MotionEvent.ACTION_DOWN:
                         offset_0x = event.getX();
                         offset_0y = event.getY();
-                        mListener.procMess(MainActivity.AB_SAVESTATE,0);
                         v.getParent().requestDisallowInterceptTouchEvent(true);
                         v.setBackgroundColor(bg_Press);
                         has_run = false;
@@ -422,14 +416,11 @@ public class CommandsFrag extends Fragment {
                         delay = delay > 50 ? delay - 50 : 0;
                         duration = duration > 50 ? duration - 50 : 0;
                         String abString = "";
-                        if (duration == 0 && delay  == 0) {
-                            mListener.procMess(MainActivity.AB_RESTORESTATE,0);
-                        } else {
+                        if (duration != 0 || delay  != 0) {
                             if (!has_dragged) {
                                 handler.removeCallbacks(mLongPressed);
                                 has_dragged = true;
                             }
-                            mListener.procMess(MainActivity.AB_SETCOLOR,bg_Norm);
                             abString = "..";
                             long now = System.currentTimeMillis()/1000L;
                             if (duration != 0)
@@ -437,7 +428,7 @@ public class CommandsFrag extends Fragment {
                             if (delay != 0)
                                 abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
                                         + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay))) + ")";
-                            mListener.procMess(MainActivity.AB_SETTEXT,abString.isEmpty()? "End Task" : abString);
+                            mListener.setTempABState(bg_Norm, abString.isEmpty()? "End Task" : abString);
                         }
                         return true;
                     case MotionEvent.ACTION_UP:
@@ -449,7 +440,7 @@ public class CommandsFrag extends Fragment {
                         duration = (int) Math.abs((event.getY() - offset_0y) * ratio_dp_px);
                         delay = delay > 50 ? delay - 50 : 0;
                         duration = duration > 50 ? duration - 50 : 0;
-                        mListener.procMess(MainActivity.AB_RESTORESTATE,0);
+                        mListener.restoreABState();
                         if (duration != 0) {
                             LayoutInflater inflater = LayoutInflater.from(getContext());
                             View commentView = inflater.inflate(R.layout.comment_prompt, null);
@@ -522,11 +513,11 @@ public class CommandsFrag extends Fragment {
 
 
     public interface OnFragmentInteractionListener {
-        void newTask(String color, long delay, long duration, String comment);
+        void logNewTask(String color, long delay, long duration, String comment);
         void addCommentToPrevTask(String comment, long delay);
+        void restoreABState();
+        void setTempABState(int color, String comment);
         void endPrevTask(long delay);
-        void procMess(int code, int arg);   //TODO: Rmove ridiculous procMessage code
-        void procMess(int code, String arg);
         void setBF(CommandsFrag bf);
         PaletteRing getPalette();
     }

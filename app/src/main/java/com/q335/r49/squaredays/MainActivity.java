@@ -1,11 +1,11 @@
 package com.q335.r49.squaredays;
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -31,6 +31,7 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener, TaskEditor.OnFragmentInteractionListener {
     static int COLOR_NO_TASK;
+    static int COLOR_ERROR;
     public void addCommentToPrevTask(String comment, long delay) {
         String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Long.toString(-delay * 60)) + ">" + comment;
         File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
@@ -47,8 +48,15 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         procMess(MainActivity.AB_SETTEXT, "No active task");
         procMess(MainActivity.PROC_ENTRY, entry);
     }
-    public void newTask(String color, long delay, long duration, String comment) {
+    public void logNewTask(String colorS, long delay, long duration, String comment) {
         long now = System.currentTimeMillis() / 1000L;
+        int color;
+        try {
+            color = Color.parseColor(colorS);
+        } catch (Exception E) {
+            Log.d("SquareDays","Bad color: " + colorS);
+            color = COLOR_ERROR;
+        }
         if (duration == 0)
             setPermABState(color, comment + " @" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay))));
         else {
@@ -88,28 +96,25 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         procMess(MainActivity.PROC_ENTRY, entry);
     }
     public void setTempABState(int color, String text) {
-        procMess(MainActivity.AB_SETCOLOR, color);
-        procMess(MainActivity.AB_SETTEXT, text);
+        AB.setBackgroundColor(color);
+        AB_curColor = color;
+        AB.setTitle(text);
+        AB_curText = text;
     }
-    public void setPermABState(String color, String text) {
-        //TODO
+    public void setPermABState(int color, String text) {
+        AB.setBackgroundColor(color);
+        AB_curColor = color;
+        AB.setTitle(text);
+        AB_curText = text;
+        AB_savedColor = AB_curColor;
+        AB_savedText = AB_curText;
+
     }
     public void restoreABState() {
-        //TODO
-    }
-
-
-    static final String LOG_FILE = "log.txt";
-    static final String COMMANDS_FILE = "commands.json";
-    static final String EXT_STORAGE_DIR = "tracker";
-    Context context;
-    SharedPreferences sprefs;
-    //TODO: selection of shape where there are overlapping tasks
-
-    PaletteRing palette;
-    static final int PALETTE_LENGTH = 24;
-    public PaletteRing getPalette() {
-        return palette;
+        AB.setBackgroundColor(AB_savedColor);
+        AB_curColor = AB_savedColor;
+        AB.setTitle(AB_savedText);
+        AB_curText = AB_savedText;
     }
 
     private Toolbar AB;
@@ -117,7 +122,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     String AB_curText = "";
     int AB_savedColor = 0;
     String AB_savedText = "";
-
     final static int PROC_ENTRY = 9;
     final static int AB_SETCOLOR = 10;
     final static int AB_SETTEXT = 11;
@@ -157,6 +161,22 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         }
     }
 
+
+
+
+    static final String LOG_FILE = "log.txt";
+    static final String COMMANDS_FILE = "commands.json";
+    static final String EXT_STORAGE_DIR = "tracker";
+    Context context;
+    SharedPreferences sprefs;
+    //TODO: selection of shape where there are overlapping tasks
+
+    PaletteRing palette;
+    static final int PALETTE_LENGTH = 24;
+    public PaletteRing getPalette() {
+        return palette;
+    }
+
     CalendarFrag GF;
         public void setGF(CalendarFrag GF) { this.GF = GF; }
     CommandsFrag BF;
@@ -175,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         CalendarWin.COLOR_STATUS_BAR = ResourcesCompat.getColor(getResources(), R.color.status_bar, null);
         CalendarRect.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         CommandsFrag.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
+        COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
         COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);
         CalendarWin.COLOR_SELECTION = ResourcesCompat.getColor(getResources(), R.color.selection, null);
