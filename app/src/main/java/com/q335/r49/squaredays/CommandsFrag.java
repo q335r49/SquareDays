@@ -254,7 +254,7 @@ public class CommandsFrag extends Fragment {
                             int duration = (int) Math.abs((event.getY() - actionDownY)*ratio_dp_px);
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
-                            String abString = "";
+                            String abString = "(Cancel)";
                             if (duration != 0 || delay != 0) {
                                 if (!has_dragged) {
                                     handler.removeCallbacks(mLongPressed);
@@ -415,7 +415,7 @@ public class CommandsFrag extends Fragment {
                         int duration = (int) Math.abs((event.getY() - offset_0y)*ratio_dp_px);
                         delay = delay > 50 ? delay - 50 : 0;
                         duration = duration > 50 ? duration - 50 : 0;
-                        String abString = "";
+                        String abString = "Cancel";
                         if (duration != 0 || delay  != 0) {
                             if (!has_dragged) {
                                 handler.removeCallbacks(mLongPressed);
@@ -428,8 +428,8 @@ public class CommandsFrag extends Fragment {
                             if (delay != 0)
                                 abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
                                         + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay))) + ")";
-                            mListener.setTempABState(bg_Norm, abString.isEmpty()? "End Task" : abString);
                         }
+                        mListener.setTempABState(bg_Norm, abString.isEmpty()? "End Task" : abString);
                         return true;
                     case MotionEvent.ACTION_UP:
                         if (has_run)
