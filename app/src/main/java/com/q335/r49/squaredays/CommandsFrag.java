@@ -31,8 +31,6 @@ import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
-//TODO: border between grid items
-
 public class CommandsFrag extends Fragment {
     static int COLOR_ERROR;
     static int COLOR_END_BOX;
@@ -83,30 +81,11 @@ public class CommandsFrag extends Fragment {
             Type listType = new TypeToken<List<String[]>>() { }.getType();
             commands = new Gson().fromJson(s, listType);
         }
-        palette.add(Color.parseColor("#B21F35"));
-        palette.add(Color.parseColor("#D82735"));
-        palette.add(Color.parseColor("#FF7435"));
-        palette.add(Color.parseColor("#FFA135"));
-        palette.add(Color.parseColor("#FFCB35"));
-        palette.add(Color.parseColor("#FFF735"));
-        palette.add(Color.parseColor("#00753A"));
-        palette.add(Color.parseColor("#009E47"));
-        palette.add(Color.parseColor("#16DD36"));
-        palette.add(Color.parseColor("#0052A5"));
-        palette.add(Color.parseColor("#0079E7"));
-        palette.add(Color.parseColor("#06A9FC"));
-        palette.add(Color.parseColor("#681E7E"));
-        palette.add(Color.parseColor("#7D3CB5"));
-        palette.add(Color.parseColor("#BD7AF6"));
-        palette.add(Color.parseColor("#F44336"));
-        palette.add(Color.parseColor("#E91E63"));
-        palette.add(Color.parseColor("#9C27B0"));
-        palette.add(Color.parseColor("#673AB7"));
-        palette.add(Color.parseColor("#3F51B5"));
-        palette.add(Color.parseColor("#2196F3"));
-        palette.add(Color.parseColor("#FF9800"));
-        palette.add(Color.parseColor("#FFEB3B"));
-        palette.add(Color.parseColor("#CDDC39"));
+        palette.add(new String[] {"#B21F35", "#D82735", "#FF7435", "#FFA135", "#FFCB35", "#FFF735",
+                "#00753A", "#009E47", "#16DD36", "#0052A5", "#0079E7",
+                "#06A9FC", "#681E7E", "#7D3CB5", "#BD7AF6", "#F44336",
+                "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3",
+                "#FF9800", "#FFEB3B", "#CDDC39"});
         for (String[] sa : commands) {
             int color;
             try {

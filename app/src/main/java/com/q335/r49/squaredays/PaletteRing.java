@@ -1,5 +1,8 @@
 package com.q335.r49.squaredays;
 
+import android.graphics.Color;
+import android.util.Log;
+
 class PaletteRing {
     private int length;
     private int size;
@@ -25,6 +28,13 @@ class PaletteRing {
         ring[pos] = c;
         pos = (pos + 1) % length;
         size++;
+    }
+    public void add(String[] colors) {
+        for (String c:colors) {
+            try {
+                add(Color.parseColor(c));
+            } catch (Exception e) { Log.d("SquareDays","Bad color: " + c); }
+        }
     }
     int get(int i) {
         return ring[(pos - 1 - i + 10*length) % length];
