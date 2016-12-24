@@ -15,6 +15,6 @@
         app:alignItems="stretch"
         app:alignContent="stretch"
         app:dividerDrawable="@drawable/divider"
-        app:showDivider="beginning|middle"
+        app:showDivider="beginning|middle|end"
         />
 </FrameLayout>

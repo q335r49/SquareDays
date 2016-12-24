@@ -1,7 +1,6 @@
 package com.q335.r49.squaredays;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -90,10 +89,6 @@ public class CalendarFrag extends Fragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    public String commentCurTask(String comment) {
-        //TODO:
     }
 
     public interface OnFragmentInteractionListener {

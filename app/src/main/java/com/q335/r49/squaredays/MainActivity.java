@@ -40,25 +40,21 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
             return COLOR_ERROR;
         }
     }
-
-    public void commentCurTask(String comment) { //TODO: *** Stop writing empty messages to log
+    public void commentCurTask(String comment) {
         String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>>" + comment;
-        //GF.procMess(entry);
-        String entry = GF.commentCurTask(comment);
+        GF.procMess(entry);
         if (!entry.isEmpty())
             writeLog(entry);
         setPermABState(COLOR_NO_TASK, "No active task");
     }
     public void startTask(String colorS, long delay, long duration, String comment) {
-        int color;
-        parseColor(colorS);
         long now = System.currentTimeMillis() / 1000L;
-        //String entry = Long.toString(now) + ">" + (new Date()).toString() + ">" + color + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Long.toString((-delay + duration) * 60L)) + ">" + comment;
+        String entry = Long.toString(now) + ">" + (new Date()).toString() + ">" + colorS + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Long.toString((-delay + duration) * 60L)) + ">" + comment;
         GF.procMess(entry);
         if (!entry.isEmpty())
             writeLog(entry);
         if (duration == 0)
-            setPermABState(color, comment + " @" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay))));
+            setPermABState(parseColor(colorS), comment + " @" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay))));
         else {
             restoreABState();
             Toast.makeText(context, comment
@@ -68,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         }
     }
     public void endCurTask(long delay) {
-//        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Long.toString(-delay * 60)) + ">";
+        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Long.toString(-delay * 60)) + ">";
         GF.procMess(entry);
         writeLog(entry);
         setPermABState(COLOR_NO_TASK, "No active task");
