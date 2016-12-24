@@ -155,6 +155,7 @@ public class CommandsFrag extends Fragment {
             final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
                 child.setBackgroundColor(bg_Norm);
 
+
             child.setOnTouchListener(new View.OnTouchListener() {
                 private float actionDownX, actionDownY;
                 private boolean has_run, has_dragged;

@@ -14,7 +14,7 @@
         app:flexWrap="wrap"
         app:alignItems="stretch"
         app:alignContent="stretch"
-
-
+        app:dividerDrawable="@drawable/divider"
+        app:showDivider="beginning|middle"
         />
 </FrameLayout>
