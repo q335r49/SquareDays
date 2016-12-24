@@ -25,8 +25,80 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.channels.FileChannel;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener, TaskEditor.OnFragmentInteractionListener {
+    static int COLOR_NO_TASK;
+    public void addCommentToPrevTask(String comment, long delay) {
+        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Long.toString(-delay * 60)) + ">" + comment;
+        File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
+        try {
+            FileOutputStream out = new FileOutputStream(internalFile, true);
+            out.write(entry.getBytes());
+            out.write(System.getProperty("line.separator").getBytes());
+            out.close();
+        } catch (Exception e) {
+            Log.d("SquareDays", e.toString());
+            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+        }
+        procMess(MainActivity.AB_SETCOLOR,COLOR_NO_TASK);
+        procMess(MainActivity.AB_SETTEXT, "No active task");
+        procMess(MainActivity.PROC_ENTRY, entry);
+    }
+    public void newTask(String color, long delay, long duration, String comment) {
+        long now = System.currentTimeMillis() / 1000L;
+        if (duration == 0)
+            setPermABState(color, comment + " @" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay))));
+        else {
+            restoreABState();
+            Toast.makeText(context, comment
+                    + "\n" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay))) + " > " + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay + 60 * duration)))
+                    + "\n" + Long.toString(duration / 60L) + ":" + String.format(Locale.US,"%02d", duration % 60) + " min", Toast.LENGTH_LONG).show();
+            procMess(MainActivity.AB_RESTORESTATE, 0);
+        }
+        String entry = Long.toString(now) + ">" + (new Date()).toString() + ">" + color + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Long.toString((-delay + duration) * 60L)) + ">" + comment;
+        File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
+        try {
+            FileOutputStream out = new FileOutputStream(internalFile, true);
+            out.write(entry.getBytes());
+            out.write(System.getProperty("line.separator").getBytes());
+            out.close();
+        } catch (Exception e) {
+            Log.d("SquareDays", e.toString());
+            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+        }
+        procMess(MainActivity.PROC_ENTRY, entry);
+    }
+    public void endPrevTask(long delay) {
+        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Long.toString(-delay * 60)) + ">";
+        File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
+        try {
+            FileOutputStream out = new FileOutputStream(internalFile, true);
+            out.write(entry.getBytes());
+            out.write(System.getProperty("line.separator").getBytes());
+            out.close();
+        } catch (Exception e) {
+            Log.d("SquareDays", e.toString());
+            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+        }
+        procMess(MainActivity.AB_SETCOLOR,COLOR_NO_TASK);
+        procMess(MainActivity.AB_SETTEXT, "No active task");
+        procMess(MainActivity.PROC_ENTRY, entry);
+    }
+    public void setTempABState(int color, String text) {
+        procMess(MainActivity.AB_SETCOLOR, color);
+        procMess(MainActivity.AB_SETTEXT, text);
+    }
+    public void setPermABState(String color, String text) {
+        //TODO
+    }
+    public void restoreABState() {
+        //TODO
+    }
+
+
     static final String LOG_FILE = "log.txt";
     static final String COMMANDS_FILE = "commands.json";
     static final String EXT_STORAGE_DIR = "tracker";
@@ -104,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         CalendarRect.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         CommandsFrag.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
-        CommandsFrag.COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);
+        COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);
         CalendarWin.COLOR_SELECTION = ResourcesCompat.getColor(getResources(), R.color.selection, null);
 
         palette = new PaletteRing(PALETTE_LENGTH);

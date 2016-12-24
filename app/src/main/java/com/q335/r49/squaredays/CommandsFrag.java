@@ -17,12 +17,9 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,13 +27,15 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
+
+//TODO: border between grid items
 
 public class CommandsFrag extends Fragment {
     static int COLOR_ERROR;
     static int COLOR_END_BOX;
-    static int COLOR_NO_TASK;
 
     SharedPreferences sprefs;
     private OnFragmentInteractionListener mListener;
@@ -289,11 +288,11 @@ public class CommandsFrag extends Fragment {
                                 abString = "..";
                                 long now = System.currentTimeMillis()/1000L;
                                 if (delay != 0)
-                                    abString += " already  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
-                                            + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + ")";
+                                    abString += " already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
+                                            + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay))) + ")";
                                 if (duration != 0)
-                                    abString += " for " + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60)
-                                            + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
+                                    abString += " for " + Integer.toString(duration / 60) + ":" + String.format(Locale.US, "%02d", duration % 60)
+                                            + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
                                 mListener.procMess(MainActivity.AB_SETTEXT, abString.isEmpty()? comF[COMMENT_IX] : abString);
                             }
                             return true;
@@ -307,28 +306,7 @@ public class CommandsFrag extends Fragment {
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
                             if (delay != 0 || duration != 0 || !has_dragged) {
-                                long now = System.currentTimeMillis() / 1000L;
-                                if (duration == 0) {
-                                    mListener.procMess(MainActivity.AB_SETCOLOR, bg_Norm);
-                                    mListener.procMess(MainActivity.AB_SETTEXT, comF[COMMENT_IX] + " @" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))));
-                                } else {
-                                    Toast.makeText(context, comF[COMMENT_IX]
-                                            + "\n" + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay))) + " > " + new SimpleDateFormat("h:mm a").format(new Date(1000L * (now - 60 * delay + 60 * duration)))
-                                            + "\n" + Integer.toString(duration / 60) + ":" + String.format("%02d", duration % 60) + " min", Toast.LENGTH_LONG).show();
-                                    mListener.procMess(MainActivity.AB_RESTORESTATE, 0);
-                                }
-                                String entry = Long.toString(now) + ">" + (new Date()).toString() + ">" + comF[COLOR_IX] + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Integer.toString((-delay + duration) * 60)) + ">" + comF[COMMENT_IX];
-                                File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
-                                try {
-                                    FileOutputStream out = new FileOutputStream(internalFile, true);
-                                    out.write(entry.getBytes());
-                                    out.write(System.getProperty("line.separator").getBytes());
-                                    out.close();
-                                } catch (Exception e) {
-                                    Log.d("SquareDays", e.toString());
-                                    Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
-                                }
-                                mListener.procMess(MainActivity.PROC_ENTRY, entry);
+                                mListener.newTask(comF[COLOR_IX],delay,duration,comF[COMMENT_IX]);
                             } else
                                 mListener.procMess(MainActivity.AB_RESTORESTATE, 0);
                             return false;
@@ -477,8 +455,8 @@ public class CommandsFrag extends Fragment {
                             if (duration != 0)
                                 abString += " + COMMENT..";
                             if (delay != 0)
-                                abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format("%02d", delay % 60)
-                                        + " (" + new SimpleDateFormat("h:mm a").format(new Date(1000L*(now - 60 * delay))) + ")";
+                                abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
+                                        + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay))) + ")";
                             mListener.procMess(MainActivity.AB_SETTEXT,abString.isEmpty()? "End Task" : abString);
                         }
                         return true;
@@ -505,20 +483,7 @@ public class CommandsFrag extends Fragment {
                                     .setTitle("Comment:")
                                     .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-                                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (finalDelay == 0 ? "0" : Integer.toString(-finalDelay * 60)) + ">" + commentEntry.getText().toString();
-                                            File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
-                                            try {
-                                                FileOutputStream out = new FileOutputStream(internalFile, true);
-                                                out.write(entry.getBytes());
-                                                out.write(System.getProperty("line.separator").getBytes());
-                                                out.close();
-                                            } catch (Exception e) {
-                                                Log.d("SquareDays", e.toString());
-                                                Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
-                                            }
-                                            mListener.procMess(MainActivity.AB_SETCOLOR,COLOR_NO_TASK);
-                                            mListener.procMess(MainActivity.AB_SETTEXT, "No active task");
-                                            mListener.procMess(MainActivity.PROC_ENTRY, entry);
+                                            mListener.addCommentToPrevTask(commentEntry.getText().toString(), finalDelay);
                                         }
                                     })
                                     .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -528,20 +493,7 @@ public class CommandsFrag extends Fragment {
                                     })
                                     .create().show();
                         } else if (delay != 0 || !has_dragged) { //TODO: *** Stop writing empty messages to log
-                            String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Integer.toString(-delay * 60)) + ">";
-                            File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
-                            try {
-                                FileOutputStream out = new FileOutputStream(internalFile, true);
-                                out.write(entry.getBytes());
-                                out.write(System.getProperty("line.separator").getBytes());
-                                out.close();
-                            } catch (Exception e) {
-                                Log.d("SquareDays", e.toString());
-                                Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
-                            }
-                            mListener.procMess(MainActivity.AB_SETCOLOR,COLOR_NO_TASK);
-                            mListener.procMess(MainActivity.AB_SETTEXT, "No active task");
-                            mListener.procMess(MainActivity.PROC_ENTRY, entry);
+                            mListener.endPrevTask(delay);
                         }
                         return false;
                     case MotionEvent.ACTION_CANCEL:
@@ -590,7 +542,10 @@ public class CommandsFrag extends Fragment {
 
 
     public interface OnFragmentInteractionListener {
-        void procMess(int code, int arg);
+        void newTask(String color, long delay, long duration, String comment);
+        void addCommentToPrevTask(String comment, long delay);
+        void endPrevTask(long delay);
+        void procMess(int code, int arg);   //TODO: Rmove ridiculous procMessage code
         void procMess(int code, String arg);
         void setBF(CommandsFrag bf);
         PaletteRing getPalette();
