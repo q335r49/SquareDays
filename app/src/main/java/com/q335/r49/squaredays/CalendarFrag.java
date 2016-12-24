@@ -208,11 +208,13 @@ class CalendarWin {
         long end_ts = conv_screen_ts(screenW, screenH);
         ratio_grid_screen_W = gridW/screenW;
         ratio_grid_screen_H = gridH/screenH;
-        RECT_SCALING_FACTOR_X = 1f - LINE_WIDTH*ratio_grid_screen_W;
-        RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
         mCanvas = canvas;
 
+        RECT_SCALING_FACTOR_X = 1f - LINE_WIDTH*ratio_grid_screen_W;
+        RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
         drawInterval(new CalendarRect(start_ts, end_ts, COLOR_GRID_BACKGROUND, ""));
+
+        RECT_SCALING_FACTOR_X = 0.9f;
         for (CalendarRect s : shapes)
             drawInterval(s);
 
