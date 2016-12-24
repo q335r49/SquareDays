@@ -53,12 +53,10 @@ public class CalendarFrag extends Fragment {
         calView = (ScaleView) (fragView.findViewById(R.id.drawing));
         String Task = calView.getCurTask();
         if (Task != null) {
-            mListener.procMess(MainActivity.AB_SETTEXT,Task);
             int color = calView.getCurTaskColor();
-            mListener.procMess(MainActivity.AB_SETCOLOR,color);
+            mListener.setPermABState(color,Task);
         } else {
-            mListener.procMess(MainActivity.AB_SETTEXT,"No active task");
-            mListener.procMess(MainActivity.AB_SETCOLOR, COLOR_NO_TASK);
+            mListener.setPermABState(COLOR_NO_TASK,"No active task");
         }
         mListener.setGF(this);
         palette = mListener.getPalette();
@@ -94,9 +92,12 @@ public class CalendarFrag extends Fragment {
         mListener = null;
     }
 
+    public String commentCurTask(String comment) {
+        //TODO:
+    }
+
     public interface OnFragmentInteractionListener {
-        void procMess(int code, int arg);
-        void procMess(int code, String arg);
+        void setPermABState(int color, String task);
         void setGF(CalendarFrag cf);
         PaletteRing getPalette();
     }
@@ -403,7 +404,7 @@ class CalendarWin {
     private final static int COMMENT_POS = 5;
     private final static int ARG_LEN = 6;
 
-    void addShape(String line) {
+    void addShape(String line) {    // TODO: Really should not process log. Curse that message buffer!
         long ts;
         String[] args = line.split(">",-1);
         if (args.length < ARG_LEN) {
@@ -419,8 +420,10 @@ class CalendarWin {
                     curTask = new CalendarRect(ts + Long.parseLong(args[START_POS]),-1,args[COLOR_POS],args[COMMENT_POS]);
                     shapes.add(curTask);
                     shapeIndex.add(curTask);
-                } else
-                    Log.d("SquareDays","Empty start and end: "+line);
+                } else if (!args[COMMENT_POS].isEmpty())
+                    curTask.comment += args[COMMENT_POS];
+                else
+                    Log.d("SquareDays","Empty command: "+line);
             } else if (args[START_POS].isEmpty()) {
                 curTask.end = ts + Long.parseLong(args[END_POS]);
                 curTask.comment += args[COMMENT_POS];
@@ -472,6 +475,7 @@ class CalendarRect {
     long start;
     long end;
     String comment;
+        public void setComment(String s) {comment = s;}
     Paint paint;
     void set(long start, long end, int color, String comment) {
         this.start = start;
@@ -483,8 +487,6 @@ class CalendarRect {
     }
     CalendarRect() { set(-1,-1,COLOR_ERROR,null); }
     CalendarRect(long start) { set(start,-1,0,null); }
-    CalendarRect(long start, long end, String color, String comment) {
-        try { set(start,end,Color.parseColor(color),comment);
-        } catch (IllegalArgumentException e) { set(start,end,COLOR_ERROR,comment); } }
+    CalendarRect(long start, long end, String color, String comment) { set(start,end,MainActivity.parseColor(color),comment); }
     CalendarRect(long start, long end, int color, String comment) { set(start,end,color,comment); }
 }

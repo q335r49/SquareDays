@@ -32,31 +32,31 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener, TaskEditor.OnFragmentInteractionListener {
     static int COLOR_NO_TASK;
     static int COLOR_ERROR;
-    public void addCommentToPrevTask(String comment, long delay) {
-        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Long.toString(-delay * 60)) + ">" + comment;
-        File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
+    static int parseColor(String s) {
         try {
-            FileOutputStream out = new FileOutputStream(internalFile, true);
-            out.write(entry.getBytes());
-            out.write(System.getProperty("line.separator").getBytes());
-            out.close();
+            return Color.parseColor(s);
         } catch (Exception e) {
-            Log.d("SquareDays", e.toString());
-            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+            Log.d("SquareDays","Bad color: " + s);
+            return COLOR_ERROR;
         }
-        procMess(MainActivity.AB_SETCOLOR,COLOR_NO_TASK);
-        procMess(MainActivity.AB_SETTEXT, "No active task");
-        procMess(MainActivity.PROC_ENTRY, entry);
     }
-    public void logNewTask(String colorS, long delay, long duration, String comment) {
-        long now = System.currentTimeMillis() / 1000L;
+
+    public void commentCurTask(String comment) { //TODO: *** Stop writing empty messages to log
+        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>>" + comment;
+        //GF.procMess(entry);
+        String entry = GF.commentCurTask(comment);
+        if (!entry.isEmpty())
+            writeLog(entry);
+        setPermABState(COLOR_NO_TASK, "No active task");
+    }
+    public void startTask(String colorS, long delay, long duration, String comment) {
         int color;
-        try {
-            color = Color.parseColor(colorS);
-        } catch (Exception E) {
-            Log.d("SquareDays","Bad color: " + colorS);
-            color = COLOR_ERROR;
-        }
+        parseColor(colorS);
+        long now = System.currentTimeMillis() / 1000L;
+        //String entry = Long.toString(now) + ">" + (new Date()).toString() + ">" + color + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Long.toString((-delay + duration) * 60L)) + ">" + comment;
+        GF.procMess(entry);
+        if (!entry.isEmpty())
+            writeLog(entry);
         if (duration == 0)
             setPermABState(color, comment + " @" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay))));
         else {
@@ -64,38 +64,35 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
             Toast.makeText(context, comment
                     + "\n" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay))) + " > " + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay + 60 * duration)))
                     + "\n" + Long.toString(duration / 60L) + ":" + String.format(Locale.US,"%02d", duration % 60) + " min", Toast.LENGTH_LONG).show();
-            procMess(MainActivity.AB_RESTORESTATE, 0);
+            restoreABState();
         }
-        String entry = Long.toString(now) + ">" + (new Date()).toString() + ">" + color + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Long.toString((-delay + duration) * 60L)) + ">" + comment;
+    }
+    public void endCurTask(long delay) {
+//        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Long.toString(-delay * 60)) + ">";
+        GF.procMess(entry);
+        writeLog(entry);
+        setPermABState(COLOR_NO_TASK, "No active task");
+    }
+
+    private void writeLog(String s) {
         File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
         try {
             FileOutputStream out = new FileOutputStream(internalFile, true);
-            out.write(entry.getBytes());
+            out.write(s.getBytes());
             out.write(System.getProperty("line.separator").getBytes());
             out.close();
         } catch (Exception e) {
             Log.d("SquareDays", e.toString());
             Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
         }
-        procMess(MainActivity.PROC_ENTRY, entry);
     }
-    public void endPrevTask(long delay) {
-        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Long.toString(-delay * 60)) + ">";
-        File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
-        try {
-            FileOutputStream out = new FileOutputStream(internalFile, true);
-            out.write(entry.getBytes());
-            out.write(System.getProperty("line.separator").getBytes());
-            out.close();
-        } catch (Exception e) {
-            Log.d("SquareDays", e.toString());
-            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
-        }
-        procMess(MainActivity.AB_SETCOLOR,COLOR_NO_TASK);
-        procMess(MainActivity.AB_SETTEXT, "No active task");
-        procMess(MainActivity.PROC_ENTRY, entry);
-    }
-    public void setTempABState(int color, String text) {
+
+    private Toolbar AB;
+    int AB_curColor = 0;
+    String AB_curText = "";
+    int AB_savedColor = 0;
+    String AB_savedText = "";
+    public void setABState(int color, String text) {
         AB.setBackgroundColor(color);
         AB_curColor = color;
         AB.setTitle(text);
@@ -116,53 +113,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         AB.setTitle(AB_savedText);
         AB_curText = AB_savedText;
     }
-
-    private Toolbar AB;
-    int AB_curColor = 0;
-    String AB_curText = "";
-    int AB_savedColor = 0;
-    String AB_savedText = "";
-    final static int PROC_ENTRY = 9;
-    final static int AB_SETCOLOR = 10;
-    final static int AB_SETTEXT = 11;
-    final static int AB_SAVESTATE = 13;
-    final static int AB_RESTORESTATE = 14;
-    public void procMess(int code, int arg) {
-        switch (code) {
-            case AB_SETCOLOR:
-                AB.setBackgroundColor(arg);
-                AB_curColor = arg;
-                break;
-            case AB_SAVESTATE:
-                AB_savedColor = AB_curColor;
-                AB_savedText = AB_curText;
-                break;
-            case AB_RESTORESTATE:
-                AB.setBackgroundColor(AB_savedColor);
-                AB_curColor = AB_savedColor;
-                AB.setTitle(AB_savedText);
-                AB_curText = AB_savedText;
-                break;
-            default:
-                Log.d("SquareDays", "Bad Message: CODE-" + code + " ARG-" + arg);
-        }
-    }
-    public void procMess(int code, String arg) {
-        switch (code) {
-            case PROC_ENTRY:
-                GF.procMess(arg);
-                break;
-            case AB_SETTEXT:
-                AB.setTitle(arg);
-                AB_curText = arg;
-                break;
-            default:
-                Log.d("SquareDays", "Bad Message: CODE " + code + " ARG " + arg);
-        }
-    }
-
-
-
 
     static final String LOG_FILE = "log.txt";
     static final String COMMANDS_FILE = "commands.json";
@@ -197,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         CommandsFrag.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
-        COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);
+        COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);   //TODO: make this a main static field, etc. (+othrers too)
         CalendarWin.COLOR_SELECTION = ResourcesCompat.getColor(getResources(), R.color.selection, null);
 
         palette = new PaletteRing(PALETTE_LENGTH);
@@ -375,8 +325,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                 File logFile = new File(context.getFilesDir(), LOG_FILE);
                                 if (logFile.delete()) {
                                     GF.procMess(ScaleView.MESS_RELOAD_LOG);
-                                    procMess(AB_SETCOLOR,0xFF192125);
-                                    procMess(AB_SETTEXT,"Empty Log");
+                                    setPermABState(COLOR_NO_TASK,"No active task");
                                 } else
                                     Log.d("SquareDays","Log clear failed!");
                             }

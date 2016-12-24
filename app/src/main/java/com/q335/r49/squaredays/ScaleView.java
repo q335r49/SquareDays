@@ -144,7 +144,7 @@ public class ScaleView extends View {
             LayoutInflater inflater = LayoutInflater.from(appContext);
             View promptView = inflater.inflate(R.layout.edit_interval, null);
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(appContext);
-            alertDialogBuilder.setView(promptView); //TODO: Move this out?
+            alertDialogBuilder.setView(promptView);
 
             final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
             commentEntry.setText(selection.comment);

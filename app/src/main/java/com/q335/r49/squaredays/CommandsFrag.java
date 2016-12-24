@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -86,15 +85,8 @@ public class CommandsFrag extends Fragment {
                 "#06A9FC", "#681E7E", "#7D3CB5", "#BD7AF6", "#F44336",
                 "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3",
                 "#FF9800", "#FFEB3B", "#CDDC39"});
-        for (String[] sa : commands) {
-            int color;
-            try {
-                color = Color.parseColor(sa[COLOR_IX]);
-                palette.add(color);
-            } catch (Exception e) {
-                Log.d("SquareDays","Bad color " + sa[COLOR_IX]);
-            }
-        }
+        for (String[] sa : commands)
+            palette.add(MainActivity.parseColor(sa[COLOR_IX]));
         makeView();
     }
 
@@ -128,9 +120,7 @@ public class CommandsFrag extends Fragment {
                 gridV.addView(child,lp);
             TextView label = (TextView) (child.findViewById(R.id.text1));
                 label.setText(comF[COMMENT_IX]);
-            int testColor=COLOR_ERROR;
-                try { testColor = Color.parseColor(comF[COLOR_IX]); } catch (IllegalArgumentException e) { Log.d("SquareDays",e.toString()); }
-            final int bg_Norm = testColor;
+            final int bg_Norm = MainActivity.parseColor(comF[COLOR_IX]);
             final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
                 child.setBackgroundColor(bg_Norm);
 
@@ -163,9 +153,7 @@ public class CommandsFrag extends Fragment {
                                     final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
                                         commentEntry.setText(comF[COMMENT_IX]);
                                     final View curColorV = promptView.findViewById(R.id.CurColor);
-                                    try {
-                                        curColorV.setBackgroundColor(Color.parseColor(comF[COLOR_IX]));
-                                    } catch (Exception e) { curColorV.setBackgroundColor(COLOR_ERROR); }
+                                    curColorV.setBackgroundColor(MainActivity.parseColor(comF[COLOR_IX]));
 
                                     final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                                     final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
@@ -269,7 +257,7 @@ public class CommandsFrag extends Fragment {
                                     abString += " for " + Integer.toString(duration / 60) + ":" + String.format(Locale.US, "%02d", duration % 60)
                                             + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
                             }
-                            mListener.setTempABState(bg_Norm, abString.isEmpty()? comF[COMMENT_IX] : abString);
+                            mListener.setABState(bg_Norm, abString.isEmpty()? comF[COMMENT_IX] : abString);
                             return true;
                         case MotionEvent.ACTION_UP:
                             if (has_run)
@@ -281,7 +269,7 @@ public class CommandsFrag extends Fragment {
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
                             if (delay != 0 || duration != 0 || !has_dragged) {
-                                mListener.logNewTask(comF[COLOR_IX],delay,duration,comF[COMMENT_IX]);
+                                mListener.startTask(comF[COLOR_IX],delay,duration,comF[COMMENT_IX]);
                             } else
                                 mListener.restoreABState();
                             return false;
@@ -429,7 +417,7 @@ public class CommandsFrag extends Fragment {
                                 abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
                                         + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay))) + ")";
                         }
-                        mListener.setTempABState(bg_Norm, abString.isEmpty()? "End Task" : abString);
+                        mListener.setABState(bg_Norm, abString.isEmpty()? "End Task" : abString);
                         return true;
                     case MotionEvent.ACTION_UP:
                         if (has_run)
@@ -449,22 +437,24 @@ public class CommandsFrag extends Fragment {
 
                             final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
                             alertDialogBuilder.setView(commentView);
-                            alertDialogBuilder  //TODO: send message to main, have processing done there!
+                            alertDialogBuilder
                                     .setCancelable(true)
                                     .setTitle("Comment:")
                                     .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-                                            mListener.addCommentToPrevTask(commentEntry.getText().toString(), finalDelay);
+                                            mListener.commentCurTask(commentEntry.getText().toString());
+                                            if (finalDelay != 0)
+                                                mListener.endCurTask(finalDelay);
                                         }
                                     })
-                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    .setNegativeButton("(Cancel)", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
                                             dialog.cancel();
                                         }
                                     })
                                     .create().show();
-                        } else if (delay != 0 || !has_dragged) { //TODO: *** Stop writing empty messages to log
-                            mListener.endPrevTask(delay);
+                        } else if (delay != 0 || !has_dragged) {
+                            mListener.endCurTask(delay);
                         }
                         return false;
                     case MotionEvent.ACTION_CANCEL:
@@ -511,13 +501,12 @@ public class CommandsFrag extends Fragment {
         mListener = null;
     }
 
-
     public interface OnFragmentInteractionListener {
-        void logNewTask(String color, long delay, long duration, String comment);
-        void addCommentToPrevTask(String comment, long delay);
+        void startTask(String color, long delay, long duration, String comment);
+        void commentCurTask(String comment);
         void restoreABState();
-        void setTempABState(int color, String comment);
-        void endPrevTask(long delay);
+        void setABState(int color, String comment);
+        void endCurTask(long delay);
         void setBF(CommandsFrag bf);
         PaletteRing getPalette();
     }

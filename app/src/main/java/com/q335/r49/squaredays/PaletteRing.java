@@ -30,11 +30,8 @@ class PaletteRing {
         size++;
     }
     public void add(String[] colors) {
-        for (String c:colors) {
-            try {
-                add(Color.parseColor(c));
-            } catch (Exception e) { Log.d("SquareDays","Bad color: " + c); }
-        }
+        for (String c:colors)
+            add(MainActivity.parseColor(c));
     }
     int get(int i) {
         return ring[(pos - 1 - i + 10*length) % length];
