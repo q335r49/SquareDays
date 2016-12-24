@@ -500,7 +500,7 @@ public class CommandsFrag extends Fragment {
 
                             final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
                             alertDialogBuilder.setView(commentView);
-                            alertDialogBuilder
+                            alertDialogBuilder  //TODO: send message to main, have processing done there!
                                     .setCancelable(true)
                                     .setTitle("Comment:")
                                     .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {

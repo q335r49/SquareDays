@@ -329,3 +329,5 @@ public class ScaleView extends View {
 //TODO: Bug: On startup: when there is an active task running, and the app is closed then opened
 //TODO: Bug: ERROR now-line or ERROR task??
 //TODO: suspect proc cur entry not doing well on GC
+//TODO: Color Error after clear log
+//TODO: investigate why it takes so long to initiallly draw: too many OnDraw calls?

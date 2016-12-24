@@ -447,7 +447,7 @@ class CalendarWin {
         for (String line : log)
             addShape(line);
     }
-    List<String> getLog(CalendarRect edited) {   //TODO: remove unnecessary shapes
+    List<String> getLog(CalendarRect edited) {
         shapes.remove(edited);
         shapes.add(edited);
         List<String> LogList = new ArrayList<>();

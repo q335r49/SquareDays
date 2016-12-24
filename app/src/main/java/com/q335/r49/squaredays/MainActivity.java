@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     static final String EXT_STORAGE_DIR = "tracker";
     Context context;
     SharedPreferences sprefs;
-    //TODO: Polish the google play store entry
+    //TODO: selection of shape where there are overlapping tasks
 
     PaletteRing palette;
     static final int PALETTE_LENGTH = 24;
