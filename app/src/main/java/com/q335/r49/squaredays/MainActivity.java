@@ -39,10 +39,7 @@ import java.util.Queue;
 
 
 //TODO: TYPOGRAPHY: Use one letter for all
-
-//TODO: Automatically add a space to comments
 //TODO: "Selected" box around currently running task -- should be white. Otherwise, boxes are black
-//TODO: Do not change Action Bar color -- only text
 
 //TODO: Clean up overlap stuff *WHILE THE ACTION IS BEING WRITTEN* in the shapes thing
 //TODO: Change "No active task" to an empty Stirng.
@@ -61,7 +58,6 @@ class logEntry {
     private static final int CMD_ADD_COMMENT = 10;
     private static final int CMD_END_TASK = 11;
     static final int MESS_CLEAR_LOG = 100;
-    static final int MESS_REDRAW = 101;
 
     private int command;
         void markForRemoval() { command = REMOVE; }
@@ -254,9 +250,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     private List<logEntry> writeBuffer = new ArrayList<>();
 
     private Toolbar AB;
-    int AB_curColor = 0;
     String AB_curText = "";
-    int AB_savedColor = 0;
     String AB_savedText = "";
     public void setABState(String text) {
         AB.setTitle(text);
@@ -265,13 +259,10 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     public void setPermABState(String text) {
         AB.setTitle(text);
         AB_curText = text;
-        AB_savedColor = AB_curColor;
         AB_savedText = AB_curText;
 
     }
     public void restoreABState() {
-        AB.setBackgroundColor(AB_savedColor);
-        AB_curColor = AB_savedColor;
         AB.setTitle(AB_savedText);
         AB_curText = AB_savedText;
     }

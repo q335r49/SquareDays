@@ -25,11 +25,7 @@ public class CalendarFrag extends Fragment {
     private ScaleView calView;
     private View fragView;
 
-    void procTask(logEntry le) {
-        String ABtext = calView.procTask(le);
-        if (ABtext != null)
-            mListener.setPermABState(ABtext);
-    }
+    void procTask(logEntry le) { mListener.setPermABState(calView.procTask(le)); }
     List<String> getWritableShapes() {return calView.getWritableShapes(); }
 
     @Override
@@ -422,17 +418,15 @@ class CalendarWin {
     String procCmd(logEntry LE) { //TODO: Clear tasks "underneath", etc.
         if (LE.isCommand()) {
             curTask.procCommand(LE);
-            return null;
         } else {
             shapes.add(LE);
             shapeIndex.add(LE);
             if (LE.isOngoing()) {
                 curTask.updateTask(LE);
                 curTask = LE;
-                return curTask.comment + " @" + (new SimpleDateFormat(" h:mm",Locale.US).format(new Date(curTask.start * 1000L)));
-            } else
-                return null;
+            }
         }
+        return curTask.isOngoing() ? curTask.comment + " @" + (new SimpleDateFormat(" h:mm",Locale.US).format(new Date(curTask.start * 1000L))) : "";
     }
     List<String> getWritableShapes() {         //TODO: figure out when file writing occurs; and figure out when a log is first loaded
         List<String> LogList = new ArrayList<>();

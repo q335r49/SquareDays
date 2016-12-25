@@ -41,11 +41,9 @@ public class ScaleView extends View {
                     case logEntry.MESS_CLEAR_LOG:
                         CW.clearShapes();
                         break;
-                    case logEntry.MESS_REDRAW:
-                        break;
                 }
-                invalidate();   //TODO: always?
-                return null;
+                invalidate();
+                return "";
             } else {
                 invalidate();
                 return CW.procCmd(le);
