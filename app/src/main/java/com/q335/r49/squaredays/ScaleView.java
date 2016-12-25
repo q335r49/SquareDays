@@ -35,7 +35,7 @@ public class ScaleView extends View {
     private String curTask;
         public String getCurTask() { return curTask; }
 
-    public void procTask(logEntry le) {
+    public String procTask(logEntry le) {
             if (le.isMessage()) {
                 switch (le.getMessage()) {
                     case logEntry.MESS_CLEAR_LOG:
@@ -44,9 +44,12 @@ public class ScaleView extends View {
                     case logEntry.MESS_REDRAW:
                         break;
                 }
-            } else
-                CW.procCmd(le);
-            invalidate();   //TODO: always?
+                invalidate();   //TODO: always?
+                return null;
+            } else {
+                invalidate();
+                return CW.procCmd(le);
+            }
     }
     List<String> getWritableShapes() {return CW.getWritableShapes(); }
 
@@ -249,6 +252,11 @@ public class ScaleView extends View {
                 return true;
         }
     }
+
+    public boolean isFullyLoaded() {
+        return CW != null;
+    }
+
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {

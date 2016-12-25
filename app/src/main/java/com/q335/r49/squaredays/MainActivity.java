@@ -243,11 +243,13 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     public void pushTask(logEntry log) {
         if (log != null)
             logQ.add(log);
+        if (GF.isFullyLoaded())
+                popTasks();
     }
     public void popTasks() {
         Log.d("SquareDays","Pop!");
-        for(logEntry l = logQ.poll(); l != null; l = logQ.poll())
-            GF.procTask(l);
+        for(logEntry le = logQ.poll(); le != null; le = logQ.poll())
+            GF.procTask(le);
     }
     private List<logEntry> writeBuffer = new ArrayList<>();
 

@@ -25,7 +25,11 @@ public class CalendarFrag extends Fragment {
     private ScaleView calView;
     private View fragView;
 
-    void procTask(logEntry l) { calView.procTask(l); }
+    void procTask(logEntry le) {
+        String ABtext = calView.procTask(le);
+        if (ABtext != null)
+            mListener.setPermABState(ABtext);
+    }
     List<String> getWritableShapes() {return calView.getWritableShapes(); }
 
     @Override
@@ -34,6 +38,12 @@ public class CalendarFrag extends Fragment {
             mListener.popTasks();
             calView.invalidate();
         }
+    }
+
+    boolean isFullyLoaded() {
+        if (calView != null)
+            return calView.isFullyLoaded();
+        return false;
     }
 
     PaletteRing palette;
@@ -409,16 +419,19 @@ class CalendarWin {
     private ArrayList<logEntry> shapes;
     private NavigableSet<logEntry> shapeIndex;
 
-    void procCmd(logEntry LE) { //TODO: Clear tasks "underneath", etc.
+    String procCmd(logEntry LE) { //TODO: Clear tasks "underneath", etc.
         if (LE.isCommand()) {
             curTask.procCommand(LE);
+            return null;
         } else {
             shapes.add(LE);
             shapeIndex.add(LE);
             if (LE.isOngoing()) {
                 curTask.updateTask(LE);
                 curTask = LE;
-            }
+                return curTask.comment + " @" + (new SimpleDateFormat(" h:mm",Locale.US).format(new Date(curTask.start * 1000L)));
+            } else
+                return null;
         }
     }
     List<String> getWritableShapes() {         //TODO: figure out when file writing occurs; and figure out when a log is first loaded
