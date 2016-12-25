@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +42,8 @@ public class ScaleView extends View {
             CW.addShape(l);
             invalidate();
     }
+    List<String> getWritableShapes() {return CW.getWritableShapes(); }
+
 
     public ScaleView(Context context) {
         super(context);
@@ -173,11 +176,8 @@ public class ScaleView extends View {
                         public void onClick(DialogInterface dialog, int id) {
                             long newstart = dateToTs(startEntry.getText().toString());
                             long newend = dateToTs(endEntry.getText().toString());
-                            if (newstart == -1 || newend == -1) {
-                                Toast.makeText(finalContext, "Bad date format", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
                             selection.reset(newstart,newend);
+                            //TODO: bring shape to foreground?
                             invalidate();
                         }
                     })

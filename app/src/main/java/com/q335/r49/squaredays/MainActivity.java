@@ -154,9 +154,11 @@ class logEntry {
             throw new IllegalArgumentException("Empty start time");
         if (le.start > le.end)
             throw new IllegalArgumentException("Starting after end time");
-        if
-
         return le;
+    }
+    public String toLogEntry() {
+        return Long.toString(start) + ">" + (new Date(start*1000L)).toString() //TODO: ### Figure out of end-start is correct
+                + ">" + String.format("#%06X", 0xFFFFFF & paint.getColor()) + ">0>" + Long.toString(end-start) + ">" + comment;
     }
 }
 
@@ -193,10 +195,23 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
             Log.d("SquareDays","Log file IO exception!");
         }
     }
-    public void writeLogsToFile(List<logEntry> log) {   //TODO: figure out when to call this
-        //TODO: mark boolean changed in commands
-        //TODO: just used SharedPrefs??!
-
+    public void writeLogsToFile() {
+        //TODO: ## figure out when to call this
+        //TODO: ## mark boolean changed in commands
+        List<String> entries = GF.getWritableShapes();
+        File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
+        try {
+            internalFile.delete();
+            FileOutputStream out = new FileOutputStream(internalFile, true);
+            for (String s : entries) {
+                out.write(s.getBytes());
+                out.write(System.getProperty("line.separator").getBytes());
+            }
+            out.close();
+        } catch (Exception e) {
+            Log.d("SquareDays", "File write error: " + e.toString());
+            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
+        }
     }
 
     private Queue<logEntry> logQ = new LinkedList<>();
@@ -209,19 +224,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
             GF.procTask(l);
     }
     private List<logEntry> writeBuffer = new ArrayList<>();
-
-    private void writeLog(String s) {
-        File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
-        try {
-            FileOutputStream out = new FileOutputStream(internalFile, true);
-            out.write(s.getBytes());
-            out.write(System.getProperty("line.separator").getBytes());
-            out.close();
-        } catch (Exception e) {
-            Log.d("SquareDays", e.toString());
-            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
-        }
-    }
 
     private Toolbar AB;
     int AB_curColor = 0;
@@ -272,6 +274,11 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
+
+    @Override
+    protected void onPause() {
+        writeLogsToFile();  //TODO: find better time to call this
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         CalendarFrag.COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);
@@ -342,6 +349,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
+                                    writeLogsToFile();
                                     copyFile(new File(getFilesDir(), "log.txt"), logFile);
                                     Toast.makeText(context, "Log entries exported to " + extStorPath + LOG_FILE, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
@@ -354,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
+                                    writeLogsToFile();
                                     copyFile(new File(getFilesDir(), "log.txt"), logFile);
                                     writeString(cmdFile, sprefs.getString("commands", ""));
                                     Toast.makeText(context, "Commands exported to " + extStorPath + COMMANDS_FILE + System.getProperty("line.separator")

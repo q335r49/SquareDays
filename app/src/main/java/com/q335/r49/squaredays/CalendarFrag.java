@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.NavigableSet;
 import java.util.TreeSet;
@@ -24,6 +25,7 @@ public class CalendarFrag extends Fragment {
     private View fragView;
 
     void procTask(logEntry l) { calView.procTask(l); }
+    List<String> getWritableShapes() {return calView.getWritableShapes(); }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
@@ -411,9 +413,15 @@ class CalendarWin {
                 break;
         }
     }
-    logEntry[] getWritableShapes() {
-        //TODO: figure out when file writing occurs; and figure out when a log is first loaded
-        return null;
+    List<String> getWritableShapes() {         //TODO: figure out when file writing occurs; and figure out when a log is first loaded
+        List<String> LogList = new ArrayList<>();
+        String entry;
+        for (logEntry r : shapes) {
+            entry = r.toLogEntry();
+            if (entry != null)
+                LogList.add(entry);
+        }
+        return LogList;
     }
     private logEntry selection;
     void setSelected(logEntry selection) {
