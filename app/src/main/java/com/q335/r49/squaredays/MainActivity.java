@@ -37,10 +37,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: Need some way to mark and select instant times -- probably by modifying the messagebox
+//TODO: *** Still: Startup bug: the AB isn't being updated even though there is a "current task"
+
+//TODO: $$$ Need some way to mark and select instant times -- probably by modifying the messagebox
 
 //TODO: TYPOGRAPHY: Use one letter for all
-//TODO: *** Still: Startup bug: the AB isn't being updated even though there is a "current task"
+
 //TODO: End task should be "add new task" WHEN THERE IS NO ACTIVE TASK (on long-press). When there is an active task, it should change to comment.
 //TODO: There should not be a "blank" button
 
@@ -76,7 +78,7 @@ class logEntry {
                     comment += com.comment;
                     break;
                 case CMD_END_TASK:
-                    if (isOngoing())
+                    if (onGoing)
                         end = com.end;
                         onGoing = false;
                     break;
@@ -86,8 +88,10 @@ class logEntry {
             return command;
         }
         void updateTask(logEntry newTask) {
-            if (isOngoing() && newTask.isOngoing()) //TODO: Error checking
+            if (onGoing && newTask.onGoing) {
+                onGoing = false;
                 end = newTask.start;
+            }
         }
 
     Paint paint;
@@ -177,6 +181,8 @@ class logEntry {
                     + Long.toString(start) + ">"
                     + ">"
                     + comment;
+        else if (end - start < 60)
+            return null;
         else
             return (new Date(start*1000L)).toString() + ">"
                     + String.format("#%06X", 0xFFFFFF & paint.getColor()) + ">"
