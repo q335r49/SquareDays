@@ -32,9 +32,29 @@ import java.util.Locale;
 //TODO: DO all the file writing using CalendarFrag, and especially onPause(); hence, all logs are "clean".
 //TODO: Write a clean log on "export" and "onDestroy"
 //TODO: Have CalendarFrag then call to update the AB
+//TODO: Filewrite buffer
+
+//TODO: Need some way to mark and select instant times -- probably by modifying the messagebox
 
 //TODO: TYPOGRAPHY: Use one letter for all
 //TODO: *** Still: Startup bug: the AB isn't being updated even though there is a "current task"
+//TODO: End task should be "add new task" WHEN THERE IS NO ACTIVE TASK (on long-press). When there is an active task, it should change to comment.
+//TODO: There should not be a "blank" button
+
+//TODO: The list should not be sorted
+//TODO: Automatically add a space to comments
+//TODO: "Selected" box around currently running task -- should be white. Otherwise, boxes are black
+//TODO: Do not change Action Bar color -- only text
+
+//TODO: Clean up overlap stuff *WHILE THE ACTION IS BEING WRITTEN* in the shapes thing
+//TODO: Change "No active task" to an empty Stirng.
+
+//TODO: Now time shows error color after removing a task from calendar
+//TODO: Rounded rectangles in Calendar.
+//TODO: Grid rectangle should be stroked boxes
+//TODO: Statusbar color
+
+
 
 
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener, TaskEditor.OnFragmentInteractionListener {
@@ -48,6 +68,11 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
             return COLOR_ERROR;
         }
     }
+
+
+
+
+
     public void commentCurTask(String comment) {
         String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>>" + comment;
         GF.procMess(entry);
