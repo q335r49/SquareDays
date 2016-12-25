@@ -9,16 +9,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Locale;
 import java.util.NavigableSet;
-import java.util.Queue;
 import java.util.TreeSet;
 
 public class CalendarFrag extends Fragment {
@@ -26,22 +22,15 @@ public class CalendarFrag extends Fragment {
 
     private ScaleView calView;
     private View fragView;
-    private Queue<String> EntryBuffer = new LinkedList<>();
-    public void procMess(String E) {
-        if (calView == null) {
-            EntryBuffer.add(E);
-            Log.d("SquareDays","Empty calView: buffer size: " + Integer.toString(EntryBuffer.size()) + " / Entry: " + E);
-        } else {
-            for (String s = EntryBuffer.poll(); s != null; EntryBuffer.poll())
-                calView.procMess(s);
-            calView.procMess(E);
-        }
-    }
+
+    void procTask(logEntry l) { calView.procTask(l); }
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
-        if (isVisibleToUser)
-            procMess(ScaleView.MESS_REDRAW);
+        if (isVisibleToUser) {
+            mListener.popTasks();   //TODO: Amu way to call this before it becomes visible? Or is this good for an "animation" type effect?
+            calView.invalidate();   //TODO: Shouldn't this be called by mListener?
+        }
     }
 
     PaletteRing palette;
@@ -59,7 +48,8 @@ public class CalendarFrag extends Fragment {
         }
         mListener.setGF(this);
         palette = mListener.getPalette();
-        calView.loadCalendarView(getContext(),palette);
+        calView.loadCalendarView(palette);
+        mListener.popTasks();   //TODO: This should automatically load the calendar view
         return fragView;
     }
 
@@ -94,6 +84,7 @@ public class CalendarFrag extends Fragment {
     public interface OnFragmentInteractionListener {
         void setPermABState(int color, String task);
         void setGF(CalendarFrag cf);
+        void popTasks();
         PaletteRing getPalette();
     }
 }
@@ -106,14 +97,14 @@ class CalendarWin {
     private Paint textStyle, boldtextStyle, nowLineStyle, statusBarStyle, selectionStyle;
     CalendarWin(long orig, float gridW, float gridH) {
         shapes = new ArrayList<>();
-        shapeIndex = new TreeSet<>(new Comparator<CalendarRect>() {
+        shapeIndex = new TreeSet<>(new Comparator<logEntry>() {
             @Override
-            public int compare(CalendarRect o1, CalendarRect o2) {
+            public int compare(logEntry o1, logEntry o2) {
                 return o1.start > o2.start ? 1 : o1.start == o2.start ? 0 : -1;
             }
         });
 
-        curTask = new CalendarRect();
+        curTask = new logEntry();
         shapes.add(curTask);
         shapeIndex.add(curTask);
 
@@ -195,13 +186,14 @@ class CalendarWin {
             RECT_SCALING_FACTOR_Y *= borderScale;
         }
     }
-    CalendarRect getShape(float sx, float sy) {
+    logEntry getShape(float sx, float sy) {
         long ts = conv_screen_ts(sx, sy);
-        CalendarRect closest = shapeIndex.floor(new CalendarRect(ts));
+        logEntry closest = shapeIndex.floor(new logEntry(ts));
         return closest.end < ts ? null : closest;
     }
     private Canvas mCanvas;
     void draw(Canvas canvas) {
+        Log.d("SquareDays", "Calendar redraw");
         int screenH = canvas.getHeight();
         int screenW = canvas.getWidth();
         long start_ts = conv_screen_ts(0f,0f);
@@ -212,10 +204,10 @@ class CalendarWin {
 
         RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
         RECT_SCALING_FACTOR_X = 0.7f;
-        drawInterval(new CalendarRect(start_ts, end_ts, COLOR_GRID_BACKGROUND, ""));
+        drawInterval(new logEntry(start_ts, end_ts, COLOR_GRID_BACKGROUND));
 
         RECT_SCALING_FACTOR_X = 0.85f;
-        for (CalendarRect s : shapes)
+        for (logEntry s : shapes)
             drawInterval(s);
 
         float gridSize;
@@ -317,8 +309,8 @@ class CalendarWin {
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
-    private void drawInterval(CalendarRect iv) {
-        if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
+    private void drawInterval(logEntry iv) {
+        if (iv.markedForRemoval || iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
@@ -341,7 +333,7 @@ class CalendarWin {
                 (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
     }
-    private void drawInterval(CalendarRect iv, Paint paint) {
+    private void drawInterval(logEntry iv, Paint paint) {
         if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
         long corner = iv.start;
@@ -388,102 +380,43 @@ class CalendarWin {
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
     }
 
-    private CalendarRect curTask;
+    private logEntry curTask;
         String getCurComment() { return curTask.end == -1 ? curTask.comment  : null; }
         int getCurColor() { return curTask.paint.getColor(); }
-    private ArrayList<CalendarRect> shapes;
-    private NavigableSet<CalendarRect> shapeIndex;
-    private final static int TIMESTAMP_POS = 0;
-    //private final static int READABLE_TIME_POS = 1;
-    private final static int COLOR_POS = 2;
-    private final static int START_POS = 3;
-    private final static int END_POS = 4;
-    private final static int COMMENT_POS = 5;
-    private final static int ARG_LEN = 6;
+    private ArrayList<logEntry> shapes;
+    private NavigableSet<logEntry> shapeIndex;
 
-    void addShape(String line) {    // TODO: Really should not process log. Curse that message buffer!
-        long ts;
-        String[] args = line.split(">",-1);
-        if (args.length < ARG_LEN) {
-            Log.d("SquareDays","Insufficient args: "+line);
-            return;
-        }
-        try {
-            ts = Long.parseLong(args[TIMESTAMP_POS]);
-            if (args[END_POS].isEmpty()) {
-                if (!args[START_POS].isEmpty()) {
-                    if (curTask.end == -1)
-                        curTask.end = ts + Long.parseLong(args[START_POS]);
-                    curTask = new CalendarRect(ts + Long.parseLong(args[START_POS]),-1,args[COLOR_POS],args[COMMENT_POS]);
-                    shapes.add(curTask);
-                    shapeIndex.add(curTask);
-                } else if (!args[COMMENT_POS].isEmpty())
-                    curTask.comment += args[COMMENT_POS];
-                else
-                    Log.d("SquareDays","Empty command: "+line);
-            } else if (args[START_POS].isEmpty()) {
-                curTask.end = ts + Long.parseLong(args[END_POS]);
-                curTask.comment += args[COMMENT_POS];
-            } else {
-                CalendarRect markTD = new CalendarRect(ts + Long.parseLong(args[START_POS]), ts + Long.parseLong(args[END_POS]), args[COLOR_POS], args[COMMENT_POS]);
-                shapes.add(markTD);
-                shapeIndex.add(markTD);
-            }
-        } catch (IllegalArgumentException e) {
-            Log.d("SquareDays","Bad color or number format: "+line);
+    void addShape(logEntry LE) {
+        switch (LE.command) {
+            case logEntry.END_TASK:
+                curTask.end = LE.timestamp + LE.duration;
+            case logEntry.ADD_COMMENT:
+                if (LE.comment != null)
+                    curTask.comment += LE.comment;
+                break;
+            case logEntry.START_TASK:
+                curTask.end = LE.timestamp + LE.delay;
+                curTask = LE;
+                LE.makeRect(true);
+                shapes.add(curTask);
+                shapeIndex.add(curTask);
+                break;
+            case logEntry.ADD_COMPLETED_TASK:
+                LE.makeRect(false);
+                shapes.add(LE);
+                shapeIndex.add(LE);
+                break;
+            case logEntry.CLEAR_LOG:
+                shapes = new ArrayList<>();
+                break;
         }
     }
-    void setLog(List<String> log) {
-        shapes = new ArrayList<>();
-        shapeIndex = new TreeSet<>(new Comparator<CalendarRect>() {
-            @Override
-            public int compare(CalendarRect o1, CalendarRect o2) {
-                return o1.start > o2.start ? 1 : o1.start == o2.start ? 0 : -1;
-            }
-        });
-        curTask = new CalendarRect();
-        shapes.add(curTask);
-        shapeIndex.add(curTask);
-        for (String line : log)
-            addShape(line);
+    logEntry[] getWritableShapes() {
+        //TODO: figure out when file writing occurs; and figure out when a log is first loaded
+        return null;
     }
-    List<String> getLog(CalendarRect edited) {
-        shapes.remove(edited);
-        shapes.add(edited);
-        List<String> LogList = new ArrayList<>();
-        for (CalendarRect r : shapes) {
-            if (r.start != -1 && r.end != -1)
-                LogList.add(Long.toString(r.start) + ">" + (new Date(r.start*1000L)).toString()
-                        + ">" + String.format("#%06X", 0xFFFFFF & r.paint.getColor()) + ">0>" + Long.toString(r.end-r.start) + ">" + r.comment);
-        }
-        if (curTask.end == -1L && curTask.start!= -1)
-            LogList.add(Long.toString(curTask.start) + ">" + (new Date(curTask.start*1000L)).toString()
-                    + ">" + String.format("#%06X", 0xFFFFFF & curTask.paint.getColor()) + ">0>-1>" + curTask.comment);
-        return LogList;
-    }
-
-    private CalendarRect selection;
-    void setSelected(CalendarRect selection) {
+    private logEntry selection;
+    void setSelected(logEntry selection) {
         this.selection = selection;
     }
-}
-class CalendarRect {
-    static int COLOR_ERROR;
-    long start;
-    long end;
-    String comment;
-        public void setComment(String s) {comment = s;}
-    Paint paint;
-    void set(long start, long end, int color, String comment) {
-        this.start = start;
-        this.end = end;
-        paint = new Paint();
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(color);
-        this.comment = comment;
-    }
-    CalendarRect() { set(-1,-1,COLOR_ERROR,null); }
-    CalendarRect(long start) { set(start,-1,0,null); }
-    CalendarRect(long start, long end, String color, String comment) { set(start,end,MainActivity.parseColor(color),comment); }
-    CalendarRect(long start, long end, int color, String comment) { set(start,end,color,comment); }
 }

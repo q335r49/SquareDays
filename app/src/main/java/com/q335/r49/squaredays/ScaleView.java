@@ -9,7 +9,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -17,23 +16,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Toast;
-
 import com.google.android.flexbox.FlexboxLayout;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
@@ -50,19 +37,11 @@ public class ScaleView extends View {
     private int curTaskColor;
         public int getCurTaskColor() { return curTaskColor; }
 
-    public static String MESS_RELOAD_LOG = "##MESS RELOAD LOG";
-    public static String MESS_REDRAW = "##MESS REDRAW";
-    public void procMess(String s) {
-        if (s.equals(MESS_RELOAD_LOG)) {
-            loadCalendarView(appContext, palette);
+    public void procTask(logEntry l) {
+            CW.addShape(l);
             invalidate();
-        } else if (s.equals(MESS_REDRAW)) {
-            invalidate();
-        } else {
-            CW.addShape(s);
-            invalidate();
-        }
     }
+
     public ScaleView(Context context) {
         super(context);
         SL = new ScaleListener();
@@ -75,29 +54,7 @@ public class ScaleView extends View {
         mScaleDetector = new ScaleGestureDetector(context, SL);
         appContext = context;
     }
-    public static List<String> read_file(Context context, String filename) {
-        try {
-            FileInputStream fis = context.openFileInput(filename);
-            InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
-            BufferedReader bufferedReader = new BufferedReader(isr);
-            ArrayList<String> sb = new ArrayList<>();
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                sb.add(line);
-            }
-            return sb;
-        } catch (FileNotFoundException e) {
-            Log.d("SquareDays","Log file not found!");
-            return new ArrayList<>();
-        } catch (UnsupportedEncodingException e) {
-            Log.d("SquareDays","Log file bad encoding!");
-            return new ArrayList<>();
-        } catch (IOException e) {
-            Log.d("SquareDays","Log file IO exception!");
-            return new ArrayList<>();
-        }
-    }
-    void loadCalendarView(Context context, PaletteRing pal) {
+    void loadCalendarView(PaletteRing pal) {
         palette = pal;
         Calendar cal = new GregorianCalendar();
         cal.setTimeInMillis(System.currentTimeMillis());
@@ -107,7 +64,6 @@ public class ScaleView extends View {
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
         CW = new CalendarWin(cal.getTimeInMillis()/1000,10f,1.5f);
-        CW.setLog(read_file(context.getApplicationContext(), MainActivity.LOG_FILE));
         CW.setLineWidth(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
         curTask = CW.getCurComment();
         curTaskColor = CW.getCurColor();
@@ -139,7 +95,7 @@ public class ScaleView extends View {
     private final Handler handler = new Handler();
     private Runnable mLongPressed = new Runnable() { public void run() {
         has_run = true;
-        final CalendarRect selection = CW.getShape(lastTouchX, lastTouchY);
+        final logEntry selection = CW.getShape(lastTouchX, lastTouchY);
         if (selection != null) {
             LayoutInflater inflater = LayoutInflater.from(appContext);
             View promptView = inflater.inflate(R.layout.edit_interval, null);
@@ -154,7 +110,7 @@ public class ScaleView extends View {
             endEntry.setText(tsToDate(selection.end));
             final View curColorV = promptView.findViewById(R.id.CurColor);
             try { curColorV.setBackgroundColor(selection.paint.getColor());
-            } catch (Exception e) { curColorV.setBackgroundColor(CalendarRect.COLOR_ERROR); }
+            } catch (Exception e) { curColorV.setBackgroundColor(logEntry.COLOR_ERROR); }
 
             final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
             final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
@@ -221,43 +177,13 @@ public class ScaleView extends View {
                                 Toast.makeText(finalContext, "Bad date format", Toast.LENGTH_SHORT).show();
                                 return;
                             }
-                            selection.set(newstart,newend,((ColorDrawable)  curColorV.getBackground()).getColor(),commentEntry.getText().toString());
-                            List<String> newLogEntries = CW.getLog(selection);
-                            File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);
-                            try {   //TODO: centralize logging, eliminate blank "end activity" entries
-                                internalFile.delete();
-                                FileOutputStream out = new FileOutputStream(internalFile, true);
-                                for (String s : newLogEntries) {
-                                    out.write(s.getBytes());
-                                    out.write(System.getProperty("line.separator").getBytes());
-                                }
-                                out.close();
-                            } catch (Exception e) {
-                                Log.d("SquareDays", e.toString());
-                                Toast.makeText(finalContext, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
-                            }
-                            CW.setLog(newLogEntries);
+                            selection.reset(newstart,newend);
                             invalidate();
                         }
                     })
                     .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            selection.set(-1,-1,0,"");
-                            List<String> newLogEntries = CW.getLog(selection);
-                            File internalFile = new File(finalContext.getFilesDir(), MainActivity.LOG_FILE);
-                            try {
-                                internalFile.delete();
-                                FileOutputStream out = new FileOutputStream(internalFile, true);
-                                for (String s : newLogEntries) {
-                                    out.write(s.getBytes());
-                                    out.write(System.getProperty("line.separator").getBytes());
-                                }
-                                out.close();
-                            } catch (Exception e) {
-                                Log.d("SquareDays", e.toString());
-                                Toast.makeText(finalContext, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
-                            }
-                            CW.setLog(newLogEntries);
+                            selection.markForRemoval();
                             invalidate();
                         }
                     })
@@ -281,7 +207,7 @@ public class ScaleView extends View {
                 handler.postDelayed(mLongPressed,1200);
                 firstTouchX = lastTouchX = x;
                 firstTouchY = lastTouchY = y;
-                CalendarRect selection = CW.getShape(x,y);
+                logEntry selection = CW.getShape(x,y);
                 if (selection != null && selection.start != -1) {
                     long duration = 1000L* (selection.end - selection.start);
                     CW.setStatusText(selection.comment + ":"

@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -21,13 +22,24 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.nio.channels.FileChannel;
+import java.nio.channels.IllegalBlockingModeException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Queue;
 
 //TODO: DO all the file writing using CalendarFrag, and especially onPause(); hence, all logs are "clean".
 //TODO: Write a clean log on "export" and "onDestroy"
@@ -56,6 +68,97 @@ import java.util.Locale;
 
 
 
+class logEntry {
+    static final int START_TASK = 15;
+    static final int ADD_COMMENT = 16;
+    static final int END_TASK = 17;
+    static final int ADD_COMPLETED_TASK = 18;
+    static final int CLEAR_LOG = 19;
+    int command;
+
+    boolean markedForRemoval;
+    long timestamp;
+    int color;
+    long delay;
+    long duration;
+    String comment;
+    public logEntry() { }
+
+    private logEntry(int color, long delay, long duration, String comment) {
+        command = START_TASK;
+        this.color = color;
+        this.delay = delay;
+        this.duration = duration;
+        this.comment = comment;
+    }
+    static logEntry commentTask(String s) {logEntry le = new logEntry(); le.command = ADD_COMMENT; le.comment = s; return le; }
+    static logEntry startTask(int color, long delay, long duration, String comment) { return new logEntry(color, delay, duration, comment); }
+    static logEntry endTask(long delay) { logEntry le = new logEntry(); le.command = END_TASK; le.delay = delay; return le; }
+    static logEntry clearLog() { logEntry le = new logEntry(); le.command = CLEAR_LOG; return le; }
+
+    //From calendarRect
+    static int COLOR_ERROR;
+    long start;
+    long end;
+    public void setComment(String s) {comment = s;}
+
+    Paint paint;
+//    void set(long start, long end, int color, String comment) {
+//        this.start = start;
+//        this.end = end;
+//    }
+    void makeRect(boolean onGoing) {
+        paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(color);
+        start = timestamp + delay;
+        end = onGoing ? -1 : timestamp + duration; //TODO: ***** verify as intended in Commands
+    }
+
+    logEntry(long start) {
+        this.start = start;
+    }
+    logEntry(long start_ts, long end_ts, int COLOR_GRID_BACKGROUND) {
+        this.start = start_ts;
+        this.end = end_ts;
+        this.color = COLOR_GRID_BACKGROUND;
+    }
+
+    void reset(long start, long end) {
+        if (end > start) {
+            delay = start - timestamp;
+            duration = end - timestamp;
+            this.start = start;
+            this.end = end;
+        } else {
+            Log.d("SquareDays", "Bad new time interval: " + start + " --> " + end);
+        }
+    }
+
+    public void markForRemoval() {
+        markedForRemoval = true;
+    }
+
+    public static logEntry parseString(String s) throws IllegalArgumentException {
+        String[] args = s.split(">",-1);
+        if (args.length < 6)
+            throw new IllegalArgumentException("Unparsable string, need at least 6 arguments: " + s);
+        logEntry le = new logEntry();
+        le.timestamp = Long.parseLong(args[0]);
+        // le.readableTimePos = args[1];
+        le.color = MainActivity.parseColor(args[2]);
+        le.delay = Long.parseLong(args[3]);
+        le.duration = Long.parseLong(args[4]);
+        le.comment = args[5];
+        if (args[3].isEmpty())
+            throw new IllegalArgumentException("Empty start time");
+        if (le.start > le.end)
+            throw new IllegalArgumentException("Starting after end time");
+        if
+
+        return le;
+    }
+}
 
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener, TaskEditor.OnFragmentInteractionListener {
     static int COLOR_NO_TASK;
@@ -69,39 +172,43 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         }
     }
 
-
-
-
-
-    public void commentCurTask(String comment) {
-        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>>" + comment;
-        GF.procMess(entry);
-        if (!entry.isEmpty())
-            writeLog(entry);
-        setPermABState(COLOR_NO_TASK, "No active task");
-    }
-    public void startTask(String colorS, long delay, long duration, String comment) {
-        long now = System.currentTimeMillis() / 1000L;
-        String entry = Long.toString(now) + ">" + (new Date()).toString() + ">" + colorS + ">" + (-delay * 60) + ">" + (duration == 0 ? "" : Long.toString((-delay + duration) * 60L)) + ">" + comment;
-        GF.procMess(entry);
-        if (!entry.isEmpty())
-            writeLog(entry);
-        if (duration == 0)
-            setPermABState(parseColor(colorS), comment + " @" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay))));
-        else {
-            restoreABState();
-            Toast.makeText(context, comment
-                    + "\n" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay))) + " > " + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay + 60 * duration)))
-                    + "\n" + Long.toString(duration / 60L) + ":" + String.format(Locale.US,"%02d", duration % 60) + " min", Toast.LENGTH_LONG).show();
-            restoreABState();
+    public void loadLogsFromFile(Context context, String filename) {
+        try {
+            FileInputStream fis = context.openFileInput(filename);
+            InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+            BufferedReader bufferedReader = new BufferedReader(isr);
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                try {
+                    pushTask(logEntry.parseString(line));
+                } catch (IllegalArgumentException E) {
+                    Log.d("SquareDays",E.toString());
+                }
+            }
+        } catch (FileNotFoundException e) {
+            Log.d("SquareDays","Log file not found!");
+        } catch (UnsupportedEncodingException e) {
+            Log.d("SquareDays","Log file bad encoding!");
+        } catch (IOException e) {
+            Log.d("SquareDays","Log file IO exception!");
         }
     }
-    public void endCurTask(long delay) {
-        String entry = Long.toString(System.currentTimeMillis() / 1000) + ">" + (new Date()).toString() + ">>>" + (delay == 0 ? "0" : Long.toString(-delay * 60)) + ">";
-        GF.procMess(entry);
-        writeLog(entry);
-        setPermABState(COLOR_NO_TASK, "No active task");
+    public void writeLogsToFile(List<logEntry> log) {   //TODO: figure out when to call this
+        //TODO: mark boolean changed in commands
+        //TODO: just used SharedPrefs??!
+
     }
+
+    private Queue<logEntry> logQ = new LinkedList<>();
+    public void pushTask(logEntry log) {
+        if (log != null)
+            logQ.add(log);
+    }
+    public void popTasks() {    //TODO: @ make sure this is being called
+        for(logEntry l = logQ.poll(); l != null; l = logQ.poll())
+            GF.procTask(l);
+    }
+    private List<logEntry> writeBuffer = new ArrayList<>();
 
     private void writeLog(String s) {
         File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
@@ -172,12 +279,12 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         CalendarWin.COLOR_GRID_BACKGROUND = ResourcesCompat.getColor(getResources(), R.color.grid_background, null);
         CalendarWin.COLOR_NOW_LINE = ResourcesCompat.getColor(getResources(), R.color.now_line, null);
         CalendarWin.COLOR_STATUS_BAR = ResourcesCompat.getColor(getResources(), R.color.status_bar, null);
-        CalendarRect.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         CommandsFrag.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
         COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);   //TODO: make this a main static field, etc. (+othrers too)
         CalendarWin.COLOR_SELECTION = ResourcesCompat.getColor(getResources(), R.color.selection, null);
+        logEntry.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
 
         palette = new PaletteRing(PALETTE_LENGTH);
 
@@ -197,6 +304,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         mSectionsPagerAdapter = new SectionsPagerAdapter(FM,BF,GF);
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        loadLogsFromFile(context, LOG_FILE);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -295,7 +403,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                     else {
                                         try {
                                             copyFile(logFile, new File(getFilesDir(), "log.txt"));
-                                            GF.procMess(ScaleView.MESS_RELOAD_LOG);
+                                            pushTask(logEntry.clearLog());
+                                            loadLogsFromFile(context, LOG_FILE);
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.d("SquareDays",e.toString());
@@ -324,7 +433,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                     else {
                                         try {
                                             copyFile(logFile, new File(getFilesDir(), "log.txt"));
-                                            GF.procMess(ScaleView.MESS_RELOAD_LOG);
+                                            pushTask(logEntry.clearLog());
+                                            loadLogsFromFile(context, LOG_FILE);
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.d("SquareDays",e.toString());
@@ -353,7 +463,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                             public void onClick(DialogInterface dialog, int which) {
                                 File logFile = new File(context.getFilesDir(), LOG_FILE);
                                 if (logFile.delete()) {
-                                    GF.procMess(ScaleView.MESS_RELOAD_LOG);
+                                    pushTask(logEntry.clearLog());
                                     setPermABState(COLOR_NO_TASK,"No active task");
                                 } else
                                     Log.d("SquareDays","Log clear failed!");

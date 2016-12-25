@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
+//TODO: *** set ActionBar
 
 public class CommandsFrag extends Fragment {
     static int COLOR_ERROR;
@@ -68,7 +69,7 @@ public class CommandsFrag extends Fragment {
         sprefs = context.getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
         String jsonText = sprefs.getString("commands", "");
         loadCommands(jsonText);
-        mListener.setBF(this);
+        mListener.setBF(this);  //TODO: change to "initialization complete"
         return view;
     }
     public void loadCommands(String s) {
@@ -270,7 +271,8 @@ public class CommandsFrag extends Fragment {
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
                             if (delay != 0 || duration != 0 || !has_dragged) {
-                                mListener.startTask(comF[COLOR_IX],delay,duration,comF[COMMENT_IX]);
+                                mListener.pushTask(logEntry.startTask(MainActivity.parseColor(comF[COLOR_IX]),delay,duration,comF[COMMENT_IX]));
+
                             } else
                                 mListener.restoreABState();
                             return false;
@@ -444,9 +446,9 @@ public class CommandsFrag extends Fragment {
                                     .setTitle("Comment:")
                                     .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-                                            mListener.commentCurTask(commentEntry.getText().toString());
+                                            mListener.pushTask(logEntry.commentTask(commentEntry.getText().toString()));
                                             if (finalDelay != 0)
-                                                mListener.endCurTask(finalDelay);
+                                                mListener.pushTask(logEntry.endTask(finalDelay));
                                         }
                                     })
                                     .setNegativeButton("(Cancel)", new DialogInterface.OnClickListener() {
@@ -456,7 +458,7 @@ public class CommandsFrag extends Fragment {
                                     })
                                     .create().show();
                         } else if (delay != 0 || !has_dragged) {
-                            mListener.endCurTask(delay);
+                            mListener.pushTask(logEntry.endTask(delay));
                         }
                         return false;
                     case MotionEvent.ACTION_CANCEL:
@@ -504,11 +506,9 @@ public class CommandsFrag extends Fragment {
     }
 
     public interface OnFragmentInteractionListener {
-        void startTask(String color, long delay, long duration, String comment);
-        void commentCurTask(String comment);
+        void pushTask(logEntry log);
         void restoreABState();
         void setABState(int color, String comment);
-        void endCurTask(long delay);
         void setBF(CommandsFrag bf);
         PaletteRing getPalette();
     }
