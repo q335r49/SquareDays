@@ -36,9 +36,15 @@ public class ScaleView extends View {
         public String getCurTask() { return curTask; }
 
     public void procTask(logEntry le) {
-            if (le.isMessage())
-                CW.clearShapes(); //only message
-            else
+            if (le.isMessage()) {
+                switch (le.getMessage()) {
+                    case logEntry.MESS_CLEAR_LOG:
+                        CW.clearShapes();
+                        break;
+                    case logEntry.MESS_REDRAW:
+                        break;
+                }
+            } else
                 CW.procCmd(le);
             invalidate();   //TODO: always?
     }

@@ -31,8 +31,8 @@ public class CalendarFrag extends Fragment {
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         if (isVisibleToUser) {
-            mListener.popTasks();   //TODO: Amu way to call this before it becomes visible? Or is this good for an "animation" type effect?
-            calView.invalidate();   //TODO: Shouldn't this be called by mListener?
+            mListener.popTasks();
+            calView.invalidate();
         }
     }
 
@@ -439,5 +439,9 @@ class CalendarWin {
     public void clearShapes() {
         shapes.clear();
         shapeIndex.clear();
+
+        curTask = new logEntry();
+        shapes.add(curTask);
+        shapeIndex.add(curTask);
     }
 }

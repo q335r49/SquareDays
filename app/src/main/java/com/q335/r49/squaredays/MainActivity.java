@@ -37,10 +37,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: DO all the file writing using CalendarFrag, and especially onPause(); hence, all logs are "clean".
-//TODO: Write a clean log on "export" and "onDestroy"
+//TODO: Handle current task on reload
 //TODO: Have CalendarFrag then call to update the AB
-//TODO: Filewrite buffer
 
 //TODO: Need some way to mark and select instant times -- probably by modifying the messagebox
 
@@ -67,7 +65,8 @@ class logEntry {
     private static final int REMOVE = -1;
     private static final int CMD_ADD_COMMENT = 10;
     private static final int CMD_END_TASK = 11;
-    private static final int MESS_CLEAR_LOG = 100;
+    static final int MESS_CLEAR_LOG = 100;
+    static final int MESS_REDRAW = 101;
 
     private int command;
         void markForRemoval() { command = REMOVE; }
@@ -85,6 +84,9 @@ class logEntry {
                         onGoing = false;
                     break;
             }
+        }
+        int getMessage() {
+            return command;
         }
         void updateTask(logEntry newTask) {
             if (isOngoing() && newTask.isOngoing()) //TODO: Error checking
@@ -167,7 +169,7 @@ class logEntry {
     }
     @Override
     public String toString() {
-        if (markedForRemoval() || end < start || paint == null)
+        if (markedForRemoval() || end - start < 60 || paint == null)
                 return null;
         return (new Date(start*1000L)).toString() + ">"
                 + String.format("#%06X", 0xFFFFFF & paint.getColor()) + ">"
@@ -428,6 +430,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                             copyFile(logFile, new File(getFilesDir(), "log.txt"));
                                             pushTask(logEntry.newClearMess());
                                             loadLogsFromFile(context, LOG_FILE);
+                                            if (GF.isVisible())
+                                                popTasks();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.d("SquareDays",e.toString());
@@ -458,6 +462,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                             copyFile(logFile, new File(getFilesDir(), "log.txt"));
                                             pushTask(logEntry.newClearMess());
                                             loadLogsFromFile(context, LOG_FILE);
+                                            if (GF.isVisible())
+                                                popTasks();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.d("SquareDays",e.toString());
@@ -488,6 +494,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                 if (logFile.delete()) {
                                     pushTask(logEntry.newClearMess());
                                     setPermABState(COLOR_NO_TASK,"No active task");
+                                    if (GF.isVisible())
+                                        popTasks();
                                 } else
                                     Log.d("SquareDays","Log clear failed!");
                             }
