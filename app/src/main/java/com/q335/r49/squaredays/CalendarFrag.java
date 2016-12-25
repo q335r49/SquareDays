@@ -44,9 +44,9 @@ public class CalendarFrag extends Fragment {
         calView = (ScaleView) (fragView.findViewById(R.id.drawing));
         String Task = calView.getCurTask();
         if (Task != null) {
-            mListener.setPermABState(COLOR_NO_TASK,Task);
+            mListener.setPermABState(Task);
         } else {
-            mListener.setPermABState(COLOR_NO_TASK,"No active task");
+            mListener.setPermABState("No active task");
         }
         mListener.setGF(this);
         palette = mListener.getPalette();
@@ -84,7 +84,7 @@ public class CalendarFrag extends Fragment {
     }
 
     public interface OnFragmentInteractionListener {
-        void setPermABState(int color, String task);
+        void setPermABState(String task);
         void setGF(CalendarFrag cf);
         void popTasks();
         PaletteRing getPalette();

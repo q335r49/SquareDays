@@ -37,8 +37,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: how to write "ongoing" to log?
-
 //TODO: Have CalendarFrag then call to update the AB
 
 //TODO: Need some way to mark and select instant times -- probably by modifying the messagebox
@@ -258,15 +256,11 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     String AB_curText = "";
     int AB_savedColor = 0;
     String AB_savedText = "";
-    public void setABState(int color, String text) {
-        AB.setBackgroundColor(color);
-        AB_curColor = color;
+    public void setABState(String text) {
         AB.setTitle(text);
         AB_curText = text;
     }
-    public void setPermABState(int color, String text) {
-        AB.setBackgroundColor(color);
-        AB_curColor = color;
+    public void setPermABState(String text) {
         AB.setTitle(text);
         AB_curText = text;
         AB_savedColor = AB_curColor;
@@ -504,7 +498,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                 File logFile = new File(context.getFilesDir(), LOG_FILE);
                                 if (logFile.delete()) {
                                     pushTask(logEntry.newClearMess());
-                                    setPermABState(COLOR_NO_TASK,"No active task");
+                                    setPermABState("No active task");
                                     if (GF.isVisible())
                                         popTasks();
                                 } else

@@ -257,9 +257,9 @@ public class CommandsFrag extends Fragment {
                                 if (duration != 0)
                                     abString += " for " + Integer.toString(duration / 60) + ":" + String.format(Locale.US, "%02d", duration % 60)
                                             + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
-                                mListener.setABState(bg_Norm, abString.isEmpty()? comF[COMMENT_IX] : abString);
+                                mListener.setABState(abString.isEmpty()? comF[COMMENT_IX] : abString);
                             } else if (has_dragged)
-                                mListener.setABState(bg_Norm, "Cancel");
+                                mListener.setABState("Cancel");
                             return true;
                         case MotionEvent.ACTION_UP:
                             if (has_run)
@@ -421,9 +421,9 @@ public class CommandsFrag extends Fragment {
                             if (delay != 0)
                                 abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
                                         + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay))) + ")";
-                            mListener.setABState(bg_Norm, abString.isEmpty()? "End Task" : abString);
+                            mListener.setABState(abString.isEmpty()? "End Task" : abString);
                         } else if (has_dragged)
-                            mListener.setABState(bg_Norm, "Cancel");
+                            mListener.setABState("Cancel");
                         return true;
                     case MotionEvent.ACTION_UP:
                         if (has_run)
@@ -510,7 +510,7 @@ public class CommandsFrag extends Fragment {
     public interface OnFragmentInteractionListener {
         void pushTask(logEntry log);
         void restoreABState();
-        void setABState(int color, String comment);
+        void setABState(String comment);
         void setBF(CommandsFrag bf);
         PaletteRing getPalette();
     }
