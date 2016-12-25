@@ -448,7 +448,7 @@ public class CommandsFrag extends Fragment {
                                     .setTitle("Comment:")
                                     .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-                                            mListener.pushTask(logEntry.newCommentCmd(commentEntry.getText().toString()));
+                                            mListener.pushTask(logEntry.newCommentCmd(" " + commentEntry.getText().toString()));
                                             if (finalDelay != 0)
                                                 mListener.pushTask(logEntry.newEndCommand(System.currentTimeMillis()/1000L - finalDelay * 60));
                                         }

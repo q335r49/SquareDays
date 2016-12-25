@@ -37,14 +37,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: *** Still: Startup bug: the AB isn't being updated even though there is a "current task"
-
-//TODO: $$$ Need some way to mark and select instant times -- probably by modifying the messagebox
 
 //TODO: TYPOGRAPHY: Use one letter for all
-
-//TODO: End task should be "add new task" WHEN THERE IS NO ACTIVE TASK (on long-press). When there is an active task, it should change to comment.
-//TODO: There should not be a "blank" button
 
 //TODO: Automatically add a space to comments
 //TODO: "Selected" box around currently running task -- should be white. Otherwise, boxes are black
@@ -58,7 +52,9 @@ import java.util.Queue;
 //TODO: Grid rectangle should be stroked boxes
 //TODO: Statusbar color
 
-//TODO: Bug: current task not being written correctly to log
+//TODO: $$$ Need some way to mark and select instant times -- probably by modifying the messagebox
+//TODO: $$$ End task should be "add new task" WHEN THERE IS NO ACTIVE TASK (on long-press). When there is an active task, it should change to comment.
+//TODO: $$$ There should not be a "blank" button
 
 class logEntry {
     private static final int REMOVE = -1;
