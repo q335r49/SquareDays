@@ -37,8 +37,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: Have CalendarFrag then call to update the AB
-
 //TODO: Need some way to mark and select instant times -- probably by modifying the messagebox
 
 //TODO: TYPOGRAPHY: Use one letter for all
@@ -327,6 +325,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
 
         AB = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(AB);
+        AB.setBackgroundColor(COLOR_NO_TASK);
 
         BF = new CommandsFrag();
         GF = new CalendarFrag();
