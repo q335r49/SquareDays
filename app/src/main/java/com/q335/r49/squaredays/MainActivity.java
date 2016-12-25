@@ -152,7 +152,6 @@ class logEntry {
             le.command = MESS_CLEAR_LOG;
         return le;
     }
-
     public static logEntry newFromString(String s) throws IllegalArgumentException {    //TODO: handle ONGOING in read & write
         String[] args = s.split(">",-1);
         if (args.length < 5)
@@ -164,11 +163,12 @@ class logEntry {
         le.start = Long.parseLong(args[2]);
         if (args[3].isEmpty())
             le.onGoing = true;
-        else
+        else {
             le.end = le.start + Long.parseLong(args[3]) * 60L;
+            if (le.start > le.end)
+                throw new IllegalArgumentException("Starting after end time: " + s);
+        }
         le.comment = args[4];
-        if (le.start > le.end)
-            throw new IllegalArgumentException("Starting after end time: " + s);
         return le;
     }
     @Override
