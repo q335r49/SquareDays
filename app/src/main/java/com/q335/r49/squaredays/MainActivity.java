@@ -61,6 +61,8 @@ import java.util.Queue;
 //TODO: Grid rectangle should be stroked boxes
 //TODO: Statusbar color
 
+//TODO: Bug: current task not being written correctly to log
+
 class logEntry {
     private static final int REMOVE = -1;
     private static final int CMD_ADD_COMMENT = 10;
@@ -80,6 +82,7 @@ class logEntry {
                 case CMD_END_TASK:
                     if (isOngoing())
                         end = com.end;
+                        onGoing = false;
                     break;
             }
         }

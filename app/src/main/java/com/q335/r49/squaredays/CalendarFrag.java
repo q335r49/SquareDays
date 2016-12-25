@@ -2,6 +2,7 @@ package com.q335.r49.squaredays;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -95,7 +96,9 @@ class CalendarWin {
     static int COLOR_NOW_LINE;
     static int COLOR_STATUS_BAR;
     static int COLOR_SELECTION;
-    private Paint textStyle, boldtextStyle, nowLineStyle, statusBarStyle, selectionStyle;
+    private Paint textStyle, boldtextStyle, nowLineStyle, statusBarStyle, selectionStyle, pathStyle;
+    private Path triangleMarker;
+    private float markerSize;
     CalendarWin(long orig, float gridW, float gridH) {
         shapes = new ArrayList<>();
         shapeIndex = new TreeSet<>(new Comparator<logEntry>() {
@@ -115,31 +118,48 @@ class CalendarWin {
         this.gridW = gridW;
         this.gridH = gridH;
         textStyle = new Paint();
-        textStyle.setColor(COLOR_SCALE_TEXT);
-        textStyle.setTypeface(Typeface.DEFAULT);
+            textStyle.setColor(COLOR_SCALE_TEXT);
+            textStyle.setTypeface(Typeface.DEFAULT);
         boldtextStyle = new Paint();
-        boldtextStyle.setColor(COLOR_SCALE_TEXT);
-        boldtextStyle.setTypeface(Typeface.DEFAULT_BOLD);
+            boldtextStyle.setColor(COLOR_SCALE_TEXT);
+            boldtextStyle.setTypeface(Typeface.DEFAULT_BOLD);
         nowLineStyle = new Paint();
-        nowLineStyle.setColor(COLOR_NOW_LINE);
+            nowLineStyle.setColor(COLOR_NOW_LINE);
         statusBarStyle = new Paint();
-        statusBarStyle.setColor(COLOR_STATUS_BAR);
-        statusBarStyle.setTextAlign(Paint.Align.LEFT);
+            statusBarStyle.setColor(COLOR_STATUS_BAR);
+            statusBarStyle.setTextAlign(Paint.Align.LEFT);
         selectionStyle = new Paint();
-        selectionStyle.setStyle(Paint.Style.STROKE);
-        selectionStyle.setColor(COLOR_SELECTION);
+            selectionStyle.setStyle(Paint.Style.STROKE);
+            selectionStyle.setColor(COLOR_SELECTION);
         statusText = "";
+        pathStyle = new Paint();
+            pathStyle.setColor(COLOR_NOW_LINE);
+            pathStyle.setStyle(Paint.Style.FILL);
+        markerSize = 0.5f;
+        triangleMarker = new Path();
+            triangleMarker.moveTo(0f,0f);
+            triangleMarker.lineTo(-markerSize*LINE_WIDTH, markerSize*LINE_WIDTH);
+            triangleMarker.lineTo(-markerSize*LINE_WIDTH, -markerSize*LINE_WIDTH);
+            triangleMarker.lineTo(0f,0f);
+            triangleMarker.close();
+
     }
     private static float LINE_WIDTH = 10;
     void setLineWidth(float f) {
         LINE_WIDTH = f;
         textStyle.setTextSize(LINE_WIDTH*2f);
-        textStyle.setStrokeWidth(LINE_WIDTH/5f);
+            textStyle.setStrokeWidth(LINE_WIDTH/5f);
         boldtextStyle.setTextSize(LINE_WIDTH*2.5f);
-        boldtextStyle.setStrokeWidth(LINE_WIDTH/5f);
+            boldtextStyle.setStrokeWidth(LINE_WIDTH/5f);
         statusBarStyle.setTextSize(LINE_WIDTH*2f);
         selectionStyle.setStrokeWidth(LINE_WIDTH/4f);
         nowLineStyle.setStrokeWidth(LINE_WIDTH/4f);
+        triangleMarker = new Path();
+            triangleMarker.moveTo(0f,0f);
+            triangleMarker.lineTo(-markerSize*LINE_WIDTH, markerSize*LINE_WIDTH);
+            triangleMarker.lineTo(-markerSize*LINE_WIDTH, -markerSize*LINE_WIDTH);
+            triangleMarker.lineTo(0f,0f);
+            triangleMarker.close();
     }
 
     private long orig;
@@ -293,14 +313,13 @@ class CalendarWin {
         if (selection!=null)
             drawInterval(selection,selectionStyle);
 
-        RECT_SCALING_FACTOR_X = 0.7f;
         long now = System.currentTimeMillis() / 1000L;
         if (curTask.isOngoing()) {
             curTask.end = now;
             drawInterval(curTask);
-            drawNowLine(now, curTask.paint);
+            drawMarker(now, curTask.paint.getColor());
         } else
-            drawNowLine(now);
+            drawMarker(now, COLOR_NOW_LINE);
 
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
@@ -354,6 +373,7 @@ class CalendarWin {
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
     private void drawNowLine(long ts) {
+        nowLineStyle.setColor(COLOR_NOW_LINE);
         long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
         float[] a = conv_ts_screen(ts,0f);
         float[] b = conv_ts_screen(ts,1f);
@@ -363,7 +383,17 @@ class CalendarWin {
                 (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
     }
-    private void drawNowLine(long ts, Paint paint) {
+    Path offsetMarker = new Path();
+    private void drawMarker(long ts, int color) {
+        pathStyle.setColor(color);
+        long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
+        float[] a = conv_ts_screen(ts,0f);
+        float[] c = conv_ts_screen(noon,0.5f);
+        triangleMarker.offset((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],(a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],offsetMarker);
+        mCanvas.drawPath(offsetMarker,pathStyle);
+    }
+    private void drawNowLine(long ts, int color) {
+        nowLineStyle.setColor(color);
         long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
         float[] a = conv_ts_screen(ts,0f);
         float[] b = conv_ts_screen(ts,1f);
@@ -371,20 +401,15 @@ class CalendarWin {
         mCanvas.drawLine((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
                 (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                 (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
-                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
+                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
     }
 
     private logEntry curTask;
-        String getCurComment() {
-            if (curTask == null)
-                return "";
-            else
-                return curTask.end == -1 ? curTask.comment  : null;
-        }
+        String getCurComment() { return curTask == null? "" : curTask.isOngoing() ? curTask.comment  : null; }
     private ArrayList<logEntry> shapes;
     private NavigableSet<logEntry> shapeIndex;
 
-    void procCmd(logEntry LE) {
+    void procCmd(logEntry LE) { //TODO: Clear tasks "underneath", etc.
         if (LE.isCommand()) {
             curTask.procCommand(LE);
         } else {
