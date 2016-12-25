@@ -15,7 +15,6 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.SeekBar;
-import android.widget.Toast;
 import com.google.android.flexbox.FlexboxLayout;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -35,12 +34,13 @@ public class ScaleView extends View {
 
     private String curTask;
         public String getCurTask() { return curTask; }
-    private int curTaskColor;
-        public int getCurTaskColor() { return curTaskColor; }
 
-    public void procTask(logEntry l) {
-            CW.addShape(l);
-            invalidate();
+    public void procTask(logEntry le) {
+            if (le.isMessage())
+                CW.clearShapes(); //only message
+            else
+                CW.procCmd(le);
+            invalidate();   //TODO: always?
     }
     List<String> getWritableShapes() {return CW.getWritableShapes(); }
 
@@ -69,7 +69,6 @@ public class ScaleView extends View {
         CW = new CalendarWin(cal.getTimeInMillis()/1000,10f,1.5f);
         CW.setLineWidth(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
         curTask = CW.getCurComment();
-        curTaskColor = CW.getCurColor();
     }
 
     public static long dateToTs(String s) {
@@ -113,7 +112,7 @@ public class ScaleView extends View {
             endEntry.setText(tsToDate(selection.end));
             final View curColorV = promptView.findViewById(R.id.CurColor);
             try { curColorV.setBackgroundColor(selection.paint.getColor());
-            } catch (Exception e) { curColorV.setBackgroundColor(logEntry.COLOR_ERROR); }
+            } catch (Exception e) { curColorV.setBackgroundColor(MainActivity.COLOR_ERROR); }
 
             final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
             final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
@@ -176,7 +175,7 @@ public class ScaleView extends View {
                         public void onClick(DialogInterface dialog, int id) {
                             long newstart = dateToTs(startEntry.getText().toString());
                             long newend = dateToTs(endEntry.getText().toString());
-                            selection.reset(newstart,newend);
+                            selection.setInterval(newstart,newend);
                             //TODO: bring shape to foreground?
                             invalidate();
                         }

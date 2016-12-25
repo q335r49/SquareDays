@@ -271,8 +271,10 @@ public class CommandsFrag extends Fragment {
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
                             if (delay != 0 || duration != 0 || !has_dragged) {
-                                mListener.pushTask(logEntry.startTask(MainActivity.parseColor(comF[COLOR_IX]),delay,duration,comF[COMMENT_IX]));
-
+                                if (duration == 0)
+                                    mListener.pushTask(logEntry.newOngoingTask(MainActivity.parseColor(comF[COLOR_IX]),System.currentTimeMillis()/1000L - delay * 60,comF[COMMENT_IX]));
+                                else
+                                    mListener.pushTask(logEntry.newCompletedTask(MainActivity.parseColor(comF[COLOR_IX]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[COMMENT_IX]));
                             } else
                                 mListener.restoreABState();
                             return false;
@@ -436,9 +438,9 @@ public class CommandsFrag extends Fragment {
                         if (duration != 0) {
                             LayoutInflater inflater = LayoutInflater.from(getContext());
                             View commentView = inflater.inflate(R.layout.comment_prompt, null);
+
                             final EditText commentEntry = (EditText) commentView.findViewById(R.id.edit1);
                             final int finalDelay = delay;
-
                             final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
                             alertDialogBuilder.setView(commentView);
                             alertDialogBuilder
@@ -446,9 +448,9 @@ public class CommandsFrag extends Fragment {
                                     .setTitle("Comment:")
                                     .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-                                            mListener.pushTask(logEntry.commentTask(commentEntry.getText().toString()));
+                                            mListener.pushTask(logEntry.newCommentCmd(commentEntry.getText().toString()));
                                             if (finalDelay != 0)
-                                                mListener.pushTask(logEntry.endTask(finalDelay));
+                                                mListener.pushTask(logEntry.newEndCommand(System.currentTimeMillis()/1000L - finalDelay * 60));
                                         }
                                     })
                                     .setNegativeButton("(Cancel)", new DialogInterface.OnClickListener() {
@@ -458,7 +460,7 @@ public class CommandsFrag extends Fragment {
                                     })
                                     .create().show();
                         } else if (delay != 0 || !has_dragged) {
-                            mListener.pushTask(logEntry.endTask(delay));
+                            mListener.pushTask(logEntry.newEndCommand(System.currentTimeMillis()/1000L - delay * 60));
                         }
                         return false;
                     case MotionEvent.ACTION_CANCEL:

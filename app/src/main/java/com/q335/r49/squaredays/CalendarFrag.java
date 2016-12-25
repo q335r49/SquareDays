@@ -43,15 +43,14 @@ public class CalendarFrag extends Fragment {
         calView = (ScaleView) (fragView.findViewById(R.id.drawing));
         String Task = calView.getCurTask();
         if (Task != null) {
-            int color = calView.getCurTaskColor();
-            mListener.setPermABState(color,Task);
+            mListener.setPermABState(COLOR_NO_TASK,Task);
         } else {
             mListener.setPermABState(COLOR_NO_TASK,"No active task");
         }
         mListener.setGF(this);
         palette = mListener.getPalette();
         calView.loadCalendarView(palette);
-        mListener.popTasks();   //TODO: This should automatically load the calendar view
+        mListener.popTasks();
         return fragView;
     }
 
@@ -116,18 +115,14 @@ class CalendarWin {
         this.gridW = gridW;
         this.gridH = gridH;
         textStyle = new Paint();
-        textStyle.setStyle(Paint.Style.FILL);
         textStyle.setColor(COLOR_SCALE_TEXT);
         textStyle.setTypeface(Typeface.DEFAULT);
         boldtextStyle = new Paint();
-        boldtextStyle.setStyle(Paint.Style.FILL);
         boldtextStyle.setColor(COLOR_SCALE_TEXT);
         boldtextStyle.setTypeface(Typeface.DEFAULT_BOLD);
         nowLineStyle = new Paint();
-        nowLineStyle.setStyle(Paint.Style.FILL);
         nowLineStyle.setColor(COLOR_NOW_LINE);
         statusBarStyle = new Paint();
-        statusBarStyle.setStyle(Paint.Style.FILL);
         statusBarStyle.setColor(COLOR_STATUS_BAR);
         statusBarStyle.setTextAlign(Paint.Align.LEFT);
         selectionStyle = new Paint();
@@ -190,8 +185,8 @@ class CalendarWin {
     }
     logEntry getShape(float sx, float sy) {
         long ts = conv_screen_ts(sx, sy);
-        logEntry closest = shapeIndex.floor(new logEntry(ts));
-        return closest.end < ts ? null : closest;
+        logEntry closest = shapeIndex.floor(logEntry.newStartTime(ts));
+        return closest == null? null : closest.end < ts ? null : closest;
     }
     private Canvas mCanvas;
     void draw(Canvas canvas) {
@@ -206,7 +201,7 @@ class CalendarWin {
 
         RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
         RECT_SCALING_FACTOR_X = 0.7f;
-        drawInterval(new logEntry(start_ts, end_ts, COLOR_GRID_BACKGROUND));
+        drawInterval(logEntry.newInterval(start_ts, end_ts, COLOR_GRID_BACKGROUND));
 
         RECT_SCALING_FACTOR_X = 0.85f;
         for (logEntry s : shapes)
@@ -300,11 +295,10 @@ class CalendarWin {
 
         RECT_SCALING_FACTOR_X = 0.7f;
         long now = System.currentTimeMillis() / 1000L;
-        if (curTask.end == -1) {
+        if (curTask.isOngoing()) {
             curTask.end = now;
             drawInterval(curTask);
-            drawNowLine(now, curTask.paint.getColor());
-            curTask.end = -1;
+            drawNowLine(now, curTask.paint);
         } else
             drawNowLine(now);
 
@@ -312,7 +306,7 @@ class CalendarWin {
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
     private void drawInterval(logEntry iv) {
-        if (iv.markedForRemoval || iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
+        if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
@@ -336,7 +330,7 @@ class CalendarWin {
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
     }
     private void drawInterval(logEntry iv, Paint paint) {
-        if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
+        if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
@@ -360,7 +354,6 @@ class CalendarWin {
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
     private void drawNowLine(long ts) {
-        nowLineStyle.setColor(COLOR_NOW_LINE);
         long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
         float[] a = conv_ts_screen(ts,0f);
         float[] b = conv_ts_screen(ts,1f);
@@ -370,8 +363,7 @@ class CalendarWin {
                 (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
     }
-    private void drawNowLine(long ts, int color) {
-        nowLineStyle.setColor(color);
+    private void drawNowLine(long ts, Paint paint) {
         long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
         float[] a = conv_ts_screen(ts,0f);
         float[] b = conv_ts_screen(ts,1f);
@@ -379,45 +371,36 @@ class CalendarWin {
         mCanvas.drawLine((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
                 (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                 (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
-                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
+                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
 
     private logEntry curTask;
-        String getCurComment() { return curTask.end == -1 ? curTask.comment  : null; }
-        int getCurColor() { return curTask.paint.getColor(); }
+        String getCurComment() {
+            if (curTask == null)
+                return "";
+            else
+                return curTask.end == -1 ? curTask.comment  : null;
+        }
     private ArrayList<logEntry> shapes;
     private NavigableSet<logEntry> shapeIndex;
 
-    void addShape(logEntry LE) {
-        switch (LE.command) {
-            case logEntry.END_TASK:
-                curTask.end = LE.timestamp + LE.duration;
-            case logEntry.ADD_COMMENT:
-                if (LE.comment != null)
-                    curTask.comment += LE.comment;
-                break;
-            case logEntry.START_TASK:
-                curTask.end = LE.timestamp + LE.delay;
+    void procCmd(logEntry LE) {
+        if (LE.isCommand()) {
+            curTask.procCommand(LE);
+        } else {
+            shapes.add(LE);
+            shapeIndex.add(LE);
+            if (LE.isOngoing()) {
+                curTask.updateTask(LE);
                 curTask = LE;
-                LE.makeRect(true);
-                shapes.add(curTask);
-                shapeIndex.add(curTask);
-                break;
-            case logEntry.ADD_COMPLETED_TASK:
-                LE.makeRect(false);
-                shapes.add(LE);
-                shapeIndex.add(LE);
-                break;
-            case logEntry.CLEAR_LOG:
-                shapes = new ArrayList<>();
-                break;
+            }
         }
     }
     List<String> getWritableShapes() {         //TODO: figure out when file writing occurs; and figure out when a log is first loaded
         List<String> LogList = new ArrayList<>();
         String entry;
         for (logEntry r : shapes) {
-            entry = r.toLogEntry();
+            entry = r.toString();
             if (entry != null)
                 LogList.add(entry);
         }
@@ -426,5 +409,10 @@ class CalendarWin {
     private logEntry selection;
     void setSelected(logEntry selection) {
         this.selection = selection;
+    }
+
+    public void clearShapes() {
+        shapes.clear();
+        shapeIndex.clear();
     }
 }
