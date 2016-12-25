@@ -37,7 +37,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: Handle current task on reload
+//TODO: how to write "ongoing" to log?
+
 //TODO: Have CalendarFrag then call to update the AB
 
 //TODO: Need some way to mark and select instant times -- probably by modifying the messagebox
@@ -161,7 +162,10 @@ class logEntry {
         le.paint = new Paint();
             le.paint.setColor(MainActivity.parseColor(args[1]));
         le.start = Long.parseLong(args[2]);
-        le.end = le.start + Long.parseLong(args[3]) * 60L;
+        if (args[3].isEmpty())
+            le.onGoing = true;
+        else
+            le.end = le.start + Long.parseLong(args[3]) * 60L;
         le.comment = args[4];
         if (le.start > le.end)
             throw new IllegalArgumentException("Starting after end time: " + s);
@@ -169,13 +173,20 @@ class logEntry {
     }
     @Override
     public String toString() {
-        if (markedForRemoval() || end - start < 60 || paint == null)
-                return null;
-        return (new Date(start*1000L)).toString() + ">"
-                + String.format("#%06X", 0xFFFFFF & paint.getColor()) + ">"
-                + Long.toString(start) + ">"
-                + Long.toString((end-start)/60) + ">"
-                + comment;
+        if (markedForRemoval() || paint == null)
+            return null;
+        else if (onGoing)
+            return (new Date(start*1000L)).toString() + ">"
+                    + String.format("#%06X", 0xFFFFFF & paint.getColor()) + ">"
+                    + Long.toString(start) + ">"
+                    + ">"
+                    + comment;
+        else
+            return (new Date(start*1000L)).toString() + ">"
+                    + String.format("#%06X", 0xFFFFFF & paint.getColor()) + ">"
+                    + Long.toString(start) + ">"
+                    + Long.toString((end-start)/60) + ">"
+                    + comment;
     }
 }
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener {
