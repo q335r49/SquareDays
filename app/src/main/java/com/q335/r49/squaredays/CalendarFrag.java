@@ -22,8 +22,6 @@ import java.util.Locale;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
-//TODO: bezier visualizaion
-//TODO: NOW should be gridline
 public class CalendarFrag extends Fragment {
     PaletteRing palette;
     private ScaleView inputLayer;
@@ -196,6 +194,7 @@ class CalendarWin {
         for (logEntry s : shapes)
             drawInterval(s);
 
+
         float gridSize;
         String timeFormat;
         if (gridH > 3f) {
@@ -278,12 +277,25 @@ class CalendarWin {
                 }
             }
         }
+
         if (selection!=null)
             drawInterval(selection,selectionStyle);
         if (curTask!= null && curTask.isOngoing())
             drawOngoingInterval(curTask,scaleA);
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
+        drawNowLine(now);
+    }
+    private void drawNowLine(long ts) {
+        nowLineStyle.setColor(COLOR_NOW_LINE);
+        long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
+        float[] a = tsToScreen(ts,0f);
+        float[] b = tsToScreen(ts,1f);
+        float[] c = tsToScreen(noon,0.5f);
+        mCanvas.drawLine(0,
+                (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                LINE_WIDTH*5f,
+                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
     }
     private static final long curveLength = 86400/24;
     private static final float gridRadius = 10f;
