@@ -8,10 +8,12 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.app.Fragment;
@@ -43,7 +45,7 @@ import java.util.Queue;
 //TODO: Clean up overlap stuff while procCmd'ing
     //TODO: Grid rectangle should be stroked boxes
 //TODO: Make file writing more efficient
-//TODO: Day of the week?
+//TODO: Day of the week on Grid??
 
 //TODO: $$$ Need some way to mark and select instant times -- probably by modifying the messagebox
 //TODO: $$$ Instant tasks & Spending tracking
@@ -327,6 +329,10 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         AB = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(AB);
         AB.setBackgroundColor(COLOR_NO_TASK);
+//        ActionBar bar = getSupportActionBar();
+//        bar.hide();
+        //Drawable drawable = ContextCompat.getDrawable(getApplicationContext(),R.drawable.change_pass);
+        //AB.setOverflowIcon(drawable);
 
         BF = new CommandsFrag();
         GF = new CalendarFrag();

@@ -1,16 +1,13 @@
 package com.q335.r49.squaredays;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.annotation.IntegerRes;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.NavigableSet;
 import java.util.TreeSet;
+
+//TODO: Fix the bezier visualization
 
 public class CalendarFrag extends Fragment {
     static int COLOR_NO_TASK;
@@ -230,7 +229,7 @@ class CalendarWin {
         return closest == null? null : closest.end < ts ? null : closest;
     }
     private Canvas mCanvas;
-    void draw(Canvas canvas) {
+    void draw(Canvas canvas) {  //TODO: Bug at high zoom
         Log.d("SquareDays","Draw Calendar");
         int screenH = canvas.getHeight();
         int screenW = canvas.getWidth();
@@ -356,7 +355,8 @@ class CalendarWin {
     private void drawBackgroundGrid(logEntry iv, long now, float scaleA, float scaleB) {
         if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start || iv.isOngoing())
             return;
-        if (iv.start > now + curveDuration) {
+        long curveLength = curTask.isOngoing() ? curveDuration : curveDuration;
+        if (iv.start > now + curveLength) {
             long corner = iv.start;
             long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
             float[] a, b, c;
@@ -378,9 +378,9 @@ class CalendarWin {
             boolean firstRun = true;
             for (; corner < iv.end; midn += 86400L) {
                 if (firstRun) {
-                    if (midn - now > curveDuration) {
+                    if (midn - now > curveLength) {
                         a = conv_ts_screen(corner, 0);
-                        b = conv_ts_screen(now + curveDuration, 1f);
+                        b = conv_ts_screen(now + curveLength, 1f);
                         c = conv_ts_screen(midn - 43199L, 0.5f);
                         float x0 = (a[0] - c[0]) * scaleA + c[0];
                         float x1 = (b[0] - c[0]) * scaleA + c[0];
@@ -412,16 +412,6 @@ class CalendarWin {
                         pp.close();
                         blockStyle.setColor(COLOR_GRID_BACKGROUND);
                         mCanvas.drawPath(pp, blockStyle);
-//                        corner = now + curveDuration;
-//
-//
-//                        RectF rr = new RectF((d[0] - f[0]) * scaleB + f[0],
-//                                (d[1] - f[1]) * RECT_SCALING_FACTOR_Y + f[1],
-//                                (e[0] - f[0]) * scaleB + f[0],
-//                                (e[1] - f[1]) * RECT_SCALING_FACTOR_Y + f[1]);
-//                        mCanvas.drawRoundRect(rr,gridRadius,gridRadius,iv.paint);
-//                        rr.bottom-=gridRadius;
-//                        mCanvas.drawRect(rr,iv.paint);
                         corner = midn + 1;
                     } else {
                         a = conv_ts_screen(corner, 0);
@@ -478,7 +468,7 @@ class CalendarWin {
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
     }
     private void drawInterval(logEntry iv, long now, float scaleA, long past, float scaleB) {
-        float scaleX = iv.start < past ? scaleB : iv.start > now ? scaleA : (float) (iv.start - past) * (scaleA - scaleB) / (float) (now - past)  + scaleB;
+        float scaleX = iv.end < past ? scaleB : iv.end > now ? scaleA : (float) (iv.end - past) * (scaleA - scaleB) / (float) (now - past)  + scaleB;
         if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start || iv.isOngoing())
             return;
         long corner = iv.start;
