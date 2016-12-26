@@ -72,7 +72,7 @@ public class ScaleView extends View {
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);
         CW = new CalendarWin(cal.getTimeInMillis()/1000L,8f,1.5f,-0.8f,-0.1f);
-        CW.setLineWidth(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
+        CW.setDPIScaling(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
     }
 
     public static long dateToTs(String s) {
@@ -101,7 +101,7 @@ public class ScaleView extends View {
     private final Handler handler = new Handler();
     private Runnable mLongPressed = new Runnable() { public void run() {
         has_run = true;
-        final logEntry selection = CW.getShape(lastTouchX, lastTouchY);
+        final logEntry selection = CW.getSelectedShape(lastTouchX, lastTouchY);
         if (selection != null) {
             LayoutInflater inflater = LayoutInflater.from(appContext);
             View promptView = inflater.inflate(R.layout.edit_interval, null);
@@ -209,7 +209,7 @@ public class ScaleView extends View {
                 handler.postDelayed(mLongPressed,1200);
                 firstTouchX = lastTouchX = x;
                 firstTouchY = lastTouchY = y;
-                logEntry selection = CW.getShape(x,y);
+                logEntry selection = CW.getSelectedShape(x,y);
                 if (selection != null && selection.start != -1) {
                     long duration = 1000L* (selection.end - selection.start);
                     CW.setStatusText(selection.comment + ":"
