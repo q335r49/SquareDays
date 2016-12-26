@@ -46,11 +46,8 @@ public class CalendarFrag extends Fragment {
         super.onActivityCreated(savedInstance);
         mListener.popTasksInitial();
         activityCreated = true;
-
     }
-
     PaletteRing palette;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         fragView = inflater.inflate(R.layout.fragment_calendar,container,false);
@@ -229,7 +226,7 @@ class CalendarWin {
 
         RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
         RECT_SCALING_FACTOR_X = 0.7f;
-        drawInterval(logEntry.newInterval(start_ts, end_ts, COLOR_GRID_BACKGROUND));
+        drawInterval(logEntry.newInterval(Math.max(start_ts,System.currentTimeMillis()/1000L), end_ts, COLOR_GRID_BACKGROUND));
 
         RECT_SCALING_FACTOR_X = 0.85f;
         for (logEntry s : shapes)

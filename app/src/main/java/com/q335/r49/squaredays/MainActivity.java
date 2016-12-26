@@ -246,7 +246,9 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         Log.d("SquareDays","Pop-init!");
         for(logEntry le = logQ.poll(); le != null; le = logQ.poll())
             GF.procTask(le);
-        setActiveTask(GF.getCurrentTask());
+        String Task = GF.getCurrentTask();
+        setActiveTask(Task);
+        setPermABState(Task);
     }
 
 
