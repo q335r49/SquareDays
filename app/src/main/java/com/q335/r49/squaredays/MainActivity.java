@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Queue;
 
 //TODO: Activate task is being called twice
+//TODO: Do not end task if it is the same?s
 //TODO: Initial end button highlighting
 //TODO: Darker markers can't be seen
 //TODO: Reconsider how removal works
@@ -235,14 +236,19 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     public void pushTask(logEntry log) {
         if (log != null)
             logQ.add(log);
-        if (GF.isFullyLoaded())
-                popTasks();
     }
     public void popTasks() {
         Log.d("SquareDays","Pop!");
         for(logEntry le = logQ.poll(); le != null; le = logQ.poll())
             GF.procTask(le);
     }
+    public void popTasksInitial() {
+        Log.d("SquareDays","Pop-init!");
+        for(logEntry le = logQ.poll(); le != null; le = logQ.poll())
+            GF.procTask(le);
+        setActiveTask(GF.getCurrentTask());
+    }
+
 
     private Toolbar AB;
     String AB_curText = "";
@@ -255,16 +261,9 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         AB.setTitle(text);
         AB_curText = text;
         AB_savedText = AB_curText;
-        int commentEnd = text.indexOf("@");
-        String comment = "";
-        if (commentEnd != -1) {
-            try {
-                comment = text.substring(0, commentEnd - 1);
-            } catch (Exception e) {
-                return;
-            }
-        }
-        BF.setActiveTask(comment);
+    }
+    public void setActiveTask(String text) {
+        BF.setActiveTask(text);
     }
     public void restoreABState() {
         AB.setTitle(AB_savedText);

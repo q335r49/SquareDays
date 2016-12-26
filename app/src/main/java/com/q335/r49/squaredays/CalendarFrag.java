@@ -28,6 +28,8 @@ public class CalendarFrag extends Fragment {
     void procTask(logEntry le) {
         mListener.setPermABState(calView.procTask(le));
     }
+    String getCurrentTask() {return calView == null ? "" : calView.getCurTask();}
+
     List<String> getWritableShapes() {return calView.getWritableShapes(); }
 
     @Override
@@ -38,10 +40,10 @@ public class CalendarFrag extends Fragment {
         }
     }
 
-    boolean isFullyLoaded() {
-        if (calView != null)
-            return calView.isFullyLoaded();
-        return false;
+    @Override
+    public void onActivityCreated(Bundle savedInstance) {
+        super.onActivityCreated(savedInstance);
+        mListener.popTasksInitial();
     }
 
     PaletteRing palette;
@@ -50,16 +52,9 @@ public class CalendarFrag extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         fragView = inflater.inflate(R.layout.fragment_calendar,container,false);
         calView = (ScaleView) (fragView.findViewById(R.id.drawing));
-        String Task = calView.getCurTask();
-        if (Task != null) {
-            mListener.setPermABState(Task);
-        } else {
-            mListener.setPermABState("");
-        }
         mListener.setGF(this);
         palette = mListener.getPalette();
         calView.loadCalendarView(palette);
-        mListener.popTasks();
         return fragView;
     }
 
@@ -95,6 +90,8 @@ public class CalendarFrag extends Fragment {
         void setPermABState(String task);
         void setGF(CalendarFrag cf);
         void popTasks();
+        void popTasksInitial();
+        void setActiveTask(String task);
         PaletteRing getPalette();
     }
 }
@@ -413,7 +410,7 @@ class CalendarWin {
     }
 
     private logEntry curTask;
-        String getCurComment() { return curTask == null? "" : curTask.isOngoing() ? curTask.comment  : null; }
+        String getCurTask() {return curTask.comment == null ? "" : curTask.comment;}
     private ArrayList<logEntry> shapes;
     private NavigableSet<logEntry> shapeIndex;
 
