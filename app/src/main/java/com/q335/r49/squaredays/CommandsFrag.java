@@ -4,10 +4,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RoundRectShape;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -122,7 +130,11 @@ public class CommandsFrag extends Fragment {
                 label.setText(comF[COMMENT_IX]);
             final int bg_Norm = MainActivity.parseColor(comF[COLOR_IX]);
             final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
-                child.setBackgroundColor(bg_Norm);
+
+            GradientDrawable rrect = new GradientDrawable();
+            rrect.setCornerRadius(15f);
+            rrect.setColor(bg_Norm);
+            child.setBackground(rrect);
 
             child.setOnTouchListener(new View.OnTouchListener() {
                 private float actionDownX, actionDownY;
@@ -137,14 +149,14 @@ public class CommandsFrag extends Fragment {
                             actionDownX = event.getX();
                             actionDownY = event.getY();
                             v.getParent().requestDisallowInterceptTouchEvent(true);
-                            v.setBackgroundColor(bg_Press);
+                            ((GradientDrawable) v.getBackground()).setColor(bg_Press);
                             final View finalView = v;
                             has_run = has_dragged = false;
                             mLongPressed = new Runnable() {
                                 public void run() {
                                     has_run = true;
                                     mListener.restoreABState();
-                                    finalView.setBackgroundColor(bg_Norm);
+                                    ((GradientDrawable) finalView.getBackground()).setColor(bg_Norm);
 
                                     Context context = getContext();
                                     View promptView = inflater.inflate(R.layout.prompts, null);
@@ -199,7 +211,7 @@ public class CommandsFrag extends Fragment {
                                     for (int i = 0; i < childCount ; i++) {
                                         View v = paletteView.getChildAt(i);
                                         v.setBackgroundColor(palette.get(i));
-                                        final int bg = ((ColorDrawable) v.getBackground()).getColor();
+                                        final int bg = ((ColorDrawable) v.getBackground()).getColor(); //TODO
                                         v.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
@@ -214,7 +226,7 @@ public class CommandsFrag extends Fragment {
                                             .setCancelable(true)
                                             .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                                                 public void onClick(DialogInterface dialog, int id) {
-                                                    int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
+                                                    int newColor = ((ColorDrawable) curColorV.getBackground()).getColor(); //TODO
                                                     commands.set(ixF, new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), "0", ""});
                                                     palette.add(newColor);
                                                     makeView();
@@ -263,7 +275,7 @@ public class CommandsFrag extends Fragment {
                         case MotionEvent.ACTION_UP:
                             if (has_run)
                                 return false;
-                            v.setBackgroundColor(bg_Norm);
+                            ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
                             handler.removeCallbacks(mLongPressed);
                             delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
                             duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
@@ -279,7 +291,7 @@ public class CommandsFrag extends Fragment {
                             return false;
                         case MotionEvent.ACTION_CANCEL:
                             handler.removeCallbacks(mLongPressed);
-                            v.setBackgroundColor(bg_Norm);
+                            ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
                             return false;
                         default:
                             return true;
@@ -291,9 +303,14 @@ public class CommandsFrag extends Fragment {
         final int bg_Norm = COLOR_END_BOX;
         final int bg_Press = darkenColor(bg_Norm,0.7f);
         View endButton = inflaterF.inflate(R.layout.gv_list_item, null);
-        endButton.setBackgroundColor(bg_Norm);
+
+        GradientDrawable rrect = new GradientDrawable();
+        rrect.setCornerRadius(15f);
+        rrect.setColor(bg_Norm);
+        endButton.setBackground(rrect);
+
         TextView label = (TextView) (endButton.findViewById(R.id.text1));
-        label.setText("End Task");
+        label.setText("!");
         gridV.addView(endButton,lp);
         endButton.setOnTouchListener(new View.OnTouchListener() {
             private float offset_0x;
@@ -311,7 +328,7 @@ public class CommandsFrag extends Fragment {
                         offset_0x = event.getX();
                         offset_0y = event.getY();
                         v.getParent().requestDisallowInterceptTouchEvent(true);
-                        v.setBackgroundColor(bg_Press);
+                        ((GradientDrawable) v.getBackground()).setColor(bg_Press);
                         has_run = false;
                         has_dragged = false;
                         mLongPressed = new Runnable() {
@@ -427,7 +444,7 @@ public class CommandsFrag extends Fragment {
                     case MotionEvent.ACTION_UP:
                         if (has_run)
                             return false;
-                        v.setBackgroundColor(bg_Norm);
+                        ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
                         handler.removeCallbacks(mLongPressed);
                         delay = (int) Math.abs((event.getX() - offset_0x) * ratio_dp_px);
                         duration = (int) Math.abs((event.getY() - offset_0y) * ratio_dp_px);
@@ -464,7 +481,7 @@ public class CommandsFrag extends Fragment {
                         return false;
                     case MotionEvent.ACTION_CANCEL:
                         handler.removeCallbacks(mLongPressed);
-                        v.setBackgroundColor(bg_Norm);
+                        ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
                         return false;
                     default:
                         return true;

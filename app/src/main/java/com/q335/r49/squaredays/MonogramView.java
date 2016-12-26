@@ -21,14 +21,8 @@ public class MonogramView extends TextView {
             mPaint.setColor(MainActivity.COLOR_NO_TASK);
             mPaint.setTypeface(Typeface.DEFAULT);
             mPaint.setTextSize(100f);
-
-//            mPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
-
             mPaint.setTypeface(MainActivity.CommandFont);
             mPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-
-//            if (font_maxheight < minMaxSize)
-//                minMaxSize = font_maxheight;
 
         bounds = new Rect();
     }
@@ -56,8 +50,13 @@ public class MonogramView extends TextView {
         float size = mPaint.getTextSize()*Math.min(scalingFactorX,scalingFactorY);
         if (size < minMaxSize)
             minMaxSize = size;
+    }
 
-//        originX = -bounds.left;
-//        originY = h-bounds.bottom;
+    public void setBackgroundColor(int color) {
+
+    }
+
+    public int getBackgroundCOlor() {
+        return 0;
     }
 }
