@@ -42,8 +42,8 @@ import java.util.Queue;
 //TODO: Reconsider how removal works
 //TODO: Clean up overlap stuff while procCmd'ing
     //TODO: Grid rectangle should be stroked boxes
-//TODO: Recovery behavior
 //TODO: Make file writing more efficient
+//TODO: Day of the week?
 
 //TODO: $$$ Need some way to mark and select instant times -- probably by modifying the messagebox
 //TODO: $$$ Instant tasks & Spending tracking

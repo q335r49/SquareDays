@@ -21,6 +21,7 @@ import java.util.TreeSet;
 
 public class CalendarFrag extends Fragment {
     static int COLOR_NO_TASK;
+    PaletteRing palette;
     boolean activityCreated;
 
     private ScaleView calView;
@@ -53,7 +54,6 @@ public class CalendarFrag extends Fragment {
         mListener.popTasksInitial();
     }
 
-    PaletteRing palette;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         fragView = inflater.inflate(R.layout.fragment_calendar,container,false);
@@ -109,7 +109,7 @@ class CalendarWin {
     private Paint textStyle, boldtextStyle, nowLineStyle, statusBarStyle, selectionStyle, pathStyle;
     private Path triangleMarker;
     private float markerSize;
-    CalendarWin(long orig, float gridW, float gridH) {
+    CalendarWin(long orig, float gridW, float gridH, float xMin, float yMin) {
         shapes = new ArrayList<>();
         shapeIndex = new TreeSet<>(new Comparator<logEntry>() {
             @Override
@@ -123,8 +123,8 @@ class CalendarWin {
         shapeIndex.add(curTask);
 
         this.orig = orig;
-        g0x = (7f-gridW)*0.8f;
-        g0y = -gridH*0.1f;
+        g0x = xMin;
+        g0y = yMin;
         this.gridW = gridW;
         this.gridH = gridH;
         textStyle = new Paint();
@@ -231,7 +231,7 @@ class CalendarWin {
         mCanvas = canvas;
 
         RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
-        RECT_SCALING_FACTOR_X = 0.7f;
+        RECT_SCALING_FACTOR_X = 0.65f;
         drawInterval(logEntry.newInterval(Math.max(start_ts,now), end_ts, COLOR_GRID_BACKGROUND));
 
         RECT_SCALING_FACTOR_X = 0.85f;
@@ -324,6 +324,7 @@ class CalendarWin {
         if (selection!=null)
             drawInterval(selection,selectionStyle);
 
+        RECT_SCALING_FACTOR_X = 0.75f;
         if (curTask.isOngoing()) {
             curTask.end = now;
             drawInterval(curTask);
