@@ -47,6 +47,12 @@ public class CalendarFrag extends Fragment {
         mListener.popTasksInitial();
         activityCreated = true;
     }
+    @Override
+    public void onResume() {
+        super.onResume();
+        mListener.popTasksInitial();
+    }
+
     PaletteRing palette;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -219,13 +225,14 @@ class CalendarWin {
         int screenW = canvas.getWidth();
         long start_ts = conv_screen_ts(0f,0f);
         long end_ts = conv_screen_ts(screenW, screenH);
+        long now = System.currentTimeMillis() / 1000L;
         ratio_grid_screen_W = gridW/screenW;
         ratio_grid_screen_H = gridH/screenH;
         mCanvas = canvas;
 
         RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
         RECT_SCALING_FACTOR_X = 0.7f;
-        drawInterval(logEntry.newInterval(Math.max(start_ts,System.currentTimeMillis()/1000L), end_ts, COLOR_GRID_BACKGROUND));
+        drawInterval(logEntry.newInterval(Math.max(start_ts,now), end_ts, COLOR_GRID_BACKGROUND));
 
         RECT_SCALING_FACTOR_X = 0.85f;
         for (logEntry s : shapes)
@@ -317,13 +324,11 @@ class CalendarWin {
         if (selection!=null)
             drawInterval(selection,selectionStyle);
 
-        long now = System.currentTimeMillis() / 1000L;
         if (curTask.isOngoing()) {
             curTask.end = now;
             drawInterval(curTask);
-            drawMarker(now, curTask.paint.getColor());
-        } else
-            drawMarker(now, COLOR_NOW_LINE);
+            drawNowLine(now, curTask.paint.getColor());
+        }
 
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
@@ -376,18 +381,7 @@ class CalendarWin {
                 (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
-    private void drawNowLine(long ts) {
-        nowLineStyle.setColor(COLOR_NOW_LINE);
-        long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
-        float[] a = conv_ts_screen(ts,0f);
-        float[] b = conv_ts_screen(ts,1f);
-        float[] c = conv_ts_screen(noon,0.5f);
-        mCanvas.drawLine((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
-                (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
-                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
-    }
-    Path offsetMarker = new Path();
+    private Path offsetMarker = new Path();
     private void drawMarker(long ts, int color) {
         pathStyle.setColor(color);
         long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
@@ -440,11 +434,9 @@ class CalendarWin {
     void setSelected(logEntry selection) {
         this.selection = selection;
     }
-
-    public void clearShapes() {
+    void clearShapes() {
         shapes.clear();
         shapeIndex.clear();
-
         curTask = new logEntry();
         shapes.add(curTask);
         shapeIndex.add(curTask);

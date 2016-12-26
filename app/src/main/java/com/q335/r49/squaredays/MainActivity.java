@@ -39,11 +39,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
-//TODO: Do not end task if it is the same?s
-//TODO: Darker markers can't be seen
 //TODO: Reconsider how removal works
 //TODO: Clean up overlap stuff while procCmd'ing
     //TODO: Grid rectangle should be stroked boxes
+//TODO: Recovery behavior
+//TODO: Make file writing more efficient
 
 //TODO: $$$ Need some way to mark and select instant times -- probably by modifying the messagebox
 //TODO: $$$ Instant tasks & Spending tracking
@@ -252,7 +252,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         setActiveTask(Task);
         setPermABState(Task);
     }
-
 
     private Toolbar AB;
     String AB_curText = "";
