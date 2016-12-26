@@ -118,6 +118,7 @@ public class CommandsFrag extends Fragment {
         lp.maxWidth = dpToPx(200);
         lp.flexGrow=FlexboxLayout.LayoutParams.ALIGN_SELF_STRETCH;
         lp.flexShrink=0.2f;
+        int cornerRadius = dpToPx(10);
 
         gridV.removeAllViews();
         final LayoutInflater inflaterF = inflater;
@@ -132,9 +133,11 @@ public class CommandsFrag extends Fragment {
             final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
 
             GradientDrawable rrect = new GradientDrawable();
-            rrect.setCornerRadius(15f);
+            rrect.setCornerRadius(cornerRadius);
             rrect.setColor(bg_Norm);
             child.setBackground(rrect);
+            MonogramView mv = (MonogramView) child.findViewById(R.id.text1);
+            mv.setColor(bg_Norm);
 
             child.setOnTouchListener(new View.OnTouchListener() {
                 private float actionDownX, actionDownY;
@@ -152,6 +155,7 @@ public class CommandsFrag extends Fragment {
                             ((GradientDrawable) v.getBackground()).setColor(bg_Press);
                             final View finalView = v;
                             has_run = has_dragged = false;
+                            mListener.setABState(comF[COMMENT_IX]);
                             mLongPressed = new Runnable() {
                                 public void run() {
                                     has_run = true;
@@ -305,9 +309,11 @@ public class CommandsFrag extends Fragment {
         View endButton = inflaterF.inflate(R.layout.gv_list_item, null);
 
         GradientDrawable rrect = new GradientDrawable();
-        rrect.setCornerRadius(15f);
+        rrect.setCornerRadius(cornerRadius);
         rrect.setColor(bg_Norm);
         endButton.setBackground(rrect);
+        MonogramView mv = (MonogramView) endButton.findViewById(R.id.text1);
+        mv.setColor(bg_Norm);
 
         TextView label = (TextView) (endButton.findViewById(R.id.text1));
         label.setText("!");

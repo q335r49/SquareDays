@@ -1,7 +1,9 @@
 package com.q335.r49.squaredays;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
@@ -18,13 +20,16 @@ public class MonogramView extends TextView {
     public MonogramView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mPaint = new Paint();
-            mPaint.setColor(MainActivity.COLOR_NO_TASK);
             mPaint.setTypeface(Typeface.DEFAULT);
             mPaint.setTextSize(100f);
             mPaint.setTypeface(MainActivity.CommandFont);
             mPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
         bounds = new Rect();
+    }
+    public void setColor(int color) {
+        mPaint.setColor(color);
+        mPaint.setColorFilter(new LightingColorFilter(0xFF444444,0X00222222));
     }
 
     @Override

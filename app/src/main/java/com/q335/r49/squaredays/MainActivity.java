@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Queue;
 
 
-//TODO: Show name of activity on press
 //TODO: "Selected" box around currently running task -- should be white. Otherwise, boxes are black
 
 //TODO: Reconsider how removal works
