@@ -58,6 +58,8 @@ public class CommandsFrag extends Fragment {
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 
+    private MonogramView activeView;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,6 +105,34 @@ public class CommandsFrag extends Fragment {
                 Math.min(Math.round(Color.red(color) * factor),255),
                 Math.min(Math.round(Color.green(color) * factor),255),
                 Math.min(Math.round(Color.blue(color) * factor),255));
+    }
+
+    public void setActiveTask(String t) {
+        for (int i = 0; i < commands.size(); i++) {
+            if (commands.get(i)[COMMENT_IX].equals(t)) {
+                View activeV = gridV.getChildAt(i);
+                setActiveTask(activeV);
+                break;
+            }
+        }
+
+    }
+
+    public void setActiveTask(View v) {
+        if (activeView != null) {
+            activeView.active = false;
+            activeView.invalidate();
+        }
+        activeView =((MonogramView) v.findViewById(R.id.text1));
+        activeView.active = true;
+        activeView.invalidate();
+    }
+    public void clearActiveTask() {
+        if (activeView != null) {
+            activeView.active = false;
+            activeView = null;
+            activeView.invalidate();
+        }
     }
 
     private void makeView() {
@@ -286,9 +316,10 @@ public class CommandsFrag extends Fragment {
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
                             if (delay != 0 || duration != 0 || !has_dragged) {
-                                if (duration == 0)
-                                    mListener.pushTask(logEntry.newOngoingTask(MainActivity.parseColor(comF[COLOR_IX]),System.currentTimeMillis()/1000L - delay * 60,comF[COMMENT_IX]));
-                                else
+                                if (duration == 0) {
+                                    mListener.pushTask(logEntry.newOngoingTask(MainActivity.parseColor(comF[COLOR_IX]), System.currentTimeMillis() / 1000L - delay * 60, comF[COMMENT_IX]));
+                                    setActiveTask(v);
+                                } else
                                     mListener.pushTask(logEntry.newCompletedTask(MainActivity.parseColor(comF[COLOR_IX]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[COMMENT_IX]));
                             } else
                                 mListener.restoreABState();
@@ -471,8 +502,11 @@ public class CommandsFrag extends Fragment {
                                     .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
                                             mListener.pushTask(logEntry.newCommentCmd(" " + commentEntry.getText().toString()));
-                                            if (finalDelay != 0)
-                                                mListener.pushTask(logEntry.newEndCommand(System.currentTimeMillis()/1000L - finalDelay * 60));
+                                            if (finalDelay != 0) {
+                                                mListener.pushTask(logEntry.newEndCommand(System.currentTimeMillis() / 1000L - finalDelay * 60));
+                                                clearActiveTask();
+
+                                            }
                                         }
                                     })
                                     .setNegativeButton("(Cancel)", new DialogInterface.OnClickListener() {
@@ -483,6 +517,7 @@ public class CommandsFrag extends Fragment {
                                     .create().show();
                         } else if (delay != 0 || !has_dragged) {
                             mListener.pushTask(logEntry.newEndCommand(System.currentTimeMillis()/1000L - delay * 60));
+                            clearActiveTask();
                         }
                         return false;
                     case MotionEvent.ACTION_CANCEL:

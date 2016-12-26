@@ -1,35 +1,23 @@
 package com.q335.r49.squaredays;
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
-import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
-import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
 public class MonogramView extends TextView {
     static float minMaxSize = 1000f;
-    private static final float[] NEGATIVE = {
-            1,     0,     0,    0, 0, // red
-            0,      -0.7f,     0,    0,  255, // green
-            0,     0,       1,    0,  0, // blue
-            0,     0,     0,      1,   0  // alpha
+    private static final float[] FILTER = {
+            -1,     0,     0,   0,  255, // red
+            0,     -1,     0,   0,  255, // green
+            0,     0,     -1,   0,  255, // blue
+            0,     0,     0,   1,  0  // alpha
     };
-
     public boolean active = false;
-    static Paint ActivePaint;
-    static {
-        ActivePaint = new Paint();
-        ActivePaint.setStyle(Paint.Style.STROKE);
-        ActivePaint.setTypeface(MainActivity.CommandFont);
-        ActivePaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-        ActivePaint.setColor(0xFFFFFFFF);
-        ActivePaint.setStyle(Paint.Style.STROKE);
-    }
+    Paint ActivePaint;
     public String Monogram;
     Paint mPaint;
     Rect bounds;
@@ -44,12 +32,20 @@ public class MonogramView extends TextView {
             mPaint.setTextSize(100f);
             mPaint.setTypeface(MainActivity.CommandFont);
             mPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+        ActivePaint = new Paint();
+            ActivePaint.setStyle(Paint.Style.FILL);
+            ActivePaint.setTypeface(MainActivity.CommandFont);
+            ActivePaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
         bounds = new Rect();
     }
     public void setColor(int color) {
-        mPaint.setColor(color);
-        mPaint.setColorFilter(new ColorMatrixColorFilter(NEGATIVE));
+        ActivePaint.setColor(color);
+        if (Color.red(color) > 200 && Color.green(color) > 200 & Color.blue(color) > 200)
+            ActivePaint.setColor(0xFF888888);
+        else
+            ActivePaint.setColorFilter(new ColorMatrixColorFilter(FILTER));
+        mPaint.setColor(MainActivity.COLOR_NO_TASK);
     }
 
     @Override
@@ -62,7 +58,7 @@ public class MonogramView extends TextView {
         canvas.drawText(Monogram, originX, originY, mPaint);
         if (active) {
             ActivePaint.setTextSize(minMaxSize);
-            ActivePaint.setStrokeWidth(minMaxSize/40f);
+            ActivePaint.setStrokeWidth(minMaxSize/10f);
             canvas.drawText(Monogram, originX, originY, ActivePaint);
         }
     }

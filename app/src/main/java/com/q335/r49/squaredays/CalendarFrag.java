@@ -25,7 +25,9 @@ public class CalendarFrag extends Fragment {
     private ScaleView calView;
     private View fragView;
 
-    void procTask(logEntry le) { mListener.setPermABState(calView.procTask(le)); }
+    void procTask(logEntry le) {
+        mListener.setPermABState(calView.procTask(le));
+    }
     List<String> getWritableShapes() {return calView.getWritableShapes(); }
 
     @Override
@@ -52,7 +54,7 @@ public class CalendarFrag extends Fragment {
         if (Task != null) {
             mListener.setPermABState(Task);
         } else {
-            mListener.setPermABState("No active task");
+            mListener.setPermABState("");
         }
         mListener.setGF(this);
         palette = mListener.getPalette();

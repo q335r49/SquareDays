@@ -38,12 +38,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: "Selected" box around currently running task -- should be white. Otherwise, boxes are black
 //TODO: Darker markers can't be seen
-
 //TODO: Reconsider how removal works
 //TODO: Clean up overlap stuff *WHILE THE ACTION IS BEING WRITTEN* in the shapes thing
-    //TODO: Rounded rectangles in Calendar.
     //TODO: Grid rectangle should be stroked boxes
 
 //TODO: $$$ Need some way to mark and select instant times -- probably by modifying the messagebox
@@ -247,7 +244,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         for(logEntry le = logQ.poll(); le != null; le = logQ.poll())
             GF.procTask(le);
     }
-    private List<logEntry> writeBuffer = new ArrayList<>();
 
     private Toolbar AB;
     String AB_curText = "";
@@ -260,7 +256,16 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         AB.setTitle(text);
         AB_curText = text;
         AB_savedText = AB_curText;
-
+        int commentEnd = text.indexOf("@");
+        String comment = "";
+        if (commentEnd != -1) {
+            try {
+                comment = text.substring(0, commentEnd - 1);
+            } catch (Exception e) {
+                return;
+            }
+        }
+        BF.setActiveTask(comment);
     }
     public void restoreABState() {
         AB.setTitle(AB_savedText);
@@ -494,7 +499,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                 File logFile = new File(context.getFilesDir(), LOG_FILE);
                                 if (logFile.delete()) {
                                     pushTask(logEntry.newClearMess());
-                                    setPermABState("No active task");
+                                    setPermABState("");
                                     if (GF.isVisible())
                                         popTasks();
                                 } else
