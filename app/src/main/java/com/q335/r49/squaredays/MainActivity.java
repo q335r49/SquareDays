@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Queue;
 
 //TODO: "Selected" box around currently running task -- should be white. Otherwise, boxes are black
+//TODO: Darker markers can't be seen
 
 //TODO: Reconsider how removal works
 //TODO: Clean up overlap stuff *WHILE THE ACTION IS BEING WRITTEN* in the shapes thing

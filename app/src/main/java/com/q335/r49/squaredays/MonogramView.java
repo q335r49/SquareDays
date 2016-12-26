@@ -1,4 +1,5 @@
 package com.q335.r49.squaredays;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrixColorFilter;
@@ -13,12 +14,22 @@ import android.widget.TextView;
 public class MonogramView extends TextView {
     static float minMaxSize = 1000f;
     private static final float[] NEGATIVE = {
-            -1.0f,     0,     0,    0, 255, // red
-            0, -1.0f,     0,    0, 255, // green
-            0,     0, -1.0f,    0, 255, // blue
-            0,     0,     0, 1.0f,   0  // alpha
+            1,     0,     0,    0, 0, // red
+            0,      -0.7f,     0,    0,  255, // green
+            0,     0,       1,    0,  0, // blue
+            0,     0,     0,      1,   0  // alpha
     };
 
+    public boolean active = false;
+    static Paint ActivePaint;
+    static {
+        ActivePaint = new Paint();
+        ActivePaint.setStyle(Paint.Style.STROKE);
+        ActivePaint.setTypeface(MainActivity.CommandFont);
+        ActivePaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+        ActivePaint.setColor(0xFFFFFFFF);
+        ActivePaint.setStyle(Paint.Style.STROKE);
+    }
     public String Monogram;
     Paint mPaint;
     Rect bounds;
@@ -28,7 +39,8 @@ public class MonogramView extends TextView {
     public MonogramView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mPaint = new Paint();
-            mPaint.setTypeface(Typeface.DEFAULT);
+            mPaint.setStyle(Paint.Style.FILL);
+            mPaint.setStrokeWidth(10f);
             mPaint.setTextSize(100f);
             mPaint.setTypeface(MainActivity.CommandFont);
             mPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
@@ -48,6 +60,11 @@ public class MonogramView extends TextView {
         Paint.FontMetrics fm = mPaint.getFontMetrics();
         originY = cHeight / 2f - fm.ascent - 2*fm.descent;
         canvas.drawText(Monogram, originX, originY, mPaint);
+        if (active) {
+            ActivePaint.setTextSize(minMaxSize);
+            ActivePaint.setStrokeWidth(minMaxSize/40f);
+            canvas.drawText(Monogram, originX, originY, ActivePaint);
+        }
     }
 
     @Override
@@ -58,8 +75,8 @@ public class MonogramView extends TextView {
         Monogram = (seq == null || seq.length() < 1 ? " " : Character.toString(seq.charAt(0)));
         mPaint.getTextBounds(Monogram, 0, 1, bounds);
 
-        float scalingFactorX = (float) w / (float) bounds.width();
-        float scalingFactorY = (float) h / (float) bounds.height();
+        float scalingFactorX =0.9f * (float) w / (float) bounds.width();
+        float scalingFactorY =0.9f * (float) h / (float) bounds.height();
         float size = mPaint.getTextSize()*Math.min(scalingFactorX,scalingFactorY);
         if (size < minMaxSize)
             minMaxSize = size;
