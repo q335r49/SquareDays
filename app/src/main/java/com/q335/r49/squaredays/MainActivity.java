@@ -37,9 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: Activate task is being called twice
 //TODO: Do not end task if it is the same?s
-//TODO: Initial end button highlighting
 //TODO: Darker markers can't be seen
 //TODO: Reconsider how removal works
 //TODO: Clean up overlap stuff while procCmd'ing
@@ -236,6 +234,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     public void pushTask(logEntry log) {
         if (log != null)
             logQ.add(log);
+        if (GF.activityCreated)
+            popTasks();
     }
     public void popTasks() {
         Log.d("SquareDays","Pop!");

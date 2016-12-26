@@ -17,6 +17,7 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.res.ResourcesCompat;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -108,16 +109,21 @@ public class CommandsFrag extends Fragment {
     }
 
     public void setActiveTask(String t) {
-        for (int i = 0; i < commands.size(); i++) {
-            if (commands.get(i)[COMMENT_IX].equals(t)) {
-                View activeV = gridV.getChildAt(i);
-                setActiveTask(activeV);
-                break;
+        if (t.isEmpty())
+            setActiveTask(endButtonMonogram);
+        else {
+            Log.d("SquareDays", "Setting active task [String]");
+            for (int i = 0; i < commands.size(); i++) {
+                if (commands.get(i)[COMMENT_IX].equals(t)) {
+                    View activeV = gridV.getChildAt(i);
+                    setActiveTask(activeV);
+                    break;
+                }
             }
         }
     }
-
     public void setActiveTask(View v) {
+        Log.d("SquareDays","Setting active task [View]");
         if (activeView != null) {
             activeView.active = false;
             activeView.invalidate();

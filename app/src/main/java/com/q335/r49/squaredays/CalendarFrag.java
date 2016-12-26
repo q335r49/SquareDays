@@ -21,6 +21,7 @@ import java.util.TreeSet;
 
 public class CalendarFrag extends Fragment {
     static int COLOR_NO_TASK;
+    boolean activityCreated;
 
     private ScaleView calView;
     private View fragView;
@@ -44,6 +45,8 @@ public class CalendarFrag extends Fragment {
     public void onActivityCreated(Bundle savedInstance) {
         super.onActivityCreated(savedInstance);
         mListener.popTasksInitial();
+        activityCreated = true;
+
     }
 
     PaletteRing palette;
