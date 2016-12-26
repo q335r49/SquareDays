@@ -230,16 +230,20 @@ class CalendarWin {
         int screenW = canvas.getWidth();
         ratio_grid_screen_W = gridW/screenW;
         ratio_grid_screen_H = gridH/screenH;
-        long now = System.currentTimeMillis() / 1000L;
         mCanvas = canvas;
 
+        long now = System.currentTimeMillis() / 1000L;
+        float scaleA = 0.25f;
+        long expansionComplete = now - 86400*5;
+        float scaleB = 1f;
+
         RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
-        RECT_SCALING_FACTOR_X = 0.65f;
+
+        RECT_SCALING_FACTOR_X = scaleA;
         drawInterval(logEntry.newInterval(Math.max(conv_screen_ts(0f,0f),now), conv_screen_ts(screenW, screenH), COLOR_GRID_BACKGROUND));
 
-        RECT_SCALING_FACTOR_X = 0.85f;
         for (logEntry s : shapes)
-            drawInterval(s, now, 0.65f, now-86400/2, 0.85f);
+            drawInterval(s, now, scaleA, expansionComplete, scaleB);
 
         float gridSize;
         String timeFormat;
@@ -323,16 +327,12 @@ class CalendarWin {
                 }
             }
         }
-
         if (selection!=null)
             drawInterval(selection,selectionStyle);
-
         if (curTask.isOngoing()) {
             curTask.end = now;
-            drawOngoingInterval(curTask,0.85f,0.65f);
-            //drawNowLine(now, curTask.paint.getColor());
+            drawOngoingInterval(curTask,scaleA);
         }
-
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
@@ -385,7 +385,7 @@ class CalendarWin {
                 (b[0]-c[0])*scaleX+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
     }
-    private void drawOngoingInterval(logEntry iv, float scaleA, float scaleB) {
+    private void drawOngoingInterval(logEntry iv, float scaleB) {
         if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
         long corner = iv.start;
