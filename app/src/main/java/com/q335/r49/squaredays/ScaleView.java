@@ -71,7 +71,7 @@ public class ScaleView extends View {
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);
-        CW = new CalendarWin(cal.getTimeInMillis()/1000,8f,1.5f,-0.8f,-0.1f);
+        CW = new CalendarWin(cal.getTimeInMillis()/1000L,8f,1.5f,-0.8f,-0.1f);
         CW.setLineWidth(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
     }
 

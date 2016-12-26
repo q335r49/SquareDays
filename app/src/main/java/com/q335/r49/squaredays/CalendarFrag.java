@@ -110,7 +110,7 @@ class CalendarWin {
     static int COLOR_NOW_LINE;
     static int COLOR_STATUS_BAR;
     static int COLOR_SELECTION;
-    private Paint textStyle, boldtextStyle, nowLineStyle, statusBarStyle, selectionStyle, pathStyle;
+    private Paint textStyle, boldtextStyle, nowLineStyle, statusBarStyle, selectionStyle, pathStyle, blockStyle;
     private Path triangleMarker;
     private float markerSize;
     CalendarWin(long orig, float gridW, float gridH, float xMin, float yMin) {
@@ -150,6 +150,10 @@ class CalendarWin {
             pathStyle.setColor(COLOR_NOW_LINE);
             pathStyle.setStyle(Paint.Style.FILL);
             //pathStyle.setFlags(Paint.ANTI_ALIAS_FLAG);
+        blockStyle = new Paint();
+            blockStyle.setColor(COLOR_NOW_LINE);
+            blockStyle.setStyle(Paint.Style.FILL);
+        //pathStyle.setFlags(Paint.ANTI_ALIAS_FLAG);
         markerSize = 0.5f;
         triangleMarker = new Path();
             triangleMarker.moveTo(0f,0f);
@@ -240,7 +244,7 @@ class CalendarWin {
         RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
 
         RECT_SCALING_FACTOR_X = scaleA;
-        drawInterval(logEntry.newInterval(Math.max(conv_screen_ts(0f,0f),now), conv_screen_ts(screenW, screenH), COLOR_GRID_BACKGROUND));
+        drawBackgroundGrid(logEntry.newInterval(Math.max(conv_screen_ts(0f,0f),now), conv_screen_ts(screenW, screenH), COLOR_GRID_BACKGROUND), now,scaleA,0.85f);
 
         for (logEntry s : shapes)
             drawInterval(s, now, scaleA, expansionComplete, scaleB);
@@ -335,6 +339,101 @@ class CalendarWin {
         }
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
+    }
+    static final long curveDuration = 86400/12;
+
+    static Path getCubics(float x0, float x1, float x2, float x3, float y0, float y1) {
+        Path pp = new Path();
+        pp.moveTo(x0,y0);
+        pp.lineTo(x1,y0);
+        pp.cubicTo(x1,(y0+y1)/2f,x2,(y0+y1)/2f,x2,y1);
+        pp.lineTo(x3,y1);
+        pp.cubicTo(x3,(y0+y1)/2f,x0,(y0+y1)/2f,x0,y0);
+        pp.close();
+        return pp;
+    }
+    private void drawBackgroundGrid(logEntry iv, long now, float scaleA, float scaleB) {
+        if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start || iv.isOngoing())
+            return;
+        if (iv.start > now + curveDuration) {
+            long corner = iv.start;
+            long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
+            float[] a, b, c;
+            for (; midn < iv.end; midn += 86400L) {
+                a = conv_ts_screen(corner, 0);
+                b = conv_ts_screen(midn, 1f);
+                c = conv_ts_screen(midn - 43199L, 0.5f);
+                mCanvas.drawRect((a[0] - c[0]) * scaleB + c[0],
+                        (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1],
+                        (b[0] - c[0]) * scaleB + c[0],
+                        (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1], iv.paint);
+                corner = midn + 1;
+            }
+            a = conv_ts_screen(corner, 0);
+            b = conv_ts_screen(iv.end, 1f);
+            c = conv_ts_screen(midn - 43199L, 0.5f);
+            mCanvas.drawRect((a[0] - c[0]) * scaleB + c[0],
+                    (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1],
+                    (b[0] - c[0]) * scaleB + c[0],
+                    (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1], iv.paint);
+        } else {
+            long corner = now;
+            long midn = now - (now - orig + 864000000000000000L) % 86400L + 86399L;
+            float[] a, b, c;
+            boolean firstRun = true;
+            for (; corner < iv.end; midn += 86400L) {
+                if (firstRun) {
+                    if (midn - now > curveDuration) {
+                        a = conv_ts_screen(corner, 0);
+                        b = conv_ts_screen(now + curveDuration, 1f);
+                        c = conv_ts_screen(midn - 43199L, 0.5f);
+                        float x0 = (a[0] - c[0]) * scaleA + c[0];
+                        float x1 = (b[0] - c[0]) * scaleA + c[0];
+                        float x2 = (b[0] - c[0]) * scaleB + c[0];
+                        float x3 = (a[0] - c[0]) * scaleB + c[0];
+                        float y0 = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
+                        float y1 = (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
+                        Path pp = getCubics(x0, x1, x2, x3, y0, y1);
+                        blockStyle.setColor(COLOR_GRID_BACKGROUND);
+                        mCanvas.drawPath(pp, blockStyle);
+                        corner = now + curveDuration;
+
+                        a = conv_ts_screen(corner, 0);
+                        b = conv_ts_screen(midn, 1f);
+                        c = conv_ts_screen(midn - 43199L, 0.5f);
+                        mCanvas.drawRect((a[0] - c[0]) * scaleB + c[0],
+                                (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1],
+                                (b[0] - c[0]) * scaleB + c[0],
+                                (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1], iv.paint);
+                        corner = midn + 1;
+                    } else {
+                        a = conv_ts_screen(corner, 0);
+                        b = conv_ts_screen(midn, 1f);
+                        c = conv_ts_screen(midn - 43199L, 0.5f);
+                        float x0 = (a[0] - c[0]) * scaleA + c[0];
+                        float x1 = (b[0] - c[0]) * scaleA + c[0];
+                        float x2 = (b[0] - c[0]) * scaleB + c[0];
+                        float x3 = (a[0] - c[0]) * scaleB + c[0];
+                        float y0 = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
+                        float y1 = (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
+                        Path pp = getCubics(x0, x1, x2, x3, y0, y1);
+                        blockStyle.setColor(COLOR_GRID_BACKGROUND);
+                        mCanvas.drawPath(pp, blockStyle);
+                        corner = midn + 1;
+                    }
+                    firstRun = false;
+                } else {
+                    a = conv_ts_screen(corner, 0);
+                    b = conv_ts_screen(midn, 1f);
+                    c = conv_ts_screen(midn - 43199L, 0.5f);
+                    mCanvas.drawRect((a[0] - c[0]) * scaleB + c[0],
+                            (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1],
+                            (b[0] - c[0]) * scaleB + c[0],
+                            (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1], iv.paint);
+                    corner = midn + 1;
+                }
+            }
+        }
     }
     private void drawInterval(logEntry iv) {
         if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start || iv.isOngoing())
