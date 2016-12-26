@@ -108,13 +108,13 @@ public class CommandsFrag extends Fragment {
                 Math.min(Math.round(Color.blue(color) * factor),255));
     }
 
-    public void setActiveTask(String t) {
-        if (t.isEmpty())
+    public void setActiveTask(logEntry le) {
+        if (le == null)
             setActiveTask(endButtonMonogram);
         else {
-            Log.d("SquareDays", "Setting active task [String]");
+            Log.d("SquareDays", "Setting active task [logEntry]");
             for (int i = 0; i < commands.size(); i++) {
-                if (commands.get(i)[COMMENT_IX].equals(t)) {
+                if (commands.get(i)[COMMENT_IX].equals(le.comment)) {
                     View activeV = gridV.getChildAt(i);
                     setActiveTask(activeV);
                     break;

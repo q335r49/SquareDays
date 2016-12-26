@@ -32,9 +32,9 @@ public class ScaleView extends View {
 
     private PaletteRing palette;
 
-    public String getCurTask() { return CW == null? "" : CW.getCurTask(); }
+    public logEntry getCurTask() { return CW == null? null : CW.getCurTask(); }
 
-    public String procTask(logEntry le) {
+    public logEntry procTask(logEntry le) {
             if (le.isMessage()) {
                 switch (le.getMessage()) {
                     case logEntry.MESS_CLEAR_LOG:
@@ -42,7 +42,7 @@ public class ScaleView extends View {
                         break;
                 }
                 invalidate();
-                return "";
+                return null;
             } else {
                 invalidate();
                 return CW.procCmd(le);

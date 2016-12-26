@@ -29,7 +29,7 @@ public class CalendarFrag extends Fragment {
     void procTask(logEntry le) {
         mListener.setPermABState(calView.procTask(le));
     }
-    String getCurrentTask() {return calView == null ? "" : calView.getCurTask();}
+    logEntry getCurrentTask() {return calView == null ? null : calView.getCurTask();}
 
     List<String> getWritableShapes() {return calView.getWritableShapes(); }
 
@@ -87,11 +87,10 @@ public class CalendarFrag extends Fragment {
     }
 
     public interface OnFragmentInteractionListener {
-        void setPermABState(String task);
+        void setPermABState(logEntry task);
         void setGF(CalendarFrag cf);
         void popTasks();
         void popTasksInitial();
-        void setActiveTask(String task);
         PaletteRing getPalette();
     }
 }
@@ -410,11 +409,11 @@ class CalendarWin {
     }
 
     private logEntry curTask;
-        String getCurTask() {return curTask.comment == null ? "" : curTask.comment;}
+        logEntry getCurTask() { return curTask; }
     private ArrayList<logEntry> shapes;
     private NavigableSet<logEntry> shapeIndex;
 
-    String procCmd(logEntry LE) {
+    logEntry procCmd(logEntry LE) {
         if (LE.isCommand()) {
             curTask.procCommand(LE);
         } else {
@@ -425,7 +424,7 @@ class CalendarWin {
                 curTask = LE;
             }
         }
-        return curTask.isOngoing() ? curTask.comment + " @" + (new SimpleDateFormat(" h:mm",Locale.US).format(new Date(curTask.start * 1000L))) : "";
+        return curTask;
     }
     List<String> getWritableShapes() {
         List<String> LogList = new ArrayList<>();

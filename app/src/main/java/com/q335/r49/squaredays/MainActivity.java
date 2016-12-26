@@ -32,9 +32,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.FileChannel;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Queue;
 
 //TODO: Do not end task if it is the same?s
@@ -246,7 +248,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         Log.d("SquareDays","Pop-init!");
         for(logEntry le = logQ.poll(); le != null; le = logQ.poll())
             GF.procTask(le);
-        String Task = GF.getCurrentTask();
+        logEntry Task = GF.getCurrentTask();
         setActiveTask(Task);
         setPermABState(Task);
     }
@@ -259,13 +261,14 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         AB.setTitle(text);
         AB_curText = text;
     }
-    public void setPermABState(String text) {
+    public void setPermABState(logEntry le) {
+        String text = le != null && le.isOngoing() ? le.comment + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
         AB.setTitle(text);
         AB_curText = text;
         AB_savedText = AB_curText;
     }
-    public void setActiveTask(String text) {
-        BF.setActiveTask(text);
+    public void setActiveTask(logEntry le) {
+        BF.setActiveTask(le);
     }
     public void restoreABState() {
         AB.setTitle(AB_savedText);
@@ -498,7 +501,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                                 File logFile = new File(context.getFilesDir(), LOG_FILE);
                                 if (logFile.delete()) {
                                     pushTask(logEntry.newClearMess());
-                                    setPermABState("");
+                                    setPermABState(null);
                                     if (GF.isVisible())
                                         popTasks();
                                 } else
