@@ -32,23 +32,21 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
 //TODO: Activate task is being called twice
+//TODO: Initial end button highlighting
 //TODO: Darker markers can't be seen
 //TODO: Reconsider how removal works
-//TODO: Clean up overlap stuff *WHILE THE ACTION IS BEING WRITTEN* in the shapes thing
+//TODO: Clean up overlap stuff while procCmd'ing
     //TODO: Grid rectangle should be stroked boxes
 
 //TODO: $$$ Need some way to mark and select instant times -- probably by modifying the messagebox
-//TODO: $$$ End task should be "add new task" WHEN THERE IS NO ACTIVE TASK (on long-press). When there is an active task, it should change to comment.
-//TODO: $$$ There should not be a "blank" button
-//TODO: $$$ Better startup & help window
-//TODO: $$$ Increase scaling speed?
+//TODO: $$$ Instant tasks & Spending tracking
+//TODO: $$$ Better help
 
 class logEntry {
     private static final int REMOVE = -1;
@@ -141,7 +139,7 @@ class logEntry {
             le.command = MESS_CLEAR_LOG;
         return le;
     }
-    public static logEntry newFromString(String s) throws IllegalArgumentException {    //TODO: handle ONGOING in read & write
+    public static logEntry newFromString(String s) throws IllegalArgumentException {
         String[] args = s.split(">",-1);
         if (args.length < 5)
             throw new IllegalArgumentException("Unparsable string, need at least 6 arguments: " + s);
@@ -278,7 +276,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     static final String EXT_STORAGE_DIR = "tracker";
     Context context;
     SharedPreferences sprefs;
-    //TODO: selection of shape where there are overlapping tasks
 
     PaletteRing palette;
     static final int PALETTE_LENGTH = 24;
@@ -311,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         CommandsFrag.COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
-        COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);   //TODO: make this a main static field, etc. (+othrers too)
+        COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);   //TODO: clean up
         CalendarWin.COLOR_SELECTION = ResourcesCompat.getColor(getResources(), R.color.selection, null);
 
         CommandFont = Typeface.createFromAsset(getAssets(),  "fonts/22203___.TTF");

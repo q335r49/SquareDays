@@ -252,7 +252,7 @@ public class CommandsFrag extends Fragment {
                                     for (int i = 0; i < childCount ; i++) {
                                         View v = paletteView.getChildAt(i);
                                         v.setBackgroundColor(palette.get(i));
-                                        final int bg = ((ColorDrawable) v.getBackground()).getColor(); //TODO
+                                        final int bg = ((ColorDrawable) v.getBackground()).getColor();
                                         v.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
@@ -267,7 +267,7 @@ public class CommandsFrag extends Fragment {
                                             .setCancelable(true)
                                             .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                                                 public void onClick(DialogInterface dialog, int id) {
-                                                    int newColor = ((ColorDrawable) curColorV.getBackground()).getColor(); //TODO
+                                                    int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                                                     commands.set(ixF, new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), "0", ""});
                                                     palette.add(newColor);
                                                     makeView();
