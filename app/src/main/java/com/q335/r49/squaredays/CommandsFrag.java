@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
-//TODO: *** set ActionBar
 
 public class CommandsFrag extends Fragment {
     static int COLOR_ERROR;
@@ -69,13 +68,13 @@ public class CommandsFrag extends Fragment {
         sprefs = context.getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
         String jsonText = sprefs.getString("commands", "");
         loadCommands(jsonText);
-        mListener.setBF(this);  //TODO: change to "initialization complete"
+        mListener.setBF(this);
         return view;
     }
     public void loadCommands(String s) {
         palette = mListener.getPalette();
         if (s.isEmpty()) {
-            commands.add(new String[]{"01 This is a task...", "red", "0", ""});
+            commands.add(new String[]{"01 This is a task...", "red", "0", ""});     //TODO: better first install behavior
             commands.add(new String[]{"02 Long press a task to edit...", "blue", "0", ""});
         } else {
             Type listType = new TypeToken<List<String[]>>() { }.getType();

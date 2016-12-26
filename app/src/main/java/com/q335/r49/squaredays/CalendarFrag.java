@@ -200,7 +200,7 @@ class CalendarWin {
     void shift(float x, float y) {
         g0y -= y * ratio_grid_screen_H;
     }
-    void scale(float scale, float x0, float y0) { //TODO: Increase scaling speed?
+    void scale(float scale, float x0, float y0) {
         float borderScale = (scale - 1 + RECT_SCALING_FACTOR_Y)/scale/RECT_SCALING_FACTOR_Y;
         if (borderScale*RECT_SCALING_FACTOR_Y > 0.7f || borderScale > 1) {
             g0y = (y0 - y0 / scale) * ratio_grid_screen_H + g0y;
@@ -415,7 +415,7 @@ class CalendarWin {
     private ArrayList<logEntry> shapes;
     private NavigableSet<logEntry> shapeIndex;
 
-    String procCmd(logEntry LE) { //TODO: Clear tasks "underneath", etc.
+    String procCmd(logEntry LE) {
         if (LE.isCommand()) {
             curTask.procCommand(LE);
         } else {
@@ -428,7 +428,7 @@ class CalendarWin {
         }
         return curTask.isOngoing() ? curTask.comment + " @" + (new SimpleDateFormat(" h:mm",Locale.US).format(new Date(curTask.start * 1000L))) : "";
     }
-    List<String> getWritableShapes() {         //TODO: figure out when file writing occurs; and figure out when a log is first loaded
+    List<String> getWritableShapes() {
         List<String> LogList = new ArrayList<>();
         String entry;
         for (logEntry r : shapes) {

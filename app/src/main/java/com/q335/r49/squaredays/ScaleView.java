@@ -51,7 +51,6 @@ public class ScaleView extends View {
     }
     List<String> getWritableShapes() {return CW.getWritableShapes(); }
 
-
     public ScaleView(Context context) {
         super(context);
         SL = new ScaleListener();
@@ -159,7 +158,6 @@ public class ScaleView extends View {
                 public void onStopTrackingTouch(SeekBar seekBar) { }
             });
 
-            final Context finalContext = appContext;
             final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
             final int childCount = paletteView.getChildCount();
             for (int i = 0; i < childCount ; i++) {

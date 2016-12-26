@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -41,17 +42,16 @@ import java.util.Queue;
 //TODO: TYPOGRAPHY: Use one letter for all
 //TODO: "Selected" box around currently running task -- should be white. Otherwise, boxes are black
 
+//TODO: Reconsider how removal works
 //TODO: Clean up overlap stuff *WHILE THE ACTION IS BEING WRITTEN* in the shapes thing
-//TODO: Change "No active task" to an empty Stirng.
-
-//TODO: Now time shows error color after removing a task from calendar
-//TODO: Rounded rectangles in Calendar.
-//TODO: Grid rectangle should be stroked boxes
-//TODO: Statusbar color
+    //TODO: Rounded rectangles in Calendar.
+    //TODO: Grid rectangle should be stroked boxes
 
 //TODO: $$$ Need some way to mark and select instant times -- probably by modifying the messagebox
 //TODO: $$$ End task should be "add new task" WHEN THERE IS NO ACTIVE TASK (on long-press). When there is an active task, it should change to comment.
 //TODO: $$$ There should not be a "blank" button
+//TODO: $$$ Better startup & help window
+//TODO: $$$ Increase scaling speed?
 
 class logEntry {
     private static final int REMOVE = -1;
@@ -186,6 +186,7 @@ class logEntry {
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener {
     static int COLOR_NO_TASK;
     static int COLOR_ERROR;
+    static Typeface CommandFont;
     static int parseColor(String s) {
         try {
             return Color.parseColor(s);
@@ -307,6 +308,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
         COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);   //TODO: make this a main static field, etc. (+othrers too)
         CalendarWin.COLOR_SELECTION = ResourcesCompat.getColor(getResources(), R.color.selection, null);
+
+        CommandFont = Typeface.createFromAsset(getAssets(),  "fonts/22203___.TTF");
 
         palette = new PaletteRing(PALETTE_LENGTH);
 
