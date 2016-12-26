@@ -38,7 +38,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-
 //TODO: "Selected" box around currently running task -- should be white. Otherwise, boxes are black
 
 //TODO: Reconsider how removal works

@@ -1,6 +1,7 @@
 package com.q335.r49.squaredays;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.LightingColorFilter;
 import android.graphics.Paint;
 import android.graphics.PorterDuffColorFilter;
@@ -11,6 +12,13 @@ import android.widget.TextView;
 
 public class MonogramView extends TextView {
     static float minMaxSize = 1000f;
+    private static final float[] NEGATIVE = {
+            -1.0f,     0,     0,    0, 255, // red
+            0, -1.0f,     0,    0, 255, // green
+            0,     0, -1.0f,    0, 255, // blue
+            0,     0,     0, 1.0f,   0  // alpha
+    };
+
     public String Monogram;
     Paint mPaint;
     Rect bounds;
@@ -29,7 +37,7 @@ public class MonogramView extends TextView {
     }
     public void setColor(int color) {
         mPaint.setColor(color);
-        mPaint.setColorFilter(new LightingColorFilter(0xFF444444,0X00222222));
+        mPaint.setColorFilter(new ColorMatrixColorFilter(NEGATIVE));
     }
 
     @Override
