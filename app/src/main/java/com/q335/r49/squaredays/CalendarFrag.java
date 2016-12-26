@@ -149,7 +149,7 @@ class CalendarWin {
         pathStyle = new Paint();
             pathStyle.setColor(COLOR_NOW_LINE);
             pathStyle.setStyle(Paint.Style.FILL);
-            pathStyle.setFlags(Paint.ANTI_ALIAS_FLAG);
+            //pathStyle.setFlags(Paint.ANTI_ALIAS_FLAG);
         markerSize = 0.5f;
         triangleMarker = new Path();
             triangleMarker.moveTo(0f,0f);
@@ -239,7 +239,7 @@ class CalendarWin {
 
         RECT_SCALING_FACTOR_X = 0.85f;
         for (logEntry s : shapes)
-            drawInterval(s);
+            drawInterval(s, now, 0.65f, now-86400/2, 0.85f);
 
         float gridSize;
         String timeFormat;
@@ -360,6 +360,31 @@ class CalendarWin {
                 (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
     }
+    private void drawInterval(logEntry iv, long now, float scaleA, long past, float scaleB) {
+        float scaleX = iv.start < past ? scaleB : iv.start > now ? scaleA : (float) (iv.start - past) * (scaleA - scaleB) / (float) (now - past)  + scaleB;
+        if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start || iv.isOngoing())
+            return;
+        long corner = iv.start;
+        long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
+        float[] a, b, c;
+        for (; midn < iv.end; midn += 86400L) {
+            a = conv_ts_screen(corner, 0);
+            b = conv_ts_screen(midn, 1f);
+            c = conv_ts_screen(midn-43199L, 0.5f);
+            mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
+                    (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                    (b[0]-c[0])*scaleX+c[0],
+                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
+            corner = midn+1;
+        }
+        a = conv_ts_screen(corner, 0);
+        b = conv_ts_screen(iv.end, 1f);
+        c = conv_ts_screen(midn-43199L, 0.5f);
+        mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
+                (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                (b[0]-c[0])*scaleX+c[0],
+                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
+    }
     private void drawOngoingInterval(logEntry iv, float scaleA, float scaleB) {
         if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
@@ -381,12 +406,14 @@ class CalendarWin {
         c = conv_ts_screen(midn-43199L, 0.5f);
         Path pp = new Path();
 
-        pp.moveTo((a[0]-c[0])*scaleA+c[0],(a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
-        pp.lineTo((b[0]-c[0])*scaleA+c[0],(a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
-        pp.lineTo((b[0]-c[0])*scaleB+c[0],(b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
-        pp.lineTo((a[0]-c[0])*scaleB+c[0],(b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
+        float y1 = (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1];
+        float y2 = (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1];
+        pp.moveTo((a[0]-c[0])*scaleB+c[0],y1);
+        pp.lineTo((b[0]-c[0])*scaleB+c[0],y1);
+        pp.lineTo((b[0]-c[0])*scaleB+c[0],y2);
+        pp.lineTo((a[0]-c[0])*scaleB+c[0],y2);
         pp.close();
-        Shader shader = new LinearGradient(0, (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1], 0, (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1], iv.paint.getColor(), COLOR_GRID_BACKGROUND, Shader.TileMode.CLAMP);
+        Shader shader = new LinearGradient(0, y1, 0, y2, iv.paint.getColor(), COLOR_GRID_BACKGROUND, Shader.TileMode.CLAMP);
         pathStyle.setShader(shader);
         mCanvas.drawPath(pp,pathStyle);
     }
