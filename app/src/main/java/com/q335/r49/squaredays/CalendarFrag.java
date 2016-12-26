@@ -5,6 +5,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.IntegerRes;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -220,14 +221,13 @@ class CalendarWin {
     }
     private Canvas mCanvas;
     void draw(Canvas canvas) {
-        Log.d("SquareDays", "Calendar redraw");
         int screenH = canvas.getHeight();
         int screenW = canvas.getWidth();
+        ratio_grid_screen_W = gridW/screenW;
+        ratio_grid_screen_H = gridH/screenH;
         long start_ts = conv_screen_ts(0f,0f);
         long end_ts = conv_screen_ts(screenW, screenH);
         long now = System.currentTimeMillis() / 1000L;
-        ratio_grid_screen_W = gridW/screenW;
-        ratio_grid_screen_H = gridH/screenH;
         mCanvas = canvas;
 
         RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
