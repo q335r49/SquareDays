@@ -375,23 +375,6 @@ class CalendarWin {
                     mCanvas.drawPath(base, gridStyle);
             }
         } else {
-//            a = tsToScreen(now, 0);
-//            b = tsToScreen(midn, 1f);
-//            c = tsToScreen(midn - 43199L, 0.5f);
-//            float x0 = (a[0] - c[0]) * scaleA + c[0];
-//            float x1 = (b[0] - c[0]) * scaleA + c[0];
-//            float x2 = (b[0] - c[0]) * scaleGrid + c[0];
-//            float x3 = (a[0] - c[0]) * scaleGrid + c[0];
-//            float y0 = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
-//            float y1 = (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
-//            Path pp = new Path();
-//                pp.moveTo(x0,y0);
-//                pp.lineTo(x1,y0);
-//                pp.cubicTo(x1,(y0+y1)/2f,x2,(y0+y1)/2f,x2,y1);
-//                pp.lineTo(x3,y1);
-//                pp.cubicTo(x3,(y0+y1)/2f,x0,(y0+y1)/2f,x0,y0);
-//                pp.close();
-//            mCanvas.drawPath(pp, gridStyle);
             bot = midn;
             a = tsToScreen(peak, 0);
             b = tsToScreen(bot, 1f);
@@ -462,9 +445,9 @@ class CalendarWin {
             a = tsToScreen(corner, 0);
             b = tsToScreen(midn, 1f);
             c = tsToScreen(midn-43199L, 0.5f);
-            mCanvas.drawRect((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+            mCanvas.drawRect((a[0]-c[0])*scaleB+c[0],
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                    (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
+                    (b[0]-c[0])*scaleB+c[0],
                     (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
             corner = midn+1;
         }
