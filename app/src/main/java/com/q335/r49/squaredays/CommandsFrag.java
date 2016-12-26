@@ -115,26 +115,33 @@ public class CommandsFrag extends Fragment {
                 break;
             }
         }
-
     }
 
     public void setActiveTask(View v) {
         if (activeView != null) {
             activeView.active = false;
             activeView.invalidate();
+        } else if (endButtonMonogram != null &&  endButtonMonogram.active) {
+            endButtonMonogram.active = false;
+            endButtonMonogram.invalidate();
         }
         activeView =((MonogramView) v.findViewById(R.id.text1));
         activeView.active = true;
         activeView.invalidate();
     }
     public void clearActiveTask() {
+        if (endButtonMonogram != null) {
+            endButtonMonogram.active = true;
+            endButtonMonogram.invalidate();
+        }
         if (activeView != null) {
             activeView.active = false;
-            activeView = null;
             activeView.invalidate();
+            activeView = null;
         }
     }
 
+    MonogramView endButtonMonogram;
     private void makeView() {
         Collections.sort(commands, new Comparator<String[]>() {
             public int compare(String[] s1, String[] s2) {
@@ -337,14 +344,14 @@ public class CommandsFrag extends Fragment {
 
         final int bg_Norm = COLOR_END_BOX;
         final int bg_Press = darkenColor(bg_Norm,0.7f);
-        View endButton = inflaterF.inflate(R.layout.gv_list_item, null);
+        final View endButton = inflaterF.inflate(R.layout.gv_list_item, null);
 
         GradientDrawable rrect = new GradientDrawable();
         rrect.setCornerRadius(cornerRadius);
         rrect.setColor(bg_Norm);
         endButton.setBackground(rrect);
-        MonogramView mv = (MonogramView) endButton.findViewById(R.id.text1);
-        mv.setColor(bg_Norm);
+        endButtonMonogram = (MonogramView) endButton.findViewById(R.id.text1);
+        endButtonMonogram.setColor(bg_Norm);
 
         TextView label = (TextView) (endButton.findViewById(R.id.text1));
         label.setText("!");
@@ -372,6 +379,7 @@ public class CommandsFrag extends Fragment {
                             public void run() {
                                 has_run = true;
                                 mListener.restoreABState();
+                                ((GradientDrawable) endButton.getBackground()).setColor(bg_Norm);
                                 LayoutInflater layoutInflater = LayoutInflater.from(getContext());
                                 View promptView = layoutInflater.inflate(R.layout.prompts, null);
                                 final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);

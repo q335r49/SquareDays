@@ -16,6 +16,12 @@ public class MonogramView extends TextView {
             0,     0,     -1,   0,  255, // blue
             0,     0,     0,   1,  0  // alpha
     };
+    private static final float[] NORM_FILTER = {
+            -0.25f,     0,     0,   0,  64, // red
+            0,     -0.25f,     0,   0,  64, // green
+            0,     0,     -0.25f,   0,  64, // blue
+            0,     0,     0,   1,  0  // alpha
+    };
     public boolean active = false;
     Paint ActivePaint;
     public String Monogram;
@@ -45,7 +51,8 @@ public class MonogramView extends TextView {
             ActivePaint.setColor(0xFF888888);
         else
             ActivePaint.setColorFilter(new ColorMatrixColorFilter(FILTER));
-        mPaint.setColor(MainActivity.COLOR_NO_TASK);
+        mPaint.setColor(color);
+        mPaint.setColorFilter(new ColorMatrixColorFilter(NORM_FILTER));
     }
 
     @Override
@@ -55,8 +62,9 @@ public class MonogramView extends TextView {
         originX = cWidth / 2f - bounds.width() / 2f - bounds.left;
         Paint.FontMetrics fm = mPaint.getFontMetrics();
         originY = cHeight / 2f - fm.ascent - 2*fm.descent;
-        canvas.drawText(Monogram, originX, originY, mPaint);
-        if (active) {
+        if (!active)
+            canvas.drawText(Monogram, originX, originY, mPaint);
+        else if (active) {
             ActivePaint.setTextSize(minMaxSize);
             ActivePaint.setStrokeWidth(minMaxSize/10f);
             canvas.drawText(Monogram, originX, originY, ActivePaint);
