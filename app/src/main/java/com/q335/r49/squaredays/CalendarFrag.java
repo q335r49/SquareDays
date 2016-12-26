@@ -8,7 +8,6 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,8 +22,8 @@ import java.util.Locale;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
-//TODO: Fix the bezier visualization
-
+//TODO: bezier visualizaion
+//TODO: NOW should be gridline
 public class CalendarFrag extends Fragment {
     PaletteRing palette;
     private ScaleView inputLayer;
@@ -35,7 +34,6 @@ public class CalendarFrag extends Fragment {
         PaletteRing getPalette();
     }
     private OnFragmentInteractionListener mListener;
-
     void procTask(logEntry le) { mListener.setPermABState(inputLayer.procTask(le)); }
     logEntry getCurrentTask() {return inputLayer == null ? null : inputLayer.getCurTask();}
     List<String> getWritableShapes() {return inputLayer.getWritableShapes(); }
@@ -79,13 +77,10 @@ public class CalendarFrag extends Fragment {
 }
 class CalendarWin {
     static int COLOR_SCALE_TEXT, COLOR_GRID_BACKGROUND, COLOR_NOW_LINE, COLOR_STATUS_BAR, COLOR_SELECTION;
-    private Paint minorTickStyle, majorTickStyle, nowLineStyle, statusBarStyle, selectionStyle, markerStyle, gridStyle;
-    private Path marker;
-    private float markerSize;
+    private Paint minorTickStyle, majorTickStyle, nowLineStyle, statusBarStyle, selectionStyle, ongoingStyle, gridStyle;
     private String statusText;
     void setStatusText(String s) { statusText = s; }
     private logEntry curTask;
-        @Nullable
         logEntry getCurTask() { return curTask; }
     private ArrayList<logEntry> shapes;
     private NavigableSet<logEntry> shapeIndex;
@@ -113,20 +108,13 @@ class CalendarWin {
         selectionStyle = new Paint();
             selectionStyle.setStyle(Paint.Style.STROKE);
             selectionStyle.setColor(COLOR_SELECTION);
-        markerStyle = new Paint();
-            markerStyle.setColor(COLOR_NOW_LINE);
-            markerStyle.setStyle(Paint.Style.FILL);
+        ongoingStyle = new Paint();
+            ongoingStyle.setColor(COLOR_NOW_LINE);
+            ongoingStyle.setStyle(Paint.Style.FILL);
         gridStyle = new Paint();
             gridStyle.setColor(COLOR_GRID_BACKGROUND);
             gridStyle.setStyle(Paint.Style.FILL);
         statusText = "";
-        markerSize = 0.5f;
-        marker = new Path();
-            marker.moveTo(0f,0f);
-            marker.lineTo(-markerSize*LINE_WIDTH, markerSize*LINE_WIDTH);
-            marker.lineTo(-markerSize*LINE_WIDTH, -markerSize*LINE_WIDTH);
-            marker.lineTo(0f,0f);
-            marker.close();
     }
     private static float LINE_WIDTH = 10;
     void setDPIScaling(float f) {
@@ -138,12 +126,6 @@ class CalendarWin {
         statusBarStyle.setTextSize(LINE_WIDTH*2f);
         selectionStyle.setStrokeWidth(LINE_WIDTH/4f);
         nowLineStyle.setStrokeWidth(LINE_WIDTH/4f);
-        marker = new Path();
-            marker.moveTo(0f,0f);
-            marker.lineTo(-markerSize*LINE_WIDTH, markerSize*LINE_WIDTH);
-            marker.lineTo(-markerSize*LINE_WIDTH, -markerSize*LINE_WIDTH);
-            marker.lineTo(0f,0f);
-            marker.close();
     }
 
     private long orig;
@@ -211,8 +193,9 @@ class CalendarWin {
 
         drawBackgroundGrid();
 
-        for (logEntry s : shapes)
+        for (logEntry s : shapes) {
             drawInterval(s);
+        }
 
         float gridSize;
         String timeFormat;
@@ -303,10 +286,9 @@ class CalendarWin {
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
-
-    //TODO: draw from start of day
     private static final long curveDuration = 86400/12;
     private static final float gridRadius = 10f;
+    private static final long maxStretch = 86400/12;
     private long prevMidn(long ts) {return ts - (ts - orig + 864000000000000000L) % 86400L;}
     private void drawBackgroundGrid() {
         long start = Math.max(screenToTs(0f,0f),now);
@@ -319,7 +301,6 @@ class CalendarWin {
         if (start > now + curveLength) {
             corner = prevMidn(start);
             long midn = corner + 86399L;
-
             for (; corner < end; midn += 86400L) {
                 a = tsToScreen(corner, 0);
                 b = tsToScreen(midn, 1f);
@@ -332,6 +313,20 @@ class CalendarWin {
             }
             return;
         }
+
+
+        long stretch = curTask.isOngoing() ? 0 : now - curTask.start > maxStretch ? maxStretch : now - curTask.start < 0 ? 0 : now-curTask.start;
+
+        long peak,bot;
+        if (curTask.isOngoing()) {
+            peak = curTask.start;
+            if (peak > now)
+                peak = now;
+            bot = now + curveLength;
+        } else {
+
+        }
+
         long midn = prevMidn(now) + 86399L;
         if (midn - now > curveLength) {
             a = tsToScreen(now, 0);
@@ -454,7 +449,6 @@ class CalendarWin {
         b = tsToScreen(now, 1f);
         c = tsToScreen(midn-43199L, 0.5f);
         Path pp = new Path();
-
         float y1 = (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1];
         float y2 = (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1];
         pp.moveTo((a[0]-c[0])*scaleB+c[0],y1);
@@ -463,8 +457,8 @@ class CalendarWin {
         pp.lineTo((a[0]-c[0])*scaleB+c[0],y2);
         pp.close();
         Shader shader = new LinearGradient(0, y1, 0, y2, iv.paint.getColor(), COLOR_GRID_BACKGROUND, Shader.TileMode.CLAMP);
-        markerStyle.setShader(shader);
-        mCanvas.drawPath(pp, markerStyle);
+        ongoingStyle.setShader(shader);
+        mCanvas.drawPath(pp, ongoingStyle);
     }
     private void drawInterval(logEntry iv, Paint paint) {
         if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
@@ -489,26 +483,6 @@ class CalendarWin {
                 (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                 (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
-    }
-    private Path offsetMarker = new Path();
-    private void drawMarker(long ts, int color) {
-        markerStyle.setColor(color);
-        long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
-        float[] a = tsToScreen(ts,0f);
-        float[] c = tsToScreen(noon,0.5f);
-        marker.offset((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],(a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],offsetMarker);
-        mCanvas.drawPath(offsetMarker, markerStyle);
-    }
-    private void drawNowLine(long ts, int color) {
-        nowLineStyle.setColor(color);
-        long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
-        float[] a = tsToScreen(ts,0f);
-        float[] b = tsToScreen(ts,1f);
-        float[] c = tsToScreen(noon,0.5f);
-        mCanvas.drawLine((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
-                (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
-                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
     }
 
     logEntry procCmd(logEntry LE) {
