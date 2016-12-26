@@ -193,9 +193,8 @@ class CalendarWin {
 
         drawBackgroundGrid();
 
-        for (logEntry s : shapes) {
+        for (logEntry s : shapes)
             drawInterval(s);
-        }
 
         float gridSize;
         String timeFormat;
@@ -281,26 +280,24 @@ class CalendarWin {
         }
         if (selection!=null)
             drawInterval(selection,selectionStyle);
-        if (curTask.isOngoing())
+        if (curTask!= null && curTask.isOngoing())
             drawOngoingInterval(curTask,scaleA);
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
-    private static final long curveDuration = 86400/12;
+    private static final long curveLength = 86400/24;
     private static final float gridRadius = 10f;
-    private static final long maxStretch = 86400/12;
+    private static final long maxStretch = 86400/40;
     private long prevMidn(long ts) {return ts - (ts - orig + 864000000000000000L) % 86400L;}
     private void drawBackgroundGrid() {
         long start = Math.max(screenToTs(0f,0f),now);
         long end = screenToTs(screenW, screenH);
         if (end <= start)
             return;
-        long curveLength = curveDuration;
         float[] a, b, c, e;
-        long corner;
+        long corner = prevMidn(start);
+        long midn = corner + 86399L;
         if (start > now + curveLength) {
-            corner = prevMidn(start);
-            long midn = corner + 86399L;
             for (; corner < end; midn += 86400L) {
                 a = tsToScreen(corner, 0);
                 b = tsToScreen(midn, 1f);
@@ -313,84 +310,110 @@ class CalendarWin {
             }
             return;
         }
-
-
-        long stretch = curTask.isOngoing() ? 0 : now - curTask.start > maxStretch ? maxStretch : now - curTask.start < 0 ? 0 : now-curTask.start;
-
         long peak,bot;
-        if (curTask.isOngoing()) {
+        if (curTask != null && curTask.isOngoing()) {
             peak = curTask.start;
             if (peak > now)
                 peak = now;
+            if (peak <= midn-86400)
+                peak = midn-86399;
             bot = now + curveLength;
         } else {
-
+            peak = now;
+            bot = now + curveLength;
         }
+        float rPeakBot = (float) (now - peak) / (float) maxStretch;
+        rPeakBot = rPeakBot > 1f ? 1f : rPeakBot;
+        float rBotPeak = 1 - rPeakBot;
+        float wPlatBase = 0.6f;
+        float wBasePlat = 1-wPlatBase;
 
-        long midn = prevMidn(now) + 86399L;
-        if (midn - now > curveLength) {
-            a = tsToScreen(now, 0);
-            b = tsToScreen(now + curveLength, 1f);
+        midn = prevMidn(now) + 86399L;
+        if (bot < midn) {
+            a = tsToScreen(peak, 0);
+            b = tsToScreen(bot, 1f);
             c = tsToScreen(midn - 43199L, 0.5f);
             e = tsToScreen(midn, 1f);
-            float x0 = (a[0] - c[0]) * scaleA + c[0];
-            float x1 = (b[0] - c[0]) * scaleA + c[0];
-            float x2 = (b[0] - c[0]) * scaleGrid + c[0];
-            float x3 = (a[0] - c[0]) * scaleGrid + c[0];
-            float y0 = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
-            float y1 = (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
-            float y2 = (e[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
-            if (y0 < screenH && y1 > 0) {
-                float y0b = y0 < -screenH ? -screenH : y0;
-                float y1b = y1 > 2 * screenH ? 2 * screenH : y1;
+            float xpL = (a[0] - c[0]) * scaleA + c[0];
+            float xpR = (b[0] - c[0]) * scaleA + c[0];
+            float xbR = (b[0] - c[0]) * scaleGrid + c[0];
+            float xbL = (a[0] - c[0]) * scaleGrid + c[0];
+            float yp = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
+            float yb = (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
+            float ym = (e[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
+            if (yp < screenH && yb > 0) {
+                float y0b = yp < -screenH ? -screenH : yp;
+                float y1b = yb > 2 * screenH ? 2 * screenH : yb;
                 Path tip = new Path();
-                    tip.moveTo(x0, y0b);
-                    tip.lineTo(x1, y0b);
-                    tip.cubicTo(x1, (y0b + y1b) / 2f, x2, (y0b + y1b) / 2f, x2, y1b);
-                    tip.lineTo(x3, y1b);
-                    tip.cubicTo(x3, (y0b + y1b) / 2f, x0, (y0b + y1b) / 2f, x0, y0b);
+                    tip.moveTo(xpL, y0b);
+                    tip.lineTo(xpR, y0b);
+                    tip.cubicTo(xpR, y0b * rBotPeak + y1b * rPeakBot, xbR, y0b*wPlatBase + y1b*wBasePlat, xbR, y1b);
+                    tip.lineTo(xbL, y1b);
+                    tip.cubicTo(xbL, y0b*wPlatBase + y1b*wBasePlat, xpL, y0b * rBotPeak + y1b * rPeakBot, xpL, y0b);
                     tip.close();
                 mCanvas.drawPath(tip, gridStyle);
             }
-            if (y2 - gridRadius > screenH) {
-                if (y1 < screenH)
-                    mCanvas.drawRect(new RectF((a[0] - c[0]) * scaleGrid + c[0], Math.max(0f,y1), (b[0] - c[0]) * scaleGrid + c[0], screenH),gridStyle);
-            } else if (y2 > 0 ) {
-                float y1b = Math.max(y1,0f);
-                Log.d("x","y1b: " + y1b + " y2: " + y2);
+            if (ym - gridRadius > screenH) {
+                if (yb < screenH)
+                    mCanvas.drawRect(new RectF((a[0] - c[0]) * scaleGrid + c[0], Math.max(0f,yb), (b[0] - c[0]) * scaleGrid + c[0], screenH),gridStyle);
+            } else if (ym > 0 ) {
+                float y1b = Math.max(yb,0f);
+                Log.d("x","y1b: " + y1b + " y2: " + ym);
                 Path base = new Path();
-                    base.moveTo(x2, y1b);
-                    if (y2 - y1b > gridRadius) {
-                        base.lineTo(x2, y2 - gridRadius);
-                        base.quadTo(x2, y2, x2 - gridRadius, y2);
-                        base.lineTo(x3 + gridRadius, y2);
-                        base.quadTo(x3, y2, x3, y2 - gridRadius);
+                    base.moveTo(xbR, y1b);
+                    if (ym - y1b > gridRadius) {
+                        base.lineTo(xbR, ym - gridRadius);
+                        base.quadTo(xbR, ym, xbR - gridRadius, ym);
+                        base.lineTo(xbL + gridRadius, ym);
+                        base.quadTo(xbL, ym, xbL, ym - gridRadius);
                     } else {
-                        base.lineTo(x2, y2);
-                        base.lineTo(x3, y2);
+                        base.lineTo(xbR, ym);
+                        base.lineTo(xbL, ym);
                     }
-                    base.lineTo(x3, y1b);
+                    base.lineTo(xbL, y1b);
                     base.close();
                     mCanvas.drawPath(base, gridStyle);
             }
         } else {
-            a = tsToScreen(now, 0);
-            b = tsToScreen(midn, 1f);
+//            a = tsToScreen(now, 0);
+//            b = tsToScreen(midn, 1f);
+//            c = tsToScreen(midn - 43199L, 0.5f);
+//            float x0 = (a[0] - c[0]) * scaleA + c[0];
+//            float x1 = (b[0] - c[0]) * scaleA + c[0];
+//            float x2 = (b[0] - c[0]) * scaleGrid + c[0];
+//            float x3 = (a[0] - c[0]) * scaleGrid + c[0];
+//            float y0 = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
+//            float y1 = (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
+//            Path pp = new Path();
+//                pp.moveTo(x0,y0);
+//                pp.lineTo(x1,y0);
+//                pp.cubicTo(x1,(y0+y1)/2f,x2,(y0+y1)/2f,x2,y1);
+//                pp.lineTo(x3,y1);
+//                pp.cubicTo(x3,(y0+y1)/2f,x0,(y0+y1)/2f,x0,y0);
+//                pp.close();
+//            mCanvas.drawPath(pp, gridStyle);
+            bot = midn;
+            a = tsToScreen(peak, 0);
+            b = tsToScreen(bot, 1f);
             c = tsToScreen(midn - 43199L, 0.5f);
-            float x0 = (a[0] - c[0]) * scaleA + c[0];
-            float x1 = (b[0] - c[0]) * scaleA + c[0];
-            float x2 = (b[0] - c[0]) * scaleGrid + c[0];
-            float x3 = (a[0] - c[0]) * scaleGrid + c[0];
-            float y0 = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
-            float y1 = (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
-            Path pp = new Path();
-                pp.moveTo(x0,y0);
-                pp.lineTo(x1,y0);
-                pp.cubicTo(x1,(y0+y1)/2f,x2,(y0+y1)/2f,x2,y1);
-                pp.lineTo(x3,y1);
-                pp.cubicTo(x3,(y0+y1)/2f,x0,(y0+y1)/2f,x0,y0);
-                pp.close();
-            mCanvas.drawPath(pp, gridStyle);
+            float xpL = (a[0] - c[0]) * scaleA + c[0];
+            float xpR = (b[0] - c[0]) * scaleA + c[0];
+            float xbR = (b[0] - c[0]) * scaleGrid + c[0];
+            float xbL = (a[0] - c[0]) * scaleGrid + c[0];
+            float yp = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
+            float yb = (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
+            if (yp < screenH && yb > 0) {
+                float y0b = yp < -screenH ? -screenH : yp;
+                float y1b = yb > 2 * screenH ? 2 * screenH : yb;
+                Path tip = new Path();
+                tip.moveTo(xpL, y0b);
+                tip.lineTo(xpR, y0b);
+                tip.cubicTo(xpR, y0b * rBotPeak + y1b * rPeakBot, xbR, y0b*wPlatBase + y1b*wBasePlat, xbR, y1b);
+                tip.lineTo(xbL, y1b);
+                tip.cubicTo(xbL, y0b*wPlatBase + y1b*wBasePlat, xpL, y0b * rBotPeak + y1b * rPeakBot, xpL, y0b);
+                tip.close();
+                mCanvas.drawPath(tip, gridStyle);
+            }
         }
         for (corner = midn + 1; corner < end; midn += 86400L) {
             a = tsToScreen(corner, 0);
