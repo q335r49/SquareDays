@@ -5,6 +5,8 @@ import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -235,15 +237,13 @@ class CalendarWin {
         ratio_grid_screen_W = gridW/screenW;
         ratio_grid_screen_H = gridH/screenH;
         mCanvas = canvas;
+        RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
 
         long now = System.currentTimeMillis() / 1000L;
         float scaleA = 0.25f;
         long expansionComplete = now - 86400*5;
         float scaleB = 1f;
 
-        RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH*ratio_grid_screen_H;
-
-        RECT_SCALING_FACTOR_X = scaleA;
         drawBackgroundGrid(logEntry.newInterval(Math.max(conv_screen_ts(0f,0f),now), conv_screen_ts(screenW, screenH), COLOR_GRID_BACKGROUND), now,scaleA,0.85f);
 
         for (logEntry s : shapes)
@@ -340,9 +340,10 @@ class CalendarWin {
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
-    static final long curveDuration = 86400/12;
 
-    static Path getCubics(float x0, float x1, float x2, float x3, float y0, float y1) {
+    private static final long curveDuration = 86400/12;
+    private static final float gridRadius = 10f;
+    private static Path getCubics(float x0, float x1, float x2, float x3, float y0, float y1) {
         Path pp = new Path();
         pp.moveTo(x0,y0);
         pp.lineTo(x1,y0);
@@ -359,27 +360,21 @@ class CalendarWin {
             long corner = iv.start;
             long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
             float[] a, b, c;
-            for (; midn < iv.end; midn += 86400L) {
+            for (; corner < iv.end; midn += 86400L) {
                 a = conv_ts_screen(corner, 0);
                 b = conv_ts_screen(midn, 1f);
                 c = conv_ts_screen(midn - 43199L, 0.5f);
-                mCanvas.drawRect((a[0] - c[0]) * scaleB + c[0],
+                RectF rr = new RectF ((a[0] - c[0]) * scaleB + c[0],
                         (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1],
                         (b[0] - c[0]) * scaleB + c[0],
-                        (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1], iv.paint);
+                        (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1]);
+                mCanvas.drawRoundRect(rr,gridRadius,gridRadius,iv.paint);
                 corner = midn + 1;
             }
-            a = conv_ts_screen(corner, 0);
-            b = conv_ts_screen(iv.end, 1f);
-            c = conv_ts_screen(midn - 43199L, 0.5f);
-            mCanvas.drawRect((a[0] - c[0]) * scaleB + c[0],
-                    (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1],
-                    (b[0] - c[0]) * scaleB + c[0],
-                    (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1], iv.paint);
         } else {
             long corner = now;
             long midn = now - (now - orig + 864000000000000000L) % 86400L + 86399L;
-            float[] a, b, c;
+            float[] a, b, c, d, e, f;
             boolean firstRun = true;
             for (; corner < iv.end; midn += 86400L) {
                 if (firstRun) {
@@ -393,18 +388,40 @@ class CalendarWin {
                         float x3 = (a[0] - c[0]) * scaleB + c[0];
                         float y0 = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
                         float y1 = (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
-                        Path pp = getCubics(x0, x1, x2, x3, y0, y1);
+                        d = conv_ts_screen(corner, 0);
+                        e = conv_ts_screen(midn, 1f);
+                        f = conv_ts_screen(midn - 43199L, 0.5f);
+                        float y2 = (e[1] - f[1]) * RECT_SCALING_FACTOR_Y + f[1];
+
+                        //Path pp = getCubics(x0, x1, x2, x3, y0, y1);
+                        Path pp = new Path();
+                        pp.moveTo(x0,y0);
+                        pp.lineTo(x1,y0);
+                        pp.cubicTo(x1,(y0+y1)/2f,x2,(y0+y1)/2f,x2,y1);
+                        if (y2 - y1 > gridRadius) {
+                            pp.lineTo(x2, y2-gridRadius);
+                            pp.quadTo(x2,y2,x2-gridRadius,y2);
+                            pp.lineTo(x3+gridRadius,y2);
+                            pp.quadTo(x3,y2,x3,y2-gridRadius);
+                        } else {
+                            pp.lineTo(x2, y2);
+                            pp.lineTo(x3, y2);
+                        }
+                        pp.lineTo(x3,y1);
+                        pp.cubicTo(x3,(y0+y1)/2f,x0,(y0+y1)/2f,x0,y0);
+                        pp.close();
                         blockStyle.setColor(COLOR_GRID_BACKGROUND);
                         mCanvas.drawPath(pp, blockStyle);
-                        corner = now + curveDuration;
-
-                        a = conv_ts_screen(corner, 0);
-                        b = conv_ts_screen(midn, 1f);
-                        c = conv_ts_screen(midn - 43199L, 0.5f);
-                        mCanvas.drawRect((a[0] - c[0]) * scaleB + c[0],
-                                (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1],
-                                (b[0] - c[0]) * scaleB + c[0],
-                                (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1], iv.paint);
+//                        corner = now + curveDuration;
+//
+//
+//                        RectF rr = new RectF((d[0] - f[0]) * scaleB + f[0],
+//                                (d[1] - f[1]) * RECT_SCALING_FACTOR_Y + f[1],
+//                                (e[0] - f[0]) * scaleB + f[0],
+//                                (e[1] - f[1]) * RECT_SCALING_FACTOR_Y + f[1]);
+//                        mCanvas.drawRoundRect(rr,gridRadius,gridRadius,iv.paint);
+//                        rr.bottom-=gridRadius;
+//                        mCanvas.drawRect(rr,iv.paint);
                         corner = midn + 1;
                     } else {
                         a = conv_ts_screen(corner, 0);
@@ -426,10 +443,11 @@ class CalendarWin {
                     a = conv_ts_screen(corner, 0);
                     b = conv_ts_screen(midn, 1f);
                     c = conv_ts_screen(midn - 43199L, 0.5f);
-                    mCanvas.drawRect((a[0] - c[0]) * scaleB + c[0],
+                    RectF rr = new RectF((a[0] - c[0]) * scaleB + c[0],
                             (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1],
                             (b[0] - c[0]) * scaleB + c[0],
-                            (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1], iv.paint);
+                            (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1]);
+                    mCanvas.drawRoundRect(rr, gridRadius, gridRadius, iv.paint);
                     corner = midn + 1;
                 }
             }
