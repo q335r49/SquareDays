@@ -25,28 +25,20 @@ import java.util.TreeSet;
 //TODO: Fix the bezier visualization
 
 public class CalendarFrag extends Fragment {
-    static int COLOR_NO_TASK;
     PaletteRing palette;
+    private ScaleView inputLayer;
+    public interface OnFragmentInteractionListener {
+        void setPermABState(logEntry task);
+        void setGF(CalendarFrag cf);
+        void popTasksInitial();
+        PaletteRing getPalette();
+    }
+    private OnFragmentInteractionListener mListener;
+
+    void procTask(logEntry le) { mListener.setPermABState(inputLayer.procTask(le)); }
+    logEntry getCurrentTask() {return inputLayer == null ? null : inputLayer.getCurTask();}
+    List<String> getWritableShapes() {return inputLayer.getWritableShapes(); }
     boolean activityCreated;
-
-    private ScaleView calView;
-    private View fragView;
-
-    void procTask(logEntry le) {
-        mListener.setPermABState(calView.procTask(le));
-    }
-    logEntry getCurrentTask() {return calView == null ? null : calView.getCurTask();}
-
-    List<String> getWritableShapes() {return calView.getWritableShapes(); }
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        if (isVisibleToUser) {
-            mListener.popTasks();
-            calView.invalidate();
-        }
-    }
-
     @Override
     public void onActivityCreated(Bundle savedInstance) {
         super.onActivityCreated(savedInstance);
@@ -58,31 +50,18 @@ public class CalendarFrag extends Fragment {
         super.onResume();
         mListener.popTasksInitial();
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        fragView = inflater.inflate(R.layout.fragment_calendar,container,false);
-        calView = (ScaleView) (fragView.findViewById(R.id.drawing));
+        View frame = inflater.inflate(R.layout.fragment_calendar,container,false);
+        inputLayer = (ScaleView) (frame.findViewById(R.id.drawing));
         mListener.setGF(this);
         palette = mListener.getPalette();
-        calView.loadCalendarView(palette);
-        return fragView;
+        inputLayer.loadCalendarView(palette);
+        return frame;
     }
-
-    public CalendarFrag() { } // Required empty public constructor
-    private OnFragmentInteractionListener mListener;
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private String mParam1;
-    private String mParam2;
+    public CalendarFrag() { }
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
+    public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); }
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -96,31 +75,17 @@ public class CalendarFrag extends Fragment {
         super.onDetach();
         mListener = null;
     }
-
-    public interface OnFragmentInteractionListener {
-        void setPermABState(logEntry task);
-        void setGF(CalendarFrag cf);
-        void popTasks();
-        void popTasksInitial();
-        PaletteRing getPalette();
-    }
 }
 class CalendarWin {
-    static int COLOR_SCALE_TEXT;
-    static int COLOR_GRID_BACKGROUND;
-    static int COLOR_NOW_LINE;
-    static int COLOR_STATUS_BAR;
-    static int COLOR_SELECTION;
+    static int COLOR_SCALE_TEXT, COLOR_GRID_BACKGROUND, COLOR_NOW_LINE, COLOR_STATUS_BAR, COLOR_SELECTION;
     private Paint textStyle, boldtextStyle, nowLineStyle, statusBarStyle, selectionStyle, pathStyle, blockStyle;
-    private Path triangleMarker;
+    private Path marker;
     private float markerSize;
     CalendarWin(long orig, float gridW, float gridH, float xMin, float yMin) {
         shapes = new ArrayList<>();
         shapeIndex = new TreeSet<>(new Comparator<logEntry>() {
             @Override
-            public int compare(logEntry o1, logEntry o2) {
-                return o1.start > o2.start ? 1 : o1.start == o2.start ? 0 : -1;
-            }
+            public int compare(logEntry o1, logEntry o2) { return o1.start > o2.start ? 1 : o1.start == o2.start ? 0 : -1; }
         });
 
         curTask = new logEntry();
@@ -156,12 +121,12 @@ class CalendarWin {
             blockStyle.setStyle(Paint.Style.FILL);
         //pathStyle.setFlags(Paint.ANTI_ALIAS_FLAG);
         markerSize = 0.5f;
-        triangleMarker = new Path();
-            triangleMarker.moveTo(0f,0f);
-            triangleMarker.lineTo(-markerSize*LINE_WIDTH, markerSize*LINE_WIDTH);
-            triangleMarker.lineTo(-markerSize*LINE_WIDTH, -markerSize*LINE_WIDTH);
-            triangleMarker.lineTo(0f,0f);
-            triangleMarker.close();
+        marker = new Path();
+            marker.moveTo(0f,0f);
+            marker.lineTo(-markerSize*LINE_WIDTH, markerSize*LINE_WIDTH);
+            marker.lineTo(-markerSize*LINE_WIDTH, -markerSize*LINE_WIDTH);
+            marker.lineTo(0f,0f);
+            marker.close();
 
     }
     private static float LINE_WIDTH = 10;
@@ -174,12 +139,12 @@ class CalendarWin {
         statusBarStyle.setTextSize(LINE_WIDTH*2f);
         selectionStyle.setStrokeWidth(LINE_WIDTH/4f);
         nowLineStyle.setStrokeWidth(LINE_WIDTH/4f);
-        triangleMarker = new Path();
-            triangleMarker.moveTo(0f,0f);
-            triangleMarker.lineTo(-markerSize*LINE_WIDTH, markerSize*LINE_WIDTH);
-            triangleMarker.lineTo(-markerSize*LINE_WIDTH, -markerSize*LINE_WIDTH);
-            triangleMarker.lineTo(0f,0f);
-            triangleMarker.close();
+        marker = new Path();
+            marker.moveTo(0f,0f);
+            marker.lineTo(-markerSize*LINE_WIDTH, markerSize*LINE_WIDTH);
+            marker.lineTo(-markerSize*LINE_WIDTH, -markerSize*LINE_WIDTH);
+            marker.lineTo(0f,0f);
+            marker.close();
     }
 
     private long orig;
@@ -554,7 +519,7 @@ class CalendarWin {
         long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
         float[] a = conv_ts_screen(ts,0f);
         float[] c = conv_ts_screen(noon,0.5f);
-        triangleMarker.offset((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],(a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],offsetMarker);
+        marker.offset((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],(a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],offsetMarker);
         mCanvas.drawPath(offsetMarker,pathStyle);
     }
     private void drawNowLine(long ts, int color) {
