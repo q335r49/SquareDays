@@ -536,6 +536,7 @@ class CalendarWin {
                 shapeIndex.remove(l);
             shapeIndex.add(le);
             curTask = shapeIndex.isEmpty() ? null : shapeIndex.first();
+            MainActivity.setLogChanged();
             return curTask;
         }
     }

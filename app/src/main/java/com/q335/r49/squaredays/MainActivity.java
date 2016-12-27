@@ -163,7 +163,7 @@ class logEntry {
                     + comment;
     }
 }
-public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener {
     static int COLOR_BACKGROUND;
     static int COLOR_ERROR;
     static Typeface CommandFont;
@@ -175,11 +175,9 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
             return COLOR_ERROR;
         }
     }
+    public static boolean LOG_CHANGED;
+        public static void setLogChanged() {LOG_CHANGED = true;}
 
-    private boolean LogChanged;
-        public void setLogChanged() {LogChanged = true;}
-    private boolean TasksChanged;
-        public void setTasksChanged() {TasksChanged = true;}
     public void loadLogsFromFile(Context context, String filename) {
         try {
             FileInputStream fis = context.openFileInput(filename);
@@ -202,6 +200,9 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         }
     }
     public void writeLogsToFile() {
+        if (!LOG_CHANGED)
+            return;
+        LOG_CHANGED = false;
         List<String> entries = GF.getWritableShapes();
         File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
         try {
@@ -212,7 +213,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                 out.write(System.getProperty("line.separator").getBytes());
             }
             out.close();
-            LogChanged = false;
         } catch (Exception e) {
             Log.d("SquareDays", "File write error: " + e.toString());
             Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
@@ -275,8 +275,8 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
 
     CalendarFrag GF;
         public void setGF(CalendarFrag GF) { this.GF = GF; }
-    CommandsFrag BF;
-        public void setBF(CommandsFrag BF) { this.BF = BF; }
+    TasksFrag BF;
+        public void setBF(TasksFrag BF) { this.BF = BF; }
     FragmentManager FM;
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
@@ -296,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         CalendarWin.COLOR_NOW_LINE = ResourcesCompat.getColor(getResources(), R.color.now_line, null);
         CalendarWin.COLOR_STATUS_BAR = ResourcesCompat.getColor(getResources(), R.color.status_bar, null);
         CalendarWin.COLOR_SELECTION = ResourcesCompat.getColor(getResources(), R.color.selection, null);
-        CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
+        TasksFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
         COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         COLOR_BACKGROUND =  ResourcesCompat.getColor(getResources(), R.color.background, null);
         CommandFont = Typeface.createFromAsset(getAssets(),  "fonts/22203___.TTF");
@@ -308,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         setSupportActionBar(AB);
         AB.setBackgroundColor(COLOR_BACKGROUND);
         FM = getSupportFragmentManager();
-        BF = new CommandsFrag();
+        BF = new TasksFrag();
         GF = new CalendarFrag();
         mSectionsPagerAdapter = new SectionsPagerAdapter(FM,BF,GF);
         mViewPager = (ViewPager) findViewById(R.id.container);

@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -32,30 +31,30 @@ import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class CommandsFrag extends Fragment {
+public class TasksFrag extends Fragment {
     static int COLOR_END_BOX;
     SharedPreferences sprefs;
     public interface OnFragmentInteractionListener {
         void pushTask(logEntry log);
         void restoreABState();
         void setABState(String comment);
-        void setBF(CommandsFrag bf);
+        void setBF(TasksFrag bf);
         PaletteRing getPalette();
     }
     private OnFragmentInteractionListener mListener;
-    private FlexboxLayout gridV;
+    private FlexboxLayout buttons;
     private List<String[]> commands = new ArrayList<>();
-    private final static int COMMENT_IX = 0;
-    private final static int COLOR_IX = 1;
+    private final static int iCOMMENT = 0;
+    private final static int iCOLOR = 1;
     private LayoutInflater inflater;
     private Context context;
     private PaletteRing palette;
+    private MonogramView activeView;
+    private MonogramView endButtonMonogram;
     private int dpToPx(int dp) {
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
-    private MonogramView activeView;
-    private MonogramView endButtonMonogram;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -63,11 +62,11 @@ public class CommandsFrag extends Fragment {
         context = getActivity().getApplicationContext();
     }
     @Override
-    public View onCreateView(LayoutInflater inf, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        inflater = inf;
-        View view = inflater.inflate(R.layout.fragment_commands,container, false);
-        gridV = (FlexboxLayout) view.findViewById(R.id.GV);
+        this.inflater = inflater;
+        View view = this.inflater.inflate(R.layout.fragment_commands,container, false);
+        buttons = (FlexboxLayout) view.findViewById(R.id.GV);
         sprefs = context.getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
         String jsonText = sprefs.getString("commands", "");
         loadCommands(jsonText);
@@ -77,12 +76,12 @@ public class CommandsFrag extends Fragment {
     public void loadCommands(String s) {
         palette = mListener.getPalette();
         if (s.isEmpty()) {
-            commands.add(new String[]{"1st task", "#1abc9c", "0", ""});
-            commands.add(new String[]{"2nd task", "#2ecc71", "0", ""});
-            commands.add(new String[]{"3rd task", "#3498db", "0", ""});
-            commands.add(new String[]{"4th task", "#9b59b6", "0", ""});
-            commands.add(new String[]{"5th task", "#34495e", "0", ""});
-            commands.add(new String[]{"6th task", "#16a085", "0", ""});
+            commands.add(new String[]{"1st task", "#1abc9c"});
+            commands.add(new String[]{"2nd task", "#2ecc71"});
+            commands.add(new String[]{"3rd task", "#3498db"});
+            commands.add(new String[]{"4th task", "#9b59b6"});
+            commands.add(new String[]{"5th task", "#34495e"});
+            commands.add(new String[]{"6th task", "#16a085"});
         } else {
             Type listType = new TypeToken<List<String[]>>() { }.getType();
             commands = new Gson().fromJson(s, listType);
@@ -92,7 +91,7 @@ public class CommandsFrag extends Fragment {
                 "#95a5a6", "#f39c12", "#d35400", "#c0392b", "#bdc3c7", "#7f8c8d", "#3b5999", "#21759b",
                 "#dd4b39", "#bd081c"});
         for (String[] sa : commands)
-            palette.add(MainActivity.parseColor(sa[COLOR_IX]));
+            palette.add(MainActivity.parseColor(sa[iCOLOR]));
         makeView();
     }
     public static int darkenColor(int color, float factor) {
@@ -105,10 +104,9 @@ public class CommandsFrag extends Fragment {
         if (le == null || !le.isOngoing())
             setActiveTask(endButtonMonogram);
         else {
-            Log.d("SquareDays", "Setting active task [logEntry]");
             for (int i = 0; i < commands.size(); i++) {
-                if (commands.get(i)[COMMENT_IX].equals(le.comment)) {
-                    View activeV = gridV.getChildAt(i);
+                if (commands.get(i)[iCOMMENT].equals(le.comment)) {
+                    View activeV = buttons.getChildAt(i);
                     setActiveTask(activeV);
                     break;
                 }
@@ -116,7 +114,6 @@ public class CommandsFrag extends Fragment {
         }
     }
     public void setActiveTask(View v) {
-        Log.d("SquareDays","Setting active task [View]");
         if (activeView != null) {
             activeView.active = false;
             activeView.invalidate();
@@ -154,18 +151,17 @@ public class CommandsFrag extends Fragment {
             lp.flexGrow=FlexboxLayout.LayoutParams.ALIGN_SELF_STRETCH;
             lp.flexShrink=0.2f;
         int cornerRadius = dpToPx(10);
-        final LayoutInflater inflaterF = inflater;
 
-        gridV.removeAllViews();
-        for (int ix = 0; ix<commands.size(); ix++) {
-            final String[] comF = commands.get(ix);
-            final int ixF = ix;
-            View child = inflaterF.inflate(R.layout.gv_list_item, null);
-            gridV.addView(child,lp);
-            final int bg_Norm = MainActivity.parseColor(comF[COLOR_IX]);
-            final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
+        buttons.removeAllViews();
+        for (int i = 0; i<commands.size(); i++) {
+            final String[] comF = commands.get(i);
+            final int ixF = i;
+            View child = inflater.inflate(R.layout.gv_list_item, null);
+            buttons.addView(child,lp);
+            final int bg_Norm = MainActivity.parseColor(comF[iCOLOR]);
+            final int bg_Press = TasksFrag.darkenColor(bg_Norm,0.7f);
             MonogramView mv = (MonogramView) child.findViewById(R.id.text1);
-                mv.setText(comF[COMMENT_IX]);
+                mv.setText(comF[iCOMMENT]);
                 mv.setColor(bg_Norm);
             GradientDrawable rrect = new GradientDrawable();
                 rrect.setCornerRadius(cornerRadius);
@@ -187,7 +183,7 @@ public class CommandsFrag extends Fragment {
                             ((GradientDrawable) v.getBackground()).setColor(bg_Press);
                             final View finalView = v;
                             hasRun = hasDragged = false;
-                            mListener.setABState(comF[COMMENT_IX]);
+                            mListener.setABState(comF[iCOMMENT]);
                             mLongPressed = new Runnable() {
                                 public void run() {
                                     hasRun = true;
@@ -195,9 +191,9 @@ public class CommandsFrag extends Fragment {
                                     ((GradientDrawable) finalView.getBackground()).setColor(bg_Norm);
                                     View promptView = inflater.inflate(R.layout.prompts, null);
                                     final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
-                                        commentEntry.setText(comF[COMMENT_IX]);
+                                        commentEntry.setText(comF[iCOMMENT]);
                                     final View curColorV = promptView.findViewById(R.id.CurColor);
-                                        curColorV.setBackgroundColor(MainActivity.parseColor(comF[COLOR_IX]));
+                                        curColorV.setBackgroundColor(MainActivity.parseColor(comF[iCOLOR]));
                                     final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                                     final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
                                     final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
@@ -301,7 +297,7 @@ public class CommandsFrag extends Fragment {
                                 if (duration != 0)
                                     abString += " for " + Integer.toString(duration / 60) + ":" + String.format(Locale.US, "%02d", duration % 60)
                                             + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
-                                mListener.setABState(abString.isEmpty()? comF[COMMENT_IX] : abString);
+                                mListener.setABState(abString.isEmpty()? comF[iCOMMENT] : abString);
                             } else if (hasDragged)
                                 mListener.setABState("Cancel");
                             return true;
@@ -316,10 +312,10 @@ public class CommandsFrag extends Fragment {
                             duration = duration > 50 ? duration - 50 : 0;
                             if (delay != 0 || duration != 0 || !hasDragged) {
                                 if (duration == 0) {
-                                    mListener.pushTask(logEntry.newOngoingTask(MainActivity.parseColor(comF[COLOR_IX]), System.currentTimeMillis() / 1000L - delay * 60, comF[COMMENT_IX]));
+                                    mListener.pushTask(logEntry.newOngoingTask(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L - delay * 60, comF[iCOMMENT]));
                                     setActiveTask(v);
                                 } else
-                                    mListener.pushTask(logEntry.newCompletedTask(MainActivity.parseColor(comF[COLOR_IX]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[COMMENT_IX]));
+                                    mListener.pushTask(logEntry.newCompletedTask(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[iCOMMENT]));
                             } else
                                 mListener.restoreABState();
                             return false;
@@ -335,8 +331,8 @@ public class CommandsFrag extends Fragment {
         }
         final int bg_Norm = COLOR_END_BOX;
         final int bg_Press = darkenColor(bg_Norm,0.7f);
-        final View endButton = inflaterF.inflate(R.layout.gv_list_item, null);
-        gridV.addView(endButton,lp);
+        final View endButton = inflater.inflate(R.layout.gv_list_item, null);
+        buttons.addView(endButton,lp);
         GradientDrawable rrect = new GradientDrawable();
             rrect.setCornerRadius(cornerRadius);
             rrect.setColor(bg_Norm);
@@ -520,12 +516,12 @@ public class CommandsFrag extends Fragment {
             }
         });
 
-        View addButton = inflaterF.inflate(R.layout.gv_list_item, null);
-        gridV.addView(addButton,lp);
+        View addButton = inflater.inflate(R.layout.gv_list_item, null);
+        buttons.addView(addButton,lp);
 
         sprefs.edit().putString("commands", new Gson().toJson(commands)).apply();
     }
-    public CommandsFrag() { }
+    public TasksFrag() { }
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
