@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
+//TODO: Reconsider how removal works
 public class ScaleView extends View {
     private CalendarWin CW;
     private ScaleListener SL;

@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
+//TODO: Why is selection off?
 //TODO:     Change background color deeper into the past
 public class CalendarFrag extends Fragment {
     PaletteRing palette;
@@ -483,13 +484,14 @@ class CalendarWin {
                 curTask.procCommand(le);
             return curTask;
         } else {
+            List<logEntry> removalList = new ArrayList<>();
             if (le.start >= le.end)
                 return curTask;
             for (logEntry e : shapeIndex) {
                 if (e.isOngoing()) {
                     if (le.isOngoing()) {
                         if (le.start <= e.start)
-                            shapeIndex.remove(e);
+                            removalList.add(e);
                         else {
                             e.setEnd(le.start);
                             break;
@@ -506,7 +508,7 @@ class CalendarWin {
                 } else {
                     if (le.isOngoing()) {
                         if (le.start <= e.start)
-                            shapeIndex.remove(e);
+                            removalList.add(e);
                         else {
                             if (le.start < e.end)
                                 e.setEnd(le.start);
@@ -516,7 +518,7 @@ class CalendarWin {
                         if (le.start <= e.start) {
                             if (le.end > e.start)
                                 if (le.end >= e.end)
-                                    shapeIndex.remove(e);
+                                    removalList.add(e);
                                 else
                                     e.start = le.end;
                         } else {
@@ -532,6 +534,8 @@ class CalendarWin {
                     }
                 }
             }
+            for (logEntry l : removalList)
+                shapeIndex.remove(l);
             shapeIndex.add(le);
             curTask = shapeIndex.isEmpty() ? null : shapeIndex.first();
             return curTask;
