@@ -81,15 +81,13 @@ class CalendarWin {
     void setStatusText(String s) { statusText = s; }
     private logEntry curTask;
         logEntry getCurTask() { return curTask; }
-    private ArrayList<logEntry> shapes;
-    private NavigableSet<logEntry> shapeIndex;
+    private TreeSet<logEntry> shapeIndex;
     CalendarWin(long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         this.orig = tsOrigin;
         this.gridW = widthDays;
         this.gridH = heightWeeks;
         g0x = xMin;
         g0y = yMin;
-        shapes = new ArrayList<>();
         shapeIndex = new TreeSet<>(new Comparator<logEntry>() {
             @Override
             public int compare(logEntry o1, logEntry o2) { return o1.start > o2.start ? -1 : o1.start == o2.start ? 0 : 1; }
@@ -193,7 +191,7 @@ class CalendarWin {
 
         drawBackgroundGrid();
 
-        for (logEntry s : shapes)
+        for (logEntry s : shapeIndex)
             drawInterval(s, s.paint);
 
         float gridSize;
@@ -483,7 +481,6 @@ class CalendarWin {
         if (le.isCommand()) {
             if (curTask != null)
                 curTask.procCommand(le);
-                // TODO: Handle the case of ending current task
             return curTask;
         } else {
             if (le.start >= le.end)
@@ -491,81 +488,66 @@ class CalendarWin {
             for (logEntry e : shapeIndex) {
                 if (e.isOngoing()) {
                     if (le.isOngoing()) {
-                        if (le.start <= e.start) {
+                        if (le.start <= e.start)
                             shapeIndex.remove(e);
-                            continue;
-                        } else {
+                        else {
                             e.setEnd(le.start);
-                            shapeIndex.add(le);
-                            e = le;
-                            return e;
+                            break;
                         }
                     } else {
                         if (le.start <= e.start) {
-                            if (le.end <= e.start) {
-                                continue;
-                            } else {
-                                e.start = le.end;
-                                continue;
+                            if (le.end > e.start) {
+                                if (le.end >= e.end)
+                                    shapeIndex.remove(e);
+                                else
+                                    e.start = le.end;
                             }
                         } else {
                             e.setEnd(le.start);
-                            e = le;
-                            shapeIndex.add(le);
-                            return e;
+                            break;
                         }
                     }
                 } else {
                     if (le.isOngoing()) {
-                        if (le.start <= e.start) {
+                        if (le.start <= e.start)
                             shapeIndex.remove(e);
-                            continue;
-                        } else {
-                            e.setEnd(le.start);
-                            e = le;
-                            shapeIndex.add(le);
-                            return e;
+                        else {
+                            if (le.start < e.end)
+                                e.setEnd(le.start);
+                            break;
                         }
                     } else {
                         if (le.start <= e.start) {
-                            if (le.end <= e.start) {
-                                continue;
-                            } else {
-                                if (le.end >= e.end) {
+                            if (le.end > e.start) {
+                                if (le.end >= e.end)
                                     shapeIndex.remove(e);
-                                    e = le;
-                                    continue;
-                                } else {
+                                else
                                     e.start = le.end;
-                                    shapeIndex.add(le);
-                                    return e;
-                                }
                             }
                         } else {
                             if (le.end < e.end) {
                                 logEntry newLog = new logEntry(e);
                                 newLog.setEnd(le.start);
-                                shapeIndex.add(newLog);
                                 e.start = le.end;
-                                shapeIndex.add(le);
-                                return e;
+                                shapeIndex.add(newLog);
+                                break;
                             } else {
                                 e.setEnd(le.start);
-                                shapeIndex.add(le);
-                                e = le;
-                                return e;
+                                break;
                             }
                         }
                     }
                 }
             }
+            shapeIndex.add(le);
+            curTask = shapeIndex.isEmpty() ? null : shapeIndex.first();
             return curTask;
         }
     }
     List<String> getWritableShapes() {
         List<String> LogList = new ArrayList<>();
         String entry;
-        for (logEntry r : shapes) {
+        for (logEntry r : shapeIndex) {
             entry = r.toString();
             if (entry != null)
                 LogList.add(entry);
@@ -577,10 +559,6 @@ class CalendarWin {
         this.selection = selection;
     }
     void clearShapes() {
-        shapes.clear();
         shapeIndex.clear();
-        curTask = new logEntry();
-        shapes.add(curTask);
-        shapeIndex.add(curTask);
     }
 }

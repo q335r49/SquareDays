@@ -68,7 +68,7 @@ class logEntry {
                 case CMD_END_TASK:
                     if (onGoing)
                         end = com.end;
-                        onGoing = false;
+                    onGoing = false;
                     break;
             }
         }
