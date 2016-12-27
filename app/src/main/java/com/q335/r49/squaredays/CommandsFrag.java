@@ -78,17 +78,21 @@ public class CommandsFrag extends Fragment {
     public void loadCommands(String s) {
         palette = mListener.getPalette();
         if (s.isEmpty()) {
-            commands.add(new String[]{"01 This is a task...", "red", "0", ""});     //TODO: better first install behavior
-            commands.add(new String[]{"02 Long press a task to edit...", "blue", "0", ""});
+            commands.add(new String[]{"1st task", "#1abc9c", "0", ""});
+            commands.add(new String[]{"2nd task", "#2ecc71", "0", ""});
+            commands.add(new String[]{"3rd task", "#3498db", "0", ""});
+            commands.add(new String[]{"4th task", "#9b59b6", "0", ""});
+            commands.add(new String[]{"5th task", "#34495e", "0", ""});
+            commands.add(new String[]{"6th task", "#16a085", "0", ""});
         } else {
             Type listType = new TypeToken<List<String[]>>() { }.getType();
             commands = new Gson().fromJson(s, listType);
         }
-        palette.add(new String[] {"#B21F35", "#D82735", "#FF7435", "#FFA135", "#FFCB35", "#FFF735",
-                "#00753A", "#009E47", "#16DD36", "#0052A5", "#0079E7",
-                "#06A9FC", "#681E7E", "#7D3CB5", "#BD7AF6", "#F44336",
-                "#E91E63", "#9C27B0", "#673AB7", "#3F51B5", "#2196F3",
-                "#FF9800", "#FFEB3B", "#CDDC39"});
+        palette.add(new String[] {"#1abc9c", "#2ecc71", "#3498db", "#9b59b6", "#34495e", "#16a085",
+                "#27ae60", "#2980b9", "#8e44ad", "#2c3e50", "#f1c40f",
+                "#e67e22", "#e74c3c", "#ecf0f1", "#95a5a6", "#f39c12",
+                "#d35400", "#c0392b", "#bdc3c7", "#7f8c8d", "#3b5999",
+                "#21759b", "#dd4b39", "#bd081c"});
         for (String[] sa : commands)
             palette.add(MainActivity.parseColor(sa[COLOR_IX]));
         makeView();
