@@ -175,8 +175,8 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             return COLOR_ERROR;
         }
     }
-    public static boolean LOG_CHANGED;
-        public static void setLogChanged() {LOG_CHANGED = true;}
+    private static boolean LOG_CHANGED;
+        static void setLogChanged() {LOG_CHANGED = true;}
 
     public void loadLogsFromFile(Context context, String filename) {
         try {
@@ -202,17 +202,20 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     public void writeLogsToFile() {
         if (!LOG_CHANGED)
             return;
-        LOG_CHANGED = false;
         List<String> entries = GF.getWritableShapes();
-        File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
+        File log = new File(context.getFilesDir(), MainActivity.LOG_FILE);
         try {
-            internalFile.delete();
-            FileOutputStream out = new FileOutputStream(internalFile, true);
+            if (log.exists()) {
+                if (!log.delete())
+                    Log.d("SquareDays", "Cannot delete log file");
+            }
+            FileOutputStream out = new FileOutputStream(log, true);
             for (String s : entries) {
                 out.write(s.getBytes());
                 out.write(System.getProperty("line.separator").getBytes());
             }
             out.close();
+            LOG_CHANGED = false;
         } catch (Exception e) {
             Log.d("SquareDays", "File write error: " + e.toString());
             Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
