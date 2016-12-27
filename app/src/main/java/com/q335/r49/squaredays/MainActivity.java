@@ -23,6 +23,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,7 +33,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -342,7 +343,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
-                                    writeString(cmdFile, sprefs.getString("commands", ""));
+                                    Files.write(sprefs.getString("commands", ""),cmdFile, Charsets.UTF_8); //TODO: Check not appending
                                     Toast.makeText(context, "Commands exported to " + extStorPath + COMMANDS_FILE, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Log.d("SquareDays",e.toString());
@@ -355,7 +356,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
                                     writeLogsToFile();
-                                    copyFile(new File(getFilesDir(), "log.txt"), logFile);
+                                    Files.copy(new File(getFilesDir(), "log.txt"),logFile);
                                     Toast.makeText(context, "Log entries exported to " + extStorPath + LOG_FILE, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Log.d("SquareDays",e.toString());
@@ -368,8 +369,8 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
                                     writeLogsToFile();
-                                    copyFile(new File(getFilesDir(), "log.txt"), logFile);
-                                    writeString(cmdFile, sprefs.getString("commands", ""));
+                                    Files.copy(new File(getFilesDir(), "log.txt"),logFile);
+                                    Files.write(sprefs.getString("commands", ""),cmdFile,Charsets.UTF_8);
                                     Toast.makeText(context, "Commands exported to " + extStorPath + COMMANDS_FILE + System.getProperty("line.separator")
                                             + "Log entries exported to " + extStorPath + LOG_FILE, Toast.LENGTH_LONG).show();
                                 } catch (Exception e) {
@@ -396,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     try {
-                                        String jsonText = readString(cmdFile);
+                                        String jsonText = Files.toString(cmdFile,Charsets.UTF_8);
                                         if (jsonText == null)
                                             Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
                                         else {
@@ -416,7 +417,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                         Toast.makeText(context, "Import failed: log file not found", Toast.LENGTH_LONG).show();
                                     else {
                                         try {
-                                            copyFile(logFile, new File(getFilesDir(), "log.txt"));
+                                            Files.copy(logFile, new File(getFilesDir(), "log.txt"));
                                             pushTask(logEntry.newClearMess());
                                             loadLogsFromFile(context, LOG_FILE);
                                             if (GF.isVisible())
@@ -433,7 +434,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     try {
-                                        String jsonText = readString(cmdFile);
+                                        String jsonText = Files.toString(cmdFile,Charsets.UTF_8);
                                         if (jsonText == null) {
                                             Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
                                         } else {
@@ -448,7 +449,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                         Toast.makeText(context, LOG_FILE + " failed: no file", Toast.LENGTH_SHORT).show();
                                     else {
                                         try {
-                                            copyFile(logFile, new File(getFilesDir(), "log.txt"));
+                                            Files.copy(logFile, new File(getFilesDir(), "log.txt"));
                                             pushTask(logEntry.newClearMess());
                                             loadLogsFromFile(context, LOG_FILE);
                                             if (GF.isVisible())
@@ -502,45 +503,10 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    public static void writeString(File file, String data) throws Exception {
-        FileOutputStream stream = new FileOutputStream(file);
-        try {
-            stream.write(data.getBytes());
-        } finally {
-            stream.close();
-        }
-    }
-    public static String readString(File file) throws Exception {
-        int length = (int) file.length();
-        byte[] bytes = new byte[length];
-
-        FileInputStream in = new FileInputStream(file);
-        try {
-            in.read(bytes);
-        } finally {
-            in.close();
-        }
-        return new String(bytes);
-    }
-    public static void copyFile(File src, File dst) throws Exception {
-        FileChannel inChannel = null;
-        FileChannel outChannel = null;
-        try {
-            inChannel = new FileInputStream(src).getChannel();
-            outChannel = new FileOutputStream(dst).getChannel();
-            inChannel.transferTo(0, inChannel.size(), outChannel);
-        } finally {
-            if (inChannel != null)
-                inChannel.close();
-            if (outChannel != null)
-                outChannel.close();
-        }
-    }
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
         Fragment F0;
         Fragment F1;
-        public SectionsPagerAdapter(FragmentManager fm, Fragment F0, Fragment F1) {
+        SectionsPagerAdapter(FragmentManager fm, Fragment F0, Fragment F1) {
             super(fm);
             this.F0 = F0;
             this.F1 = F1;
