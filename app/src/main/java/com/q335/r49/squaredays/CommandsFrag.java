@@ -103,7 +103,7 @@ public class CommandsFrag extends Fragment {
                 Math.min(Math.round(Color.blue(color) * factor),255));
     }
     public void setActiveTask(logEntry le) {
-        if (le == null)
+        if (le == null || !le.isOngoing())
             setActiveTask(endButtonMonogram);
         else {
             Log.d("SquareDays", "Setting active task [logEntry]");
