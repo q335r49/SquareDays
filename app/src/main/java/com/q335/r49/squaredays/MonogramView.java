@@ -11,25 +11,23 @@ import android.widget.TextView;
 public class MonogramView extends TextView {
     static float minMaxSize = 1000f;
     private static final float[] FILTER = {
-            -1,     0,     0,   0,  255, // red
-            0,     -1,     0,   0,  255, // green
-            0,     0,     -1,   0,  255, // blue
-            0,     0,     0,   1,  0  // alpha
+            -1, 0, 0, 0,255, // red
+            0, -1, 0, 0,255, // green
+            0,  0,-1, 0,255, // blue
+            0,  0, 0, 1,  0  // alpha
     };
     private static final float[] NORM_FILTER = {
-            -0.25f,     0,     0,   0,  64, // red
-            0,     -0.25f,     0,   0,  64, // green
-            0,     0,     -0.25f,   0,  64, // blue
-            0,     0,     0,   1,  0  // alpha
+            -0.25f,0,     0,     0,64, // red
+            0,     -0.25f,0,     0,64, // green
+            0,     0,     -0.25f,0,64, // blue
+            0,     0,     0,     1,0   // alpha
     };
-    public boolean active = false;
-    Paint ActivePaint;
     public String Monogram;
-    Paint mPaint;
-    Rect bounds;
-    int cHeight;
-    int cWidth;
+    int cWidth, cHeight;
     float originX, originY;
+    Paint mPaint, ActivePaint;
+    Rect bounds;
+    public boolean active;
     public MonogramView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mPaint = new Paint();
@@ -42,7 +40,6 @@ public class MonogramView extends TextView {
             ActivePaint.setStyle(Paint.Style.FILL);
             ActivePaint.setTypeface(MainActivity.CommandFont);
             ActivePaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-
         bounds = new Rect();
     }
     public void setColor(int color) {
@@ -54,7 +51,6 @@ public class MonogramView extends TextView {
         mPaint.setColor(color);
         mPaint.setColorFilter(new ColorMatrixColorFilter(NORM_FILTER));
     }
-
     @Override
     public void onDraw(Canvas canvas) {
         mPaint.setTextSize(minMaxSize);
@@ -64,33 +60,23 @@ public class MonogramView extends TextView {
         originY = cHeight / 2f - fm.ascent - 2*fm.descent;
         if (!active)
             canvas.drawText(Monogram, originX, originY, mPaint);
-        else if (active) {
+        else {
             ActivePaint.setTextSize(minMaxSize);
             ActivePaint.setStrokeWidth(minMaxSize/10f);
             canvas.drawText(Monogram, originX, originY, ActivePaint);
         }
     }
-
     @Override
     public void onSizeChanged(int w, int h, int oldw, int oldh) {
-        cHeight = h;
         cWidth = w;
-        CharSequence seq = super.getText();
-        Monogram = (seq == null || seq.length() < 1 ? " " : Character.toString(seq.charAt(0)));
+        cHeight = h;
         mPaint.getTextBounds(Monogram, 0, 1, bounds);
-
-        float scalingFactorX =0.9f * (float) w / (float) bounds.width();
-        float scalingFactorY =0.9f * (float) h / (float) bounds.height();
-        float size = mPaint.getTextSize()*Math.min(scalingFactorX,scalingFactorY);
+        float size = mPaint.getTextSize()*Math.min(0.9f * (float) w / (float) bounds.width(),0.9f * (float) h / (float) bounds.height());
         if (size < minMaxSize)
             minMaxSize = size;
     }
-
-    public void setBackgroundColor(int color) {
-
-    }
-
-    public int getBackgroundCOlor() {
-        return 0;
+    @Override
+    public void onTextChanged (CharSequence text, int start, int lengthBefore, int lengthAfter) {
+        Monogram = text.length() > 0 ? Character.toString(text.charAt(0)) : " ";
     }
 }

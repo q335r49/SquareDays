@@ -40,9 +40,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
-//TODO: $$$ Make file writing more efficient
-//TODO: $$$ Day of the week on Grid??
-//TODO: $$$ Need some way to mark and select instant times -- probably by modifying the messagebox
 //TODO: $$$ Instant tasks & Spending tracking
 //TODO: $$$ Better help
 
