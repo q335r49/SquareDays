@@ -49,15 +49,15 @@ class logEntry {
     private static final int CMD_ADD_COMMENT = 10;
     private static final int CMD_END_TASK = 11;
     static final int MESS_CLEAR_LOG = 100;
-
     private int command;
         int getMessage() { return command; }
     Paint paint;
         void setColor(int color) { paint.setColor(color); }
-    String comment;
     long start;
     long end;
+    String comment;
         void setEnd(long end) {onGoing = false; this.end = end; };
+        boolean isBadInterval() { return !onGoing && start > end; }
     private boolean onGoing = false;
         boolean isOngoing() { return onGoing; }
 

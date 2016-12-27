@@ -483,7 +483,7 @@ class CalendarWin {
             return curTask;
         } else {
             List<logEntry> removalList = new ArrayList<>();
-            if (!le.isOngoing() && le.start >= le.end)
+            if (le.isBadInterval())
                 return curTask;
             for (logEntry e : shapeIndex) {
                 if (e.isOngoing()) {
