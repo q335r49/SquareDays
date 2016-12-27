@@ -496,12 +496,8 @@ class CalendarWin {
                         }
                     } else {
                         if (le.start <= e.start) {
-                            if (le.end > e.start) {
-                                if (le.end >= e.end)
-                                    shapeIndex.remove(e);
-                                else
-                                    e.start = le.end;
-                            }
+                            if (le.end > e.start)
+                                e.start = le.end;
                         } else {
                             e.setEnd(le.start);
                             break;
@@ -518,23 +514,20 @@ class CalendarWin {
                         }
                     } else {
                         if (le.start <= e.start) {
-                            if (le.end > e.start) {
+                            if (le.end > e.start)
                                 if (le.end >= e.end)
                                     shapeIndex.remove(e);
                                 else
                                     e.start = le.end;
-                            }
                         } else {
                             if (le.end < e.end) {
                                 logEntry newLog = new logEntry(e);
                                 newLog.setEnd(le.start);
-                                e.start = le.end;
                                 shapeIndex.add(newLog);
-                                break;
-                            } else {
+                                e.start = le.end;
+                            } else
                                 e.setEnd(le.start);
-                                break;
-                            }
+                            break;
                         }
                     }
                 }
