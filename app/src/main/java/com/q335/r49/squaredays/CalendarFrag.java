@@ -192,8 +192,7 @@ class CalendarWin {
         drawBackgroundGrid();
 
         for (logEntry s : shapes)
-            drawInterval(s);
-
+            drawInterval(s, s.paint);
 
         float gridSize;
         String timeFormat;
@@ -282,9 +281,9 @@ class CalendarWin {
             drawInterval(selection,selectionStyle);
         if (curTask!= null && curTask.isOngoing())
             drawOngoingInterval(curTask,scaleA);
+        drawNowLine(now);
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
-        drawNowLine(now);
     }
     private void drawNowLine(long ts) {
         nowLineStyle.setColor(COLOR_NOW_LINE);
@@ -422,7 +421,7 @@ class CalendarWin {
             corner = midn + 1;
         }
     }
-    private void drawInterval(logEntry iv) {
+    private void drawInterval(logEntry iv, Paint paint) {
         float scaleX = iv.end < expansionComplete ? scaleB : iv.end > now ? scaleA : (float) (iv.end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
         if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start || iv.isOngoing())
             return;
@@ -436,7 +435,7 @@ class CalendarWin {
             mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                     (b[0]-c[0])*scaleX+c[0],
-                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
+                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
             corner = midn+1;
         }
         a = tsToScreen(corner, 0);
@@ -445,7 +444,7 @@ class CalendarWin {
         mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
                 (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                 (b[0]-c[0])*scaleX+c[0],
-                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
+                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
     private void drawOngoingInterval(logEntry iv, float scaleB) {
         if (iv.markedForRemoval() || iv.start == -1 || now <= iv.start)
@@ -478,31 +477,6 @@ class CalendarWin {
         ongoingStyle.setShader(shader);
         mCanvas.drawPath(pp, ongoingStyle);
     }
-    private void drawInterval(logEntry iv, Paint paint) {
-        if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
-            return;
-        long corner = iv.start;
-        long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
-        float[] a, b, c;
-        for (; midn < iv.end; midn += 86400L) {
-            a = tsToScreen(corner, 0);
-            b = tsToScreen(midn, 1f);
-            c = tsToScreen(midn-43199L, 0.5f);
-            mCanvas.drawRect((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
-                    (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                    (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
-                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
-            corner = midn+1;
-        }
-        a = tsToScreen(corner, 0);
-        b = tsToScreen(iv.end, 1f);
-        c = tsToScreen(midn-43199L, 0.5f);
-        mCanvas.drawRect((a[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
-                (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                (b[0]-c[0])*RECT_SCALING_FACTOR_X+c[0],
-                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
-    }
-
     logEntry procCmd(logEntry LE) {
         if (LE.isCommand()) {
             if (curTask != null)
