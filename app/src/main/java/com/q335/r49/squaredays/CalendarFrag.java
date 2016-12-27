@@ -22,8 +22,7 @@ import java.util.Locale;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
-//TODO: Why is selection off??
-//TODO:     Change background color deeper into the past
+//TODO: $$$ Change background color deeper into the past
 public class CalendarFrag extends Fragment {
     PaletteRing palette;
     private ScaleView inputLayer;
@@ -424,7 +423,7 @@ class CalendarWin {
     }
     private void drawInterval(logEntry iv, Paint paint) {
         float scaleX = iv.end < expansionComplete ? scaleB : iv.end > now ? scaleA : (float) (iv.end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
-        if (iv.markedForRemoval() || iv.start == -1 || iv.end == -1 || iv.end <= iv.start || iv.isOngoing())
+        if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start || iv.isOngoing())
             return;
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
@@ -448,7 +447,7 @@ class CalendarWin {
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
     private void drawOngoingInterval(logEntry iv, float scaleB) {
-        if (iv.markedForRemoval() || iv.start == -1 || now <= iv.start)
+        if (iv.start == -1 || now <= iv.start)
             return;
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
@@ -557,5 +556,13 @@ class CalendarWin {
     }
     void clearShapes() {
         shapeIndex.clear();
+    }
+
+    void updateEntry(logEntry selection, long l, long l1) {
+        //TODO:
+    }
+
+    void removeEntry(logEntry selection) {
+        //TODO:
     }
 }

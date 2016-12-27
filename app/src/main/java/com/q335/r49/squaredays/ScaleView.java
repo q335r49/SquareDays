@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-//TODO: Reconsider how removal works!
 public class ScaleView extends View {
     private CalendarWin CW;
     private ScaleListener SL;
@@ -170,28 +169,24 @@ public class ScaleView extends View {
                     }
                 });
             }
-            alertDialogBuilder
-                    .setCancelable(true)
-                    .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            long newstart = dateToTs(startEntry.getText().toString());
-                            long newend = dateToTs(endEntry.getText().toString());
-                            selection.setInterval(newstart,newend);
-                            //TODO: bring shape to foreground? (Actually, wait until we redo Addshape)
-                            invalidate();
-                        }
-                    })
-                    .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            selection.markForRemoval();
-                            invalidate();
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            dialog.cancel();
-                        }
-                    });
+            alertDialogBuilder.setCancelable(true);
+            alertDialogBuilder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    CW.updateEntry(selection, dateToTs(startEntry.getText().toString()), dateToTs(endEntry.getText().toString()));
+                    invalidate();
+                }
+            });
+            alertDialogBuilder.setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    CW.removeEntry(selection);
+                    invalidate();
+                }
+            });
+            alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    dialog.cancel();
+                }
+            });
             alertDialogBuilder.create().show();
         }
     }};

@@ -39,14 +39,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
-//TODO: Make file writing more efficient
-//TODO: Day of the week on Grid??
+//TODO: $$$ Make file writing more efficient
+//TODO: $$$ Day of the week on Grid??
 //TODO: $$$ Need some way to mark and select instant times -- probably by modifying the messagebox
 //TODO: $$$ Instant tasks & Spending tracking
 //TODO: $$$ Better help
 
 class logEntry {
-    private static final int REMOVE = -1;
     private static final int CMD_ADD_COMMENT = 10;
     private static final int CMD_END_TASK = 11;
     static final int MESS_CLEAR_LOG = 100;
@@ -58,7 +57,6 @@ class logEntry {
     String comment;
     long start;
     long end;
-        void setInterval(long start, long end) { this.start = start; this.end = end; }
         void setEnd(long end) {onGoing = false; this.end = end; };
     private boolean onGoing = false;
         boolean isOngoing() { return onGoing; }
@@ -73,8 +71,6 @@ class logEntry {
         onGoing = e.onGoing;
     }
 
-    void markForRemoval() { command = REMOVE; }
-    boolean markedForRemoval() {return (command == REMOVE); }
     boolean isCommand() {return command >= CMD_ADD_COMMENT && command < MESS_CLEAR_LOG; }
     boolean isMessage() {return command >= MESS_CLEAR_LOG;}
     void procCommand(logEntry com) {
@@ -150,7 +146,7 @@ class logEntry {
     }
     @Override
     public String toString() {
-        if (markedForRemoval() || paint == null)
+        if (paint == null)
             return null;
         else if (onGoing)
             return (new Date(start*1000L)).toString() + ">"
