@@ -17,7 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.SeekBar;
-import android.widget.TextView;
+
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -32,36 +32,34 @@ import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
-//TODO: Change background color deeper into the past
 public class CommandsFrag extends Fragment {
-    static int COLOR_ERROR;
     static int COLOR_END_BOX;
-
     SharedPreferences sprefs;
+    public interface OnFragmentInteractionListener {
+        void pushTask(logEntry log);
+        void restoreABState();
+        void setABState(String comment);
+        void setBF(CommandsFrag bf);
+        PaletteRing getPalette();
+    }
     private OnFragmentInteractionListener mListener;
     private FlexboxLayout gridV;
     private List<String[]> commands = new ArrayList<>();
     private final static int COMMENT_IX = 0;
     private final static int COLOR_IX = 1;
     private LayoutInflater inflater;
-    Context context;
-
+    private Context context;
     private PaletteRing palette;
-
     private int dpToPx(int dp) {
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
-
     private MonogramView activeView;
+    private MonogramView endButtonMonogram;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
         context = getActivity().getApplicationContext();
     }
     @Override
@@ -89,23 +87,20 @@ public class CommandsFrag extends Fragment {
             Type listType = new TypeToken<List<String[]>>() { }.getType();
             commands = new Gson().fromJson(s, listType);
         }
-        palette.add(new String[] {"#1abc9c", "#2ecc71", "#3498db", "#9b59b6", "#34495e", "#16a085",
-                "#27ae60", "#2980b9", "#8e44ad", "#2c3e50", "#f1c40f",
-                "#e67e22", "#e74c3c", "#ecf0f1", "#95a5a6", "#f39c12",
-                "#d35400", "#c0392b", "#bdc3c7", "#7f8c8d", "#3b5999",
-                "#21759b", "#dd4b39", "#bd081c"});
+        palette.add(new String[]     {"#1abc9c", "#2ecc71", "#3498db", "#9b59b6", "#34495e", "#16a085",
+                "#27ae60", "#2980b9", "#8e44ad", "#2c3e50", "#f1c40f", "#e67e22", "#e74c3c", "#ecf0f1",
+                "#95a5a6", "#f39c12", "#d35400", "#c0392b", "#bdc3c7", "#7f8c8d", "#3b5999", "#21759b",
+                "#dd4b39", "#bd081c"});
         for (String[] sa : commands)
             palette.add(MainActivity.parseColor(sa[COLOR_IX]));
         makeView();
     }
-
     public static int darkenColor(int color, float factor) {
         return Color.argb(Color.alpha(color),
                 Math.min(Math.round(Color.red(color) * factor),255),
                 Math.min(Math.round(Color.green(color) * factor),255),
                 Math.min(Math.round(Color.blue(color) * factor),255));
     }
-
     public void setActiveTask(logEntry le) {
         if (le == null)
             setActiveTask(endButtonMonogram);
@@ -145,7 +140,6 @@ public class CommandsFrag extends Fragment {
         }
     }
 
-    MonogramView endButtonMonogram;
     private void makeView() {
         Collections.sort(commands, new Comparator<String[]>() {
             public int compare(String[] s1, String[] s2) {
@@ -153,36 +147,33 @@ public class CommandsFrag extends Fragment {
             }
         });
         FlexboxLayout.LayoutParams lp = new FlexboxLayout.LayoutParams(dpToPx(30),dpToPx(30));
-        lp.minHeight = dpToPx(50);
-        lp.minWidth = dpToPx(80);
-        lp.maxHeight = dpToPx(200);
-        lp.maxWidth = dpToPx(200);
-        lp.flexGrow=FlexboxLayout.LayoutParams.ALIGN_SELF_STRETCH;
-        lp.flexShrink=0.2f;
+            lp.minHeight = dpToPx(50);
+            lp.minWidth = dpToPx(80);
+            lp.maxHeight = dpToPx(200);
+            lp.maxWidth = dpToPx(200);
+            lp.flexGrow=FlexboxLayout.LayoutParams.ALIGN_SELF_STRETCH;
+            lp.flexShrink=0.2f;
         int cornerRadius = dpToPx(10);
+        final LayoutInflater inflaterF = inflater;
 
         gridV.removeAllViews();
-        final LayoutInflater inflaterF = inflater;
         for (int ix = 0; ix<commands.size(); ix++) {
             final String[] comF = commands.get(ix);
             final int ixF = ix;
             View child = inflaterF.inflate(R.layout.gv_list_item, null);
-                gridV.addView(child,lp);
-            TextView label = (TextView) (child.findViewById(R.id.text1));
-                label.setText(comF[COMMENT_IX]);
+            gridV.addView(child,lp);
             final int bg_Norm = MainActivity.parseColor(comF[COLOR_IX]);
             final int bg_Press = CommandsFrag.darkenColor(bg_Norm,0.7f);
-
-            GradientDrawable rrect = new GradientDrawable();
-            rrect.setCornerRadius(cornerRadius);
-            rrect.setColor(bg_Norm);
-            child.setBackground(rrect);
             MonogramView mv = (MonogramView) child.findViewById(R.id.text1);
-            mv.setColor(bg_Norm);
-
+                mv.setText(comF[COMMENT_IX]);
+                mv.setColor(bg_Norm);
+            GradientDrawable rrect = new GradientDrawable();
+                rrect.setCornerRadius(cornerRadius);
+                rrect.setColor(bg_Norm);
+            child.setBackground(rrect);
             child.setOnTouchListener(new View.OnTouchListener() {
                 private float actionDownX, actionDownY;
-                private boolean has_run, has_dragged;
+                private boolean hasRun, hasDragged;
                 private final Handler handler = new Handler();
                 private Runnable mLongPressed;
                 private final float ratio_dp_px = 1000f /(float) dpToPx(1000);
@@ -195,24 +186,18 @@ public class CommandsFrag extends Fragment {
                             v.getParent().requestDisallowInterceptTouchEvent(true);
                             ((GradientDrawable) v.getBackground()).setColor(bg_Press);
                             final View finalView = v;
-                            has_run = has_dragged = false;
+                            hasRun = hasDragged = false;
                             mListener.setABState(comF[COMMENT_IX]);
                             mLongPressed = new Runnable() {
                                 public void run() {
-                                    has_run = true;
+                                    hasRun = true;
                                     mListener.restoreABState();
                                     ((GradientDrawable) finalView.getBackground()).setColor(bg_Norm);
-
-                                    Context context = getContext();
                                     View promptView = inflater.inflate(R.layout.prompts, null);
-                                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context);
-                                    alertDialogBuilder.setView(promptView);
-
                                     final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
                                         commentEntry.setText(comF[COMMENT_IX]);
                                     final View curColorV = promptView.findViewById(R.id.CurColor);
-                                    curColorV.setBackgroundColor(MainActivity.parseColor(comF[COLOR_IX]));
-
+                                        curColorV.setBackgroundColor(MainActivity.parseColor(comF[COLOR_IX]));
                                     final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                                     final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
                                     final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
@@ -254,10 +239,10 @@ public class CommandsFrag extends Fragment {
                                     final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
                                     final int childCount = paletteView.getChildCount();
                                     for (int i = 0; i < childCount ; i++) {
-                                        View v = paletteView.getChildAt(i);
-                                        v.setBackgroundColor(palette.get(i));
-                                        final int bg = ((ColorDrawable) v.getBackground()).getColor();
-                                        v.setOnClickListener(new View.OnClickListener() {
+                                        View pv = paletteView.getChildAt(i);
+                                        pv.setBackgroundColor(palette.get(i));
+                                        final int bg = ((ColorDrawable) pv.getBackground()).getColor();
+                                        pv.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
                                                 seekRed.setProgress(Color.red(bg));
@@ -267,6 +252,9 @@ public class CommandsFrag extends Fragment {
                                             }
                                         });
                                     }
+
+                                    final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                                    alertDialogBuilder.setView(promptView);
                                     alertDialogBuilder
                                             .setCancelable(true)
                                             .setPositiveButton("Update", new DialogInterface.OnClickListener() {
@@ -287,23 +275,23 @@ public class CommandsFrag extends Fragment {
                                                 public void onClick(DialogInterface dialog, int id) {
                                                     dialog.cancel();
                                                 }
-                                            });
-                                    alertDialogBuilder.create().show();
+                                            })
+                                            .create().show();
                                 }
                             };
                             handler.postDelayed(mLongPressed,1200);
                             return true;
                         case MotionEvent.ACTION_MOVE:
-                            if (has_run)
+                            if (hasRun)
                                 return false;
                             int delay = (int) Math.abs((event.getX() - actionDownX)*ratio_dp_px);
                             int duration = (int) Math.abs((event.getY() - actionDownY)*ratio_dp_px);
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
                             if (duration != 0 || delay != 0) {
-                                if (!has_dragged) {
+                                if (!hasDragged) {
                                     handler.removeCallbacks(mLongPressed);
-                                    has_dragged = true;
+                                    hasDragged = true;
                                 }
                                 String abString = "..";
                                 long now = System.currentTimeMillis()/1000L;
@@ -314,11 +302,11 @@ public class CommandsFrag extends Fragment {
                                     abString += " for " + Integer.toString(duration / 60) + ":" + String.format(Locale.US, "%02d", duration % 60)
                                             + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
                                 mListener.setABState(abString.isEmpty()? comF[COMMENT_IX] : abString);
-                            } else if (has_dragged)
+                            } else if (hasDragged)
                                 mListener.setABState("Cancel");
                             return true;
                         case MotionEvent.ACTION_UP:
-                            if (has_run)
+                            if (hasRun)
                                 return false;
                             ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
                             handler.removeCallbacks(mLongPressed);
@@ -326,7 +314,7 @@ public class CommandsFrag extends Fragment {
                             duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
                             delay = delay > 50 ? delay - 50 : 0;
                             duration = duration > 50 ? duration - 50 : 0;
-                            if (delay != 0 || duration != 0 || !has_dragged) {
+                            if (delay != 0 || duration != 0 || !hasDragged) {
                                 if (duration == 0) {
                                     mListener.pushTask(logEntry.newOngoingTask(MainActivity.parseColor(comF[COLOR_IX]), System.currentTimeMillis() / 1000L - delay * 60, comF[COMMENT_IX]));
                                     setActiveTask(v);
@@ -345,55 +333,44 @@ public class CommandsFrag extends Fragment {
                 }
             });
         }
-
         final int bg_Norm = COLOR_END_BOX;
         final int bg_Press = darkenColor(bg_Norm,0.7f);
         final View endButton = inflaterF.inflate(R.layout.gv_list_item, null);
-
+        gridV.addView(endButton,lp);
         GradientDrawable rrect = new GradientDrawable();
-        rrect.setCornerRadius(cornerRadius);
-        rrect.setColor(bg_Norm);
+            rrect.setCornerRadius(cornerRadius);
+            rrect.setColor(bg_Norm);
         endButton.setBackground(rrect);
         endButtonMonogram = (MonogramView) endButton.findViewById(R.id.text1);
-        endButtonMonogram.setColor(bg_Norm);
-
-        TextView label = (TextView) (endButton.findViewById(R.id.text1));
-        label.setText("!");
-        gridV.addView(endButton,lp);
+            endButtonMonogram.setColor(bg_Norm);
+            endButtonMonogram.setText("!");
         endButton.setOnTouchListener(new View.OnTouchListener() {
-            private float offset_0x;
-            private float offset_0y;
+            private float actionDownX, actionDownY;
+            private boolean hasRun, hasDragged;
             private final Handler handler = new Handler();
             private Runnable mLongPressed;
-            boolean has_run = false;
-            boolean has_dragged;
             private final float ratio_dp_px = 1000f /(float) dpToPx(1000);
-
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getActionMasked()) {
                     case MotionEvent.ACTION_DOWN:
-                        offset_0x = event.getX();
-                        offset_0y = event.getY();
+                        actionDownX = event.getX();
+                        actionDownY = event.getY();
                         v.getParent().requestDisallowInterceptTouchEvent(true);
                         ((GradientDrawable) v.getBackground()).setColor(bg_Press);
-                        has_run = false;
-                        has_dragged = false;
+                        hasRun = hasDragged = false;
                         mLongPressed = new Runnable() {
                             public void run() {
-                                has_run = true;
+                                hasRun = true;
                                 mListener.restoreABState();
                                 ((GradientDrawable) endButton.getBackground()).setColor(bg_Norm);
-                                LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-                                View promptView = layoutInflater.inflate(R.layout.prompts, null);
+                                View promptView = inflater.inflate(R.layout.prompts, null);
                                 final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
                                 final View curColorV = promptView.findViewById(R.id.CurColor);
-
                                 final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                                 final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
                                 final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
                                 final SeekBar seekBlue = (SeekBar) promptView.findViewById(R.id.seekBlue);
-
                                 seekRed.setProgress(Color.red(curColor));
                                 seekRed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                                     @Override
@@ -444,6 +421,7 @@ public class CommandsFrag extends Fragment {
                                         }
                                     });
                                 }
+
                                 final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
                                 alertDialogBuilder.setView(promptView);
                                 alertDialogBuilder
@@ -468,16 +446,16 @@ public class CommandsFrag extends Fragment {
                         handler.postDelayed(mLongPressed,1200);
                         return true;
                     case MotionEvent.ACTION_MOVE:
-                        if (has_run)
+                        if (hasRun)
                             return false;
-                        int delay = (int) Math.abs((event.getX() - offset_0x)*ratio_dp_px);
-                        int duration = (int) Math.abs((event.getY() - offset_0y)*ratio_dp_px);
+                        int delay = (int) Math.abs((event.getX() - actionDownX)*ratio_dp_px);
+                        int duration = (int) Math.abs((event.getY() - actionDownY)*ratio_dp_px);
                         delay = delay > 50 ? delay - 50 : 0;
                         duration = duration > 50 ? duration - 50 : 0;
                         if (duration != 0 || delay  != 0) {
-                            if (!has_dragged) {
+                            if (!hasDragged) {
                                 handler.removeCallbacks(mLongPressed);
-                                has_dragged = true;
+                                hasDragged = true;
                             }
                             String abString = "..";
                             long now = System.currentTimeMillis()/1000L;
@@ -487,16 +465,16 @@ public class CommandsFrag extends Fragment {
                                 abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
                                         + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay))) + ")";
                             mListener.setABState(abString.isEmpty()? "End Task" : abString);
-                        } else if (has_dragged)
+                        } else if (hasDragged)
                             mListener.setABState("Cancel");
                         return true;
                     case MotionEvent.ACTION_UP:
-                        if (has_run)
+                        if (hasRun)
                             return false;
                         ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
                         handler.removeCallbacks(mLongPressed);
-                        delay = (int) Math.abs((event.getX() - offset_0x) * ratio_dp_px);
-                        duration = (int) Math.abs((event.getY() - offset_0y) * ratio_dp_px);
+                        delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
+                        duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
                         delay = delay > 50 ? delay - 50 : 0;
                         duration = duration > 50 ? duration - 50 : 0;
                         mListener.restoreABState();
@@ -527,7 +505,7 @@ public class CommandsFrag extends Fragment {
                                         }
                                     })
                                     .create().show();
-                        } else if (delay != 0 || !has_dragged) {
+                        } else if (delay != 0 || !hasDragged) {
                             mListener.pushTask(logEntry.newEndCommand(System.currentTimeMillis()/1000L - delay * 60));
                             clearActiveTask();
                         }
@@ -547,40 +525,18 @@ public class CommandsFrag extends Fragment {
 
         sprefs.edit().putString("commands", new Gson().toJson(commands)).apply();
     }
-
-    public CommandsFrag() { } // Required empty public constructor
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private String mParam1;
-    private String mParam2;
-    public static CommandsFrag newInstance(String param1, String param2) {
-        CommandsFrag fragment = new CommandsFrag();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    public CommandsFrag() { }
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
+        if (context instanceof OnFragmentInteractionListener)
             mListener = (OnFragmentInteractionListener) context;
-        } else {
+        else
             throw new RuntimeException(context.toString() + " must implement OnFragmentInteractionListener");
-        }
     }
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
-    }
-
-    public interface OnFragmentInteractionListener {
-        void pushTask(logEntry log);
-        void restoreABState();
-        void setABState(String comment);
-        void setBF(CommandsFrag bf);
-        PaletteRing getPalette();
     }
 }

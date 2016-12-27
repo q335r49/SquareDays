@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
+//TODO:     Change background color deeper into the past
 public class CalendarFrag extends Fragment {
     PaletteRing palette;
     private ScaleView inputLayer;
