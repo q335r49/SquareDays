@@ -56,30 +56,7 @@ class logEntry {
     static final int MESS_CLEAR_LOG = 100;
 
     private int command;
-        void markForRemoval() { command = REMOVE; }
-        boolean markedForRemoval() {return (command == REMOVE); }
-        boolean isCommand() {return command >= CMD_ADD_COMMENT && command < MESS_CLEAR_LOG; }
-        boolean isMessage() {return command >= MESS_CLEAR_LOG;}
-        void procCommand(logEntry com) {
-            switch (com.command) {
-                case CMD_ADD_COMMENT:
-                    comment += com.comment;
-                    break;
-                case CMD_END_TASK:
-                    if (onGoing)
-                        end = com.end;
-                    onGoing = false;
-                    break;
-            }
-        }
         int getMessage() { return command; }
-        void updateTask(logEntry newTask) {
-            if (onGoing && newTask.onGoing) {
-                onGoing = false;
-                end = newTask.start;
-            }
-        }
-
     Paint paint;
         void setColor(int color) { paint.setColor(color); }
     String comment;
@@ -87,9 +64,35 @@ class logEntry {
     long end;
         void setInterval(long start, long end) { this.start = start; this.end = end; }
         void setEnd(long end) {onGoing = false; this.end = end; };
-    logEntry() { }
     private boolean onGoing = false;
         boolean isOngoing() { return onGoing; }
+
+    private logEntry() {}
+    logEntry(logEntry e) {
+        command = e.command;
+        paint = new Paint(e.paint);
+        comment = e.comment;
+        start = e.start;
+        end = e.end;
+        onGoing = e.onGoing;
+    }
+
+    void markForRemoval() { command = REMOVE; }
+    boolean markedForRemoval() {return (command == REMOVE); }
+    boolean isCommand() {return command >= CMD_ADD_COMMENT && command < MESS_CLEAR_LOG; }
+    boolean isMessage() {return command >= MESS_CLEAR_LOG;}
+    void procCommand(logEntry com) {
+        switch (com.command) {
+            case CMD_ADD_COMMENT:
+                comment += com.comment;
+                break;
+            case CMD_END_TASK:
+                if (onGoing)
+                    end = com.end;
+                onGoing = false;
+                break;
+        }
+    }
 
     static logEntry newStartTime(long start) {
         logEntry le = new logEntry();
@@ -131,7 +134,7 @@ class logEntry {
             le.command = MESS_CLEAR_LOG;
         return le;
     }
-    public static logEntry newFromString(String s) throws IllegalArgumentException {
+    static logEntry newFromString(String s) throws IllegalArgumentException {
         String[] args = s.split(">",-1);
         if (args.length < 5)
             throw new IllegalArgumentException("Unparsable string, need at least 6 arguments: " + s);
