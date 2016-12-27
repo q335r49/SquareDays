@@ -478,13 +478,16 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 File logFile = new File(context.getFilesDir(), LOG_FILE);
-                                if (logFile.delete()) {
-                                    pushTask(logEntry.newClearMess());
-                                    setPermABState(null);
-                                    if (GF.isVisible())
-                                        popTasks();
+                                if (logFile.exists()) {
+                                    if (logFile.delete()) {
+                                        pushTask(logEntry.newClearMess());
+                                        setPermABState(null);
+                                        if (GF.isVisible())
+                                            popTasks();
+                                    } else
+                                        Log.d("SquareDays", "Log clear failed!");
                                 } else
-                                    Log.d("SquareDays","Log clear failed!");
+                                    pushTask(logEntry.newClearMess());
                             }
                         })
                         .show();

@@ -321,6 +321,7 @@ class CalendarWin {
             return;
         }
         long peak,bot;
+        float rPeakBot, rBotPeak, wPlatBase, wBasePlat;
         if (curTask != null && curTask.isOngoing()) {
             peak = curTask.start;
             if (peak > now)
@@ -328,16 +329,20 @@ class CalendarWin {
             if (peak <= midn-86400)
                 peak = midn-86399;
             bot = now + curveLength;
+            rPeakBot = (float) (now - peak) / (float) maxStretch;
+            rPeakBot = rPeakBot > 1f ? 1f : rPeakBot;
+            rBotPeak = 1 - rPeakBot;
+            wPlatBase = 0.6f;
+            wBasePlat = 1-wPlatBase;
         } else {
             peak = now;
             bot = now + curveLength;
+            rPeakBot = (float) (now - peak) / (float) maxStretch;
+            rPeakBot = rPeakBot > 1f ? 1f : rPeakBot;
+            rBotPeak = 1 - rPeakBot;
+            wPlatBase = 0.99f;
+            wBasePlat = 1-wPlatBase;
         }
-        float rPeakBot = (float) (now - peak) / (float) maxStretch;
-        rPeakBot = rPeakBot > 1f ? 1f : rPeakBot;
-        float rBotPeak = 1 - rPeakBot;
-        float wPlatBase = 0.6f;
-        float wBasePlat = 1-wPlatBase;
-
         midn = prevMidn(now) + 86399L;
         if (bot < midn) {
             a = tsToScreen(peak, 0);
