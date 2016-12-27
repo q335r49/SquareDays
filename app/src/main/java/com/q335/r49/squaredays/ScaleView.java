@@ -179,7 +179,7 @@ public class ScaleView extends View {
                             long newstart = dateToTs(startEntry.getText().toString());
                             long newend = dateToTs(endEntry.getText().toString());
                             selection.setInterval(newstart,newend);
-                            //TODO: bring shape to foreground?
+                            //TODO: bring shape to foreground? (Actually, wait until we redo Addshape)
                             invalidate();
                         }
                     })

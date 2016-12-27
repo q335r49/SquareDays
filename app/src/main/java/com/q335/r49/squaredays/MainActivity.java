@@ -8,12 +8,10 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.res.ResourcesCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v4.app.Fragment;
@@ -74,9 +72,7 @@ class logEntry {
                     break;
             }
         }
-        int getMessage() {
-            return command;
-        }
+        int getMessage() { return command; }
         void updateTask(logEntry newTask) {
             if (onGoing && newTask.onGoing) {
                 onGoing = false;
@@ -94,14 +90,6 @@ class logEntry {
     private boolean onGoing = false;
         boolean isOngoing() { return onGoing; }
 
-    static logEntry newInterval(long start_ts, long end_ts, int color) {
-        logEntry le = new logEntry();
-            le.paint = new Paint();
-                le.paint.setColor(color);
-            le.start = start_ts;
-            le.end = end_ts;
-        return le;
-    }
     static logEntry newStartTime(long start) {
         logEntry le = new logEntry();
             le.start = start;
@@ -182,7 +170,7 @@ class logEntry {
     }
 }
 public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener {
-    static int COLOR_NO_TASK;
+    static int COLOR_BACKGROUND;
     static int COLOR_ERROR;
     static Typeface CommandFont;
     static int parseColor(String s) {
@@ -300,41 +288,31 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
     @Override
     protected void onPause() {
         super.onPause();
-        writeLogsToFile();  //TODO: find better time to call this
+        writeLogsToFile();
         Log.d("Squaredays","File written");
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         CalendarWin.COLOR_SCALE_TEXT = ResourcesCompat.getColor(getResources(), R.color.scale_text, null);
         CalendarWin.COLOR_GRID_BACKGROUND = ResourcesCompat.getColor(getResources(), R.color.grid_background, null);
         CalendarWin.COLOR_NOW_LINE = ResourcesCompat.getColor(getResources(), R.color.now_line, null);
         CalendarWin.COLOR_STATUS_BAR = ResourcesCompat.getColor(getResources(), R.color.status_bar, null);
-        COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
-        CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
-        COLOR_NO_TASK =  ResourcesCompat.getColor(getResources(), R.color.no_task, null);   //TODO: clean up
         CalendarWin.COLOR_SELECTION = ResourcesCompat.getColor(getResources(), R.color.selection, null);
-
+        CommandsFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
+        COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
+        COLOR_BACKGROUND =  ResourcesCompat.getColor(getResources(), R.color.background, null);
         CommandFont = Typeface.createFromAsset(getAssets(),  "fonts/22203___.TTF");
-
         palette = new PaletteRing(PALETTE_LENGTH);
-
-        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         context = getApplicationContext();
         sprefs = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
-
         AB = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(AB);
-        AB.setBackgroundColor(COLOR_NO_TASK);
-//        ActionBar bar = getSupportActionBar();
-//        bar.hide();
-        //Drawable drawable = ContextCompat.getDrawable(getApplicationContext(),R.drawable.change_pass);
-        //AB.setOverflowIcon(drawable);
-
+        AB.setBackgroundColor(COLOR_BACKGROUND);
+        FM = getSupportFragmentManager();
         BF = new CommandsFrag();
         GF = new CalendarFrag();
-        FM = getSupportFragmentManager();
         mSectionsPagerAdapter = new SectionsPagerAdapter(FM,BF,GF);
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
