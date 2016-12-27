@@ -1,5 +1,4 @@
 package com.q335.r49.squaredays;
-
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -29,11 +28,9 @@ public class ScaleView extends View {
     private ScaleListener SL;
     private ScaleGestureDetector mScaleDetector;
     private Context appContext;
-
     private PaletteRing palette;
 
     public logEntry getCurTask() { return CW == null? null : CW.getCurTask(); }
-
     public logEntry procTask(logEntry le) {
             if (le.isMessage()) {
                 switch (le.getMessage()) {
@@ -246,11 +243,6 @@ public class ScaleView extends View {
                 return true;
         }
     }
-
-    public boolean isFullyLoaded() {
-        return CW != null;
-    }
-
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
