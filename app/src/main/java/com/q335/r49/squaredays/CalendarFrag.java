@@ -152,7 +152,7 @@ class CalendarWin {
         gy = (gy-cy)/RECT_SCALING_FACTOR_Y;
         return gy > 0.5f ? 0.5f + cy : gy < -0.5f? -0.5f + cy : gy + cy;
     }
-    private long screenToTs(float sx, float sy) { return gridToTs(screenToGridX(sx), screenToGridY(sy)); }
+    long screenToTs(float sx, float sy) { return gridToTs(screenToGridX(sx), screenToGridY(sy)); }
     private long gridToTs(float gx, float gy) { return (long) (((float) Math.floor(gy)*7 + (gx < 0f ?  0f : gx >= 6f ? 6f : (float) Math.floor(gx)) + (gy - (float) Math.floor(gy)))*86400f) + orig; }
     void shift(float x, float y) {
         g0y -= y * rGridScreenH;
@@ -168,7 +168,7 @@ class CalendarWin {
     }
     logEntry getSelectedShape(float sx, float sy) {
         long ts = screenToTs(sx, sy);
-        logEntry closest = shapeIndex.floor(logEntry.newStartTime(ts));
+        logEntry closest = shapeIndex.ceiling(logEntry.newStartTime(ts));
         return closest == null? null : closest.end < ts ? null : closest;
     }
 

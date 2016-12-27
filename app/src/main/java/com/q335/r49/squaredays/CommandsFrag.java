@@ -32,7 +32,7 @@ import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
-//TODO: uhoh
+//TODO:  uhoh
 public class CommandsFrag extends Fragment {
     static int COLOR_END_BOX;
     SharedPreferences sprefs;

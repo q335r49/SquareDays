@@ -69,7 +69,7 @@ public class ScaleView extends View {
             cal.set(Calendar.MINUTE, 0);
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);
-        CW = new CalendarWin(cal.getTimeInMillis()/1000L-52000L,8f,1.5f,-0.8f,-0.1f);
+        CW = new CalendarWin(cal.getTimeInMillis()/1000L,8f,1.5f,-0.8f,-0.1f);
         CW.setDPIScaling(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
     }
 
@@ -194,7 +194,6 @@ public class ScaleView extends View {
                     });
             alertDialogBuilder.create().show();
         }
-
     }};
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
@@ -216,7 +215,7 @@ public class ScaleView extends View {
                             + String.format(Locale.US, " (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
                             TimeUnit.MILLISECONDS.toMinutes(duration)%60));
                 } else
-                    CW.setStatusText("");
+                    CW.setStatusText(new SimpleDateFormat(" h:mm", Locale.US).format(new Date(CW.screenToTs(x,y)*1000L)));
                 CW.setSelected(selection);
                 invalidate();
                 return true;
