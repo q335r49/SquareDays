@@ -202,7 +202,7 @@ public class ScaleView extends View {
                 firstTouchX = lastTouchX = x;
                 firstTouchY = lastTouchY = y;
                 logEntry selection = CW.getSelectedShape(x,y);
-                if (selection != null && selection.start != -1) {
+                if (selection != null) {
                     long duration = 1000L* (selection.end - selection.start);
                     CW.setStatusText(selection.comment + ":"
                             + new SimpleDateFormat(" h:mm-", Locale.US).format(new Date(selection.start*1000L))
@@ -210,7 +210,7 @@ public class ScaleView extends View {
                             + String.format(Locale.US, " (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
                             TimeUnit.MILLISECONDS.toMinutes(duration)%60));
                 } else
-                    CW.setStatusText(new SimpleDateFormat(" h:mm", Locale.US).format(new Date(CW.screenToTs(x,y)*1000L)));
+                    CW.setStatusText("");
                 CW.setSelected(selection);
                 invalidate();
                 return true;

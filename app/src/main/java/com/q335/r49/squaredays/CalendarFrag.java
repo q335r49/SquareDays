@@ -276,7 +276,6 @@ class CalendarWin {
                 }
             }
         }
-
         if (selection!=null)
             drawInterval(selection,selectionStyle);
         if (curTask!= null && curTask.isOngoing())
@@ -484,7 +483,7 @@ class CalendarWin {
             return curTask;
         } else {
             List<logEntry> removalList = new ArrayList<>();
-            if (le.start >= le.end)
+            if (!le.isOngoing() && le.start >= le.end)
                 return curTask;
             for (logEntry e : shapeIndex) {
                 if (e.isOngoing()) {
