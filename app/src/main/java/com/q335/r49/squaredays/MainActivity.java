@@ -176,6 +176,10 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         }
     }
 
+    private boolean LogChanged;
+        public void setLogChanged() {LogChanged = true;}
+    private boolean TasksChanged;
+        public void setTasksChanged() {TasksChanged = true;}
     public void loadLogsFromFile(Context context, String filename) {
         try {
             FileInputStream fis = context.openFileInput(filename);
@@ -208,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
                 out.write(System.getProperty("line.separator").getBytes());
             }
             out.close();
+            LogChanged = false;
         } catch (Exception e) {
             Log.d("SquareDays", "File write error: " + e.toString());
             Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
