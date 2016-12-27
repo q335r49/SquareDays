@@ -39,12 +39,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
-//TODO: Reconsider how removal works
-//TODO: Clean up overlap stuff while procCmd'ing
-    //TODO: Grid rectangle should be stroked boxes
 //TODO: Make file writing more efficient
 //TODO: Day of the week on Grid??
-
 //TODO: $$$ Need some way to mark and select instant times -- probably by modifying the messagebox
 //TODO: $$$ Instant tasks & Spending tracking
 //TODO: $$$ Better help
@@ -93,7 +89,6 @@ class logEntry {
                 break;
         }
     }
-
     static logEntry newStartTime(long start) {
         logEntry le = new logEntry();
             le.start = start;
@@ -208,8 +203,6 @@ public class MainActivity extends AppCompatActivity implements CommandsFrag.OnFr
         }
     }
     public void writeLogsToFile() {
-        //TODO: ## figure out when to call this
-        //TODO: ## mark boolean changed in commands
         List<String> entries = GF.getWritableShapes();
         File internalFile = new File(context.getFilesDir(), MainActivity.LOG_FILE);
         try {
