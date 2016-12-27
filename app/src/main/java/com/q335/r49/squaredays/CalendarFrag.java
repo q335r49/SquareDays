@@ -124,6 +124,7 @@ class CalendarWin {
         statusBarStyle.setTextSize(LINE_WIDTH*2f);
         selectionStyle.setStrokeWidth(LINE_WIDTH/4f);
         nowLineStyle.setStrokeWidth(LINE_WIDTH/4f);
+        gridRadius = LINE_WIDTH;
     }
 
     private long orig;
@@ -297,7 +298,7 @@ class CalendarWin {
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
     }
     private static final long curveLength = 86400/24;
-    private static final float gridRadius = 10f;
+    private static float gridRadius = 10f;
     private static final long maxStretch = 86400/40;
     private long prevMidn(long ts) {return ts - (ts - orig + 864000000000000000L) % 86400L;}
     private void drawBackgroundGrid() {

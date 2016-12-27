@@ -32,6 +32,7 @@ import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
+//TODO: Change background color deeper into the past
 public class CommandsFrag extends Fragment {
     static int COLOR_ERROR;
     static int COLOR_END_BOX;
