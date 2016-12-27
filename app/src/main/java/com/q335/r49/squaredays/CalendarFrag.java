@@ -22,7 +22,7 @@ import java.util.Locale;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 
-//TODO: Why is selection off?
+//TODO: Why is selection off??
 //TODO:     Change background color deeper into the past
 public class CalendarFrag extends Fragment {
     PaletteRing palette;
