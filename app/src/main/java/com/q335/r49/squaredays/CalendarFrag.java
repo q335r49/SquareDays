@@ -557,12 +557,16 @@ class CalendarWin {
     void clearShapes() {
         shapeIndex.clear();
     }
-
-    void updateEntry(logEntry selection, long l, long l1) {
-        //TODO:
+    void updateEntry(logEntry selection, long start, long end) {
+        if (shapeIndex.remove(selection)) {
+            selection.start = start;
+            selection.setEnd(end);
+            procCmd(selection);
+        } else
+            Log.d("SquareDays","Cannot remove selection: " + selection.toString());
     }
-
     void removeEntry(logEntry selection) {
-        //TODO:
+        if (!shapeIndex.remove(selection))
+            Log.d("SquareDays","Cannot remove selection: " + selection.toString());
     }
 }

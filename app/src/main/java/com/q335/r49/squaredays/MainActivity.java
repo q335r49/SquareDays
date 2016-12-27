@@ -70,7 +70,6 @@ class logEntry {
         end = e.end;
         onGoing = e.onGoing;
     }
-
     boolean isCommand() {return command >= CMD_ADD_COMMENT && command < MESS_CLEAR_LOG; }
     boolean isMessage() {return command >= MESS_CLEAR_LOG;}
     void procCommand(logEntry com) {
