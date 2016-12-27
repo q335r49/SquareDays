@@ -86,6 +86,7 @@ class logEntry {
     long start;
     long end;
         void setInterval(long start, long end) { this.start = start; this.end = end; }
+        void setEnd(long end) {onGoing = false; this.end = end; };
     logEntry() { }
     private boolean onGoing = false;
         boolean isOngoing() { return onGoing; }

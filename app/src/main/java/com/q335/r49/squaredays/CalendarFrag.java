@@ -92,7 +92,7 @@ class CalendarWin {
         shapes = new ArrayList<>();
         shapeIndex = new TreeSet<>(new Comparator<logEntry>() {
             @Override
-            public int compare(logEntry o1, logEntry o2) { return o1.start > o2.start ? 1 : o1.start == o2.start ? 0 : -1; }
+            public int compare(logEntry o1, logEntry o2) { return o1.start > o2.start ? -1 : o1.start == o2.start ? 0 : 1; }
         });
         minorTickStyle = new Paint();
             minorTickStyle.setColor(COLOR_SCALE_TEXT);
@@ -479,20 +479,88 @@ class CalendarWin {
         ongoingStyle.setShader(shader);
         mCanvas.drawPath(pp, ongoingStyle);
     }
-    logEntry procCmd(logEntry LE) {
-        if (LE.isCommand()) {
+    logEntry procCmd(logEntry le) {
+        if (le.isCommand()) {
             if (curTask != null)
-                curTask.procCommand(LE);
+                curTask.procCommand(le);
+                // TODO: Handle the case of ending current task
+            return curTask;
         } else {
-            shapes.add(LE);
-            shapeIndex.add(LE);
-            if (LE.isOngoing()) {
-                if (curTask != null)
-                    curTask.updateTask(LE);
-                curTask = LE;
+            if (le.start >= le.end)
+                return curTask;
+            for (logEntry e : shapeIndex) {
+                if (e.isOngoing()) {
+                    if (le.isOngoing()) {
+                        if (le.start <= e.start) {
+                            shapeIndex.remove(e);
+                            continue;
+                        } else {
+                            e.setEnd(le.start);
+                            shapeIndex.add(le);
+                            e = le;
+                            return e;
+                        }
+                    } else {
+                        if (le.start <= e.start) {
+                            if (le.end <= e.start) {
+                                continue;
+                            } else {
+                                e.start = le.end;
+                                continue;
+                            }
+                        } else {
+                            e.setEnd(le.start);
+                            e = le;
+                            shapeIndex.add(le);
+                            return e;
+                        }
+                    }
+                } else {
+                    if (le.isOngoing()) {
+                        if (le.start <= e.start) {
+                            shapeIndex.remove(e);
+                            continue;
+                        } else {
+                            e.setEnd(le.start);
+                            e = le;
+                            shapeIndex.add(le);
+                            return e;
+                        }
+                    } else {
+                        if (le.start <= e.start) {
+                            if (le.end <= e.start) {
+                                continue;
+                            } else {
+                                if (le.end >= e.end) {
+                                    shapeIndex.remove(e);
+                                    e = le;
+                                    continue;
+                                } else {
+                                    e.start = le.end;
+                                    shapeIndex.add(le);
+                                    return e;
+                                }
+                            }
+                        } else {
+                            if (le.end < e.end) {
+                                logEntry newLog = new logEntry(e);
+                                newLog.setEnd(le.start);
+                                shapeIndex.add(newLog);
+                                e.start = le.end;
+                                shapeIndex.add(le);
+                                return e;
+                            } else {
+                                e.setEnd(le.start);
+                                shapeIndex.add(le);
+                                e = le;
+                                return e;
+                            }
+                        }
+                    }
+                }
             }
+            return curTask;
         }
-        return curTask;
     }
     List<String> getWritableShapes() {
         List<String> LogList = new ArrayList<>();
