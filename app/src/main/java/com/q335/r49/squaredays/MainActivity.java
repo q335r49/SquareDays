@@ -41,6 +41,8 @@ import java.util.Locale;
 import java.util.Queue;
 
 //TODO: $$$ Instant tasks & Spending tracking
+//TODO: pop-init called twice
+//TODO: No color in cur-task drawing
 class logEntry {
     static final int ONGOING = 1;
     static final int CMD_ADD_COMMENT = 10;

@@ -282,7 +282,7 @@ class CalendarWin {
         }
         if (selection!=null)
             drawInterval(selection,selectionStyle);
-        if (curTask!= null)
+        if (curTask != null)
             drawOngoingInterval(curTask,scaleA);
         drawNowLine(now);
         if (!statusText.isEmpty())
@@ -455,9 +455,6 @@ class CalendarWin {
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
     private void drawOngoingInterval(logEntry iv, float scaleB) {
-        Log.d("X", iv.toString(true));
-        if (!iv.isValidInterval())
-            return;
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
         float[] a, b, c;
@@ -504,6 +501,7 @@ class CalendarWin {
                     curTask = null;
                 } else
                     return null;
+                break;
             case logEntry.ONGOING:
                 if (curTask == null) {
                     curTask = a;
@@ -518,6 +516,7 @@ class CalendarWin {
                         return curTask;
                     }
                 }
+                break;
             default:
                 c = a;
         }
