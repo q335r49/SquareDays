@@ -53,7 +53,6 @@ class logEntry {
     long start;
     long end;
         void setEnd(long end) { this.end = end; };
-        boolean isValidInterval() { return start < end; }
     String comment;
 
     private logEntry() {}

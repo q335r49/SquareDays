@@ -520,7 +520,7 @@ class CalendarWin {
             default:
                 c = a;
         }
-        if (!c.isValidInterval())
+        if (c.end > c.start)
             return curTask;
         List<logEntry> removalList = new ArrayList<>();
         for (logEntry p : shapeIndex) {
