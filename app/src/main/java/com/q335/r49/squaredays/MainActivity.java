@@ -41,7 +41,7 @@ import java.util.Locale;
 import java.util.Queue;
 
 //TODO: $$$ Instant tasks & Spending tracking
-//TODO: pop-init called twice
+//TODO: Better github interface
 class logEntry {
     static final int ONGOING = 1;
     static final int CMD_ADD_COMMENT = 10;
@@ -211,13 +211,15 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         for(logEntry le = logQ.poll(); le != null; le = logQ.poll())
             GF.procTask(le);
     }
-    public void popTasksInitial() {
-        Log.d("SquareDays","Pop-init!");
+    public void onMsgProcessorLoaded() {
+        Log.d("SquareDays","Init!");
+        logEntry Task = null;
         for(logEntry le = logQ.poll(); le != null; le = logQ.poll())
-            GF.procTask(le);
-        logEntry Task = GF.getCurrentTask();
-        setActiveTask(Task);
-        setPermABState(Task);
+            Task = GF.procTask(le);
+        if (Task != null)
+            Task = GF.procTask(logEntry.newCommentCmd(""));
+        if (Task != null)
+            setActiveTask(Task);
     }
 
     private Toolbar AB;

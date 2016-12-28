@@ -30,24 +30,27 @@ public class CalendarFrag extends Fragment {
     public interface OnFragmentInteractionListener {
         void setPermABState(logEntry task);
         void setGF(CalendarFrag cf);
-        void popTasksInitial();
+        void onMsgProcessorLoaded();
         PaletteRing getPalette();
     }
     private OnFragmentInteractionListener mListener;
-    void procTask(logEntry le) { mListener.setPermABState(inputLayer.procTask(le)); }
+    logEntry procTask(logEntry le) {
+        logEntry ret = inputLayer.procTask(le);
+        mListener.setPermABState(ret);
+        return ret;
+    }
     logEntry getCurrentTask() {return inputLayer == null ? null : inputLayer.getCurTask();}
     List<String> getWritableShapes() {return inputLayer.getWritableShapes(); }
     boolean activityCreated;
     @Override
     public void onActivityCreated(Bundle savedInstance) {
         super.onActivityCreated(savedInstance);
-        mListener.popTasksInitial();
         activityCreated = true;
     }
     @Override
     public void onResume() {
         super.onResume();
-        mListener.popTasksInitial();
+        mListener.onMsgProcessorLoaded();
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -560,9 +563,11 @@ class CalendarWin {
             if (entry != null)
                 LogList.add(entry);
         }
-        entry = curTask.toLogLine(true);
-        if (entry != null)
-            LogList.add(entry);
+        if (curTask != null) {
+            entry = curTask.toLogLine(true);
+            if (entry != null)
+                LogList.add(entry);
+        }
         return LogList;
     }
     private logEntry selection;
