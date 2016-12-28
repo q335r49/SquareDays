@@ -486,7 +486,7 @@ class CalendarWin {
         mCanvas.drawPath(pp, ongoingStyle);
     }
     logEntry procCmd(logEntry a) {
-        logEntry c = null;
+        logEntry c;
         switch (a.command) {
             case logEntry.CMD_ADD_COMMENT:
                 if (curTask != null) {
@@ -517,6 +517,8 @@ class CalendarWin {
                         return curTask;
                     }
                 }
+            default:
+                c = a;
         }
         if (!c.isValidInterval())
             return curTask;

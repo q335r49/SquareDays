@@ -101,7 +101,7 @@ public class TasksFrag extends Fragment {
                 Math.min(Math.round(Color.blue(color) * factor),255));
     }
     public void setActiveTask(logEntry le) {
-        if (le == null || !le.isOngoing())
+        if (le == null)
             setActiveTask(endButtonMonogram);
         else {
             for (int i = 0; i < commands.size(); i++) {
