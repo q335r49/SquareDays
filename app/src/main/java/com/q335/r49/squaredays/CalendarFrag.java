@@ -481,69 +481,66 @@ class CalendarWin {
         ongoingStyle.setShader(shader);
         mCanvas.drawPath(pp, ongoingStyle);
     }
-    logEntry procCmd(logEntry le) {
-        if (le.isCommand()) {
+    logEntry procCmd(logEntry c) {
+        if (c.isCommand()) {
             if (curTask != null)
-                curTask.procCommand(le);
-            return curTask;
-        } else {
-            List<logEntry> removalList = new ArrayList<>();
-            if (le.isBadInterval())
-                return curTask;
-            for (logEntry e : shapeIndex) {
-                if (e.isOngoing()) {
-                    if (le.isOngoing()) {
-                        if (le.start <= e.start)
-                            removalList.add(e);
-                        else {
-                            e.setEnd(le.start);
-                            break;
-                        }
-                    } else {
-                        if (le.start <= e.start) {
-                            if (le.end > e.start)
-                                e.start = le.end;
-                        } else {
-                            e.setEnd(le.start);
-                            break;
-                        }
-                    }
-                } else {
-                    if (le.isOngoing()) {
-                        if (le.start <= e.start)
-                            removalList.add(e);
-                        else {
-                            if (le.start < e.end)
-                                e.setEnd(le.start);
-                            break;
-                        }
-                    } else {
-                        if (le.start <= e.start) {
-                            if (le.end > e.start)
-                                if (le.end >= e.end)
-                                    removalList.add(e);
-                                else
-                                    e.start = le.end;
-                        } else {
-                            if (le.end < e.end) {
-                                logEntry newLog = new logEntry(e);
-                                newLog.setEnd(le.start);
-                                shapeIndex.add(newLog);
-                                e.start = le.end;
-                            } else
-                                e.setEnd(le.start);
-                            break;
-                        }
-                    }
-                }
-            }
-            for (logEntry l : removalList)
-                shapeIndex.remove(l);
-            shapeIndex.add(le);
-            curTask = shapeIndex.isEmpty() ? null : shapeIndex.first();
-            MainActivity.setLogChanged();
+                curTask.procCommand(c);
             return curTask;
         }
+        if (c.isBadInterval())
+            return curTask;
+        List<logEntry> removalList = new ArrayList<>();
+        for (logEntry p : shapeIndex) {
+            if (p.isOngoing()) {
+                if (c.isOngoing()) {
+                    if (c.start <= p.start)
+                        removalList.add(p);
+                    else {
+                        p.setEnd(c.start);
+                        break;
+                    }
+                } else {
+                    if (c.start <= p.start) {
+                        if (c.end > p.start)
+                            p.start = c.end;
+                    } else {
+                        p.setEnd(c.start);
+                        break;
+                    }
+                }
+            } else if (c.isOngoing()) {
+                if (c.start <= p.start)
+                    removalList.add(p);
+                else {
+                    if (c.start < p.end)
+                        p.setEnd(c.start);
+                    break;
+                }
+            } else if (c.start <= p.start) {
+                if (c.end > p.start)
+                    if (c.end >= p.end)
+                        removalList.add(p);
+                    else
+                        p.start = c.end;
+            } else if (c.start > p.end)
+                break;
+            else if (c.end < p.end) {
+                logEntry newLog = new logEntry(p);
+                newLog.setEnd(c.start);
+                shapeIndex.add(newLog);
+                p.start = c.end;
+                break;
+            } else {
+                p.setEnd(c.start);
+                break;
+            }
+        }
+        for (logEntry l : removalList)
+            shapeIndex.remove(l);
+        shapeIndex.add(c);
+        curTask = shapeIndex.isEmpty() ? null : shapeIndex.first();
+        MainActivity.setLogChanged();
+        return curTask;
     }
     List<String> getWritableShapes() {
         List<String> LogList = new ArrayList<>();
