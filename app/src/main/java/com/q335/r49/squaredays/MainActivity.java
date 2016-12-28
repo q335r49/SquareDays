@@ -41,7 +41,6 @@ import java.util.Locale;
 import java.util.Queue;
 
 //TODO: $$$ Instant tasks & Spending tracking
-//TODO: Better github interface
 class logEntry {
     static final int ONGOING = 1;
     static final int CMD_ADD_COMMENT = 10;
@@ -211,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         for(logEntry le = logQ.poll(); le != null; le = logQ.poll())
             setPermABState(GF.procTask(le));
     }
-    public void onMsgProcessorLoaded() {
+    public void onCalProcLoaded() {
         Log.d("SquareDays","Init!");
         logEntry Task = null;
         if (logQ.isEmpty())

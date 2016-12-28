@@ -22,14 +22,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
 
-//TODO: $$$ Change background color deeper into the past
-//TODO: curTask should be static?!
 public class CalendarFrag extends Fragment {
     PaletteRing palette;
     private ScaleView inputLayer;
     public interface OnFragmentInteractionListener {
         void setGF(CalendarFrag cf);
-        void onMsgProcessorLoaded();
+        void onCalProcLoaded();
         PaletteRing getPalette();
     }
     private OnFragmentInteractionListener mListener;
@@ -45,7 +43,7 @@ public class CalendarFrag extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mListener.onMsgProcessorLoaded();
+        mListener.onCalProcLoaded();
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
