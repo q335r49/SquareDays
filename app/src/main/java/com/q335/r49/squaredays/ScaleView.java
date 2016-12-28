@@ -98,7 +98,7 @@ public class ScaleView extends View {
     private final Handler handler = new Handler();
     private Runnable mLongPressed = new Runnable() { public void run() {
         has_run = true;
-        final logEntry selection = CW.getSelectedShape(lastTouchX, lastTouchY);
+        final logEntry selection = CW.getSelection();
         if (selection != null) {
             LayoutInflater inflater = LayoutInflater.from(appContext);
             View promptView = inflater.inflate(R.layout.edit_interval, null);
@@ -178,7 +178,7 @@ public class ScaleView extends View {
             });
             alertDialogBuilder.setNeutralButton("Remove", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    CW.removeEntry(selection);
+                    CW.removeSelection();
                     invalidate();
                 }
             });

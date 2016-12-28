@@ -556,9 +556,14 @@ class CalendarWin {
         return LogList;
     }
     private logEntry selection;
-    void setSelected(logEntry selection) {
-        this.selection = selection;
-    }
+        void setSelected(logEntry selection) { this.selection = selection; }
+        logEntry getSelection() { return selection; }
+        public void removeSelection() {
+            if (!shapeIndex.remove(selection))
+                Log.d("SquareDays","Cannot remove selection: " + selection.toString());
+            selection = null;
+            setStatusText("");
+        }
     void clearShapes() {
         shapeIndex.clear();
     }
@@ -568,10 +573,6 @@ class CalendarWin {
             selection.setEnd(end);
             procCmd(selection);
         } else
-            Log.d("SquareDays","Cannot remove selection: " + selection.toString());
-    }
-    void removeEntry(logEntry selection) {
-        if (!shapeIndex.remove(selection))
             Log.d("SquareDays","Cannot remove selection: " + selection.toString());
     }
 }
