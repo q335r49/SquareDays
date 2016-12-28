@@ -214,12 +214,12 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     public void onMsgProcessorLoaded() {
         Log.d("SquareDays","Init!");
         logEntry Task = null;
-        for(logEntry le = logQ.poll(); le != null; le = logQ.poll())
+        if (logQ.isEmpty())
+            Task = GF.procTask(logEntry.newCommentCmd(""));
+        else for (logEntry le = logQ.poll(); le != null; le = logQ.poll())
             Task = GF.procTask(le);
         if (Task != null)
-            Task = GF.procTask(logEntry.newCommentCmd(""));
-        if (Task != null)
-            setActiveTask(Task);
+            BF.setActiveTask(Task);
     }
 
     private Toolbar AB;
@@ -234,9 +234,6 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         AB.setTitle(text);
         AB_curText = text;
         AB_savedText = AB_curText;
-    }
-    public void setActiveTask(logEntry le) {
-        BF.setActiveTask(le);
     }
     public void restoreABState() {
         AB.setTitle(AB_savedText);
