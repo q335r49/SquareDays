@@ -8,6 +8,7 @@ import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,6 +24,7 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 
 //TODO: $$$ Change background color deeper into the past
+//TODO: curTask should be static?!
 public class CalendarFrag extends Fragment {
     PaletteRing palette;
     private ScaleView inputLayer;
@@ -79,7 +81,9 @@ class CalendarWin {
     private Paint minorTickStyle, majorTickStyle, nowLineStyle, statusBarStyle, selectionStyle, ongoingStyle, gridStyle;
     private String statusText;
     void setStatusText(String s) { statusText = s; }
+    @Nullable
     private logEntry curTask;
+        @Nullable
         logEntry getCurTask() { return curTask; }
     private TreeSet<logEntry> shapeIndex;
     CalendarWin(long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
@@ -278,7 +282,7 @@ class CalendarWin {
         }
         if (selection!=null)
             drawInterval(selection,selectionStyle);
-        if (curTask!= null && curTask.isOngoing())
+        if (curTask!= null)
             drawOngoingInterval(curTask,scaleA);
         drawNowLine(now);
         if (!statusText.isEmpty())
@@ -322,7 +326,7 @@ class CalendarWin {
         }
         long peak,bot;
         float wPeakBot, wBotPeak, wPlatBase, wBasePlat;
-        if (curTask != null && curTask.isOngoing()) {
+        if (curTask != null) {
             peak = curTask.start;
             if (peak > now)
                 peak = now;
@@ -427,7 +431,7 @@ class CalendarWin {
     }
     private void drawInterval(logEntry iv, Paint paint) {
         float scaleX = iv.end < expansionComplete ? scaleB : iv.end > now ? scaleA : (float) (iv.end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
-        if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start || iv.isOngoing())
+        if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
@@ -481,42 +485,44 @@ class CalendarWin {
         ongoingStyle.setShader(shader);
         mCanvas.drawPath(pp, ongoingStyle);
     }
-    logEntry procCmd(logEntry c) {
-        if (c.isCommand()) {
-            if (curTask != null)
-                curTask.procCommand(c);
-            return curTask;
+    logEntry procCmd(logEntry a) {
+        logEntry c = null;
+        switch (a.command) {
+            case logEntry.CMD_ADD_COMMENT:
+                if (curTask != null) {
+                    if (curTask.comment != null)
+                        curTask.comment += a.comment == null ? "" : a.comment;
+                    else
+                        curTask.comment = a.comment;
+                }
+                return curTask;
+            case logEntry.CMD_END_TASK:
+                if (curTask != null) {
+                    curTask.setEnd(a.end);
+                    c = curTask;
+                    curTask = null;
+                } else
+                    return null;
+            case logEntry.ONGOING:
+                if (curTask == null) {
+                    curTask = a;
+                    return curTask;
+                } else {
+                    if (curTask.start < a.start) {
+                        curTask.end = a.start;
+                        c = curTask;
+                        curTask = a;
+                    } else {
+                        curTask = a;
+                        return curTask;
+                    }
+                }
         }
-        if (c.isBadInterval())
+        if (!c.isValidInterval())
             return curTask;
         List<logEntry> removalList = new ArrayList<>();
         for (logEntry p : shapeIndex) {
-            if (p.isOngoing()) {
-                if (c.isOngoing()) {
-                    if (c.start <= p.start)
-                        removalList.add(p);
-                    else {
-                        p.setEnd(c.start);
-                        break;
-                    }
-                } else {
-                    if (c.start <= p.start) {
-                        if (c.end > p.start)
-                            p.start = c.end;
-                    } else {
-                        p.setEnd(c.start);
-                        break;
-                    }
-                }
-            } else if (c.isOngoing()) {
-                if (c.start <= p.start)
-                    removalList.add(p);
-                else {
-                    if (c.start < p.end)
-                        p.setEnd(c.start);
-                    break;
-                }
-            } else if (c.start <= p.start) {
+            if (c.start <= p.start) {
                 if (c.end > p.start)
                     if (c.end >= p.end)
                         removalList.add(p);
@@ -538,7 +544,6 @@ class CalendarWin {
         for (logEntry l : removalList)
             shapeIndex.remove(l);
         shapeIndex.add(c);
-        curTask = shapeIndex.isEmpty() ? null : shapeIndex.first();
         MainActivity.setLogChanged();
         return curTask;
     }

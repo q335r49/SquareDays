@@ -42,20 +42,17 @@ import java.util.Queue;
 
 //TODO: $$$ Instant tasks & Spending tracking
 class logEntry {
-    private static final int CMD_ADD_COMMENT = 10;
-    private static final int CMD_END_TASK = 11;
+    static final int ONGOING = 1;
+    static final int CMD_ADD_COMMENT = 10;
+    static final int CMD_END_TASK = 11;
     static final int MESS_CLEAR_LOG = 100;
-    private int command;
-        int getMessage() { return command; }
+    int command;
     Paint paint;
-        void setColor(int color) { paint.setColor(color); }
     long start;
     long end;
+        void setEnd(long end) { this.end = end; };
+        boolean isValidInterval() { return start < end; }
     String comment;
-        void setEnd(long end) {onGoing = false; this.end = end; };
-        boolean isBadInterval() { return !onGoing && start > end; }
-    private boolean onGoing = false;
-        boolean isOngoing() { return onGoing; }
 
     private logEntry() {}
     logEntry(logEntry e) {
@@ -64,21 +61,6 @@ class logEntry {
         comment = e.comment;
         start = e.start;
         end = e.end;
-        onGoing = e.onGoing;
-    }
-    boolean isCommand() {return command >= CMD_ADD_COMMENT && command < MESS_CLEAR_LOG; }
-    boolean isMessage() {return command >= MESS_CLEAR_LOG;}
-    void procCommand(logEntry com) {
-        switch (com.command) {
-            case CMD_ADD_COMMENT:
-                comment += com.comment;
-                break;
-            case CMD_END_TASK:
-                if (onGoing)
-                    end = com.end;
-                onGoing = false;
-                break;
-        }
     }
     static logEntry newStartTime(long start) {
         logEntry le = new logEntry();
@@ -91,7 +73,6 @@ class logEntry {
                 le.paint.setColor(color);
             le.start = start;
             le.comment = comment;
-            le.onGoing = true;
         return le;
     }
     static logEntry newCompletedTask(int color, long start, long duration, String comment) {
@@ -130,7 +111,7 @@ class logEntry {
             le.paint.setColor(MainActivity.parseColor(args[1]));
         le.start = Long.parseLong(args[2]);
         if (args[3].isEmpty())
-            le.onGoing = true;
+            le.command = logEntry.ONGOING;
         else {
             le.end = le.start + Long.parseLong(args[3]) * 60L;
             if (le.start > le.end)
@@ -139,8 +120,7 @@ class logEntry {
         le.comment = args[4];
         return le;
     }
-    @Override
-    public String toString() {
+    public String toString(boolean onGoing) {
         if (paint == null)
             return null;
         else if (onGoing)
@@ -247,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         AB_curText = text;
     }
     public void setPermABState(logEntry le) {
-        String text = le != null && le.isOngoing() ? le.comment + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
+        String text = le != null ? le.comment + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
         AB.setTitle(text);
         AB_curText = text;
         AB_savedText = AB_curText;
