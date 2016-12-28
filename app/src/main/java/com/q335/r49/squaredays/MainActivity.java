@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     public void popTasks() {
         Log.d("SquareDays","Pop!");
         for(logEntry le = logQ.poll(); le != null; le = logQ.poll())
-            GF.procTask(le);
+            setPermABState(GF.procTask(le));
     }
     public void onMsgProcessorLoaded() {
         Log.d("SquareDays","Init!");
@@ -218,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             Task = GF.procTask(logEntry.newCommentCmd(""));
         else for (logEntry le = logQ.poll(); le != null; le = logQ.poll())
             Task = GF.procTask(le);
+        setPermABState(Task);
         BF.setActiveTask(Task);
     }
 

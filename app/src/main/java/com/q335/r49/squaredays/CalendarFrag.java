@@ -28,17 +28,13 @@ public class CalendarFrag extends Fragment {
     PaletteRing palette;
     private ScaleView inputLayer;
     public interface OnFragmentInteractionListener {
-        void setPermABState(logEntry task);
         void setGF(CalendarFrag cf);
         void onMsgProcessorLoaded();
         PaletteRing getPalette();
     }
     private OnFragmentInteractionListener mListener;
-    logEntry procTask(logEntry le) {
-        logEntry ret = inputLayer.procTask(le);
-        mListener.setPermABState(ret);
-        return ret;
-    }
+    logEntry procTask(logEntry le) { return inputLayer.procTask(le); }
+
     List<String> getWritableShapes() {return inputLayer.getWritableShapes(); }
     boolean activityCreated;
     @Override
