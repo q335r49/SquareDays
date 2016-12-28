@@ -1,0 +1,40 @@
+body {
+    color: #AAAAAA;
+    background-color: #192125;
+}
+
+b {
+    color: white
+}
+h1 {
+    color: #AAAAAA;
+    text-align: center;
+}
+p.caption {
+    float:right;
+}
+img.c1 {
+    float:left;
+    width:90%;
+    margin:5px 5px 5px 5px;
+}
+div.sec {
+    float:left;
+}
+
+table {
+    padding:0px;
+    border-collapse:collapse;
+}
+
+
+td {
+    padding-bottom: 2em
+}
+td.text {
+    padding-top: 1em;
+    vertical-align:top;
+}
+td.img {
+    vertical-align:top;
+}
