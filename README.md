@@ -1,6 +1,6 @@
-## Track every minute of your life
+## SquareDays
 
-**Squaredays** is a time management app that logs how you spend your time. It's being updated regularly as I do "field testing". :)
+... is a time management app that logs how you spend your time. It's being updated regularly as I do "field testing". :)
 
 
 <a href="url"><img src="https://lh3.googleusercontent.com/WdCbOnZKLqy7hDNruflxR_luvnSUh_OfTvz_StadDcfLqsVvvDkkFqmNYNRo8wUZ5UU=h310-rw" width="300"></a>
@@ -8,7 +8,7 @@
 ## Installation
  **[APK Download](/apk)**
  
- **[Google Play](https://play.google.com/store/apps/details?id=com.q335.r49.tracker&hl=en)** (Preferred)
+ **[Google Play](https://play.google.com/store/apps/details?id=com.q335.r49.tracker&hl=en)** (preferred)
 ## Directions
 <table style="width:100%">
     <tr>
