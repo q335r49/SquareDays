@@ -321,7 +321,7 @@ class CalendarWin {
             return;
         }
         long peak,bot;
-        float rPeakBot, rBotPeak, wPlatBase, wBasePlat;
+        float wPeakBot, wBotPeak, wPlatBase, wBasePlat;
         if (curTask != null && curTask.isOngoing()) {
             peak = curTask.start;
             if (peak > now)
@@ -329,19 +329,19 @@ class CalendarWin {
             if (peak <= midn-86400)
                 peak = midn-86399;
             bot = now + curveLength;
-            rPeakBot = (float) (now - peak) / (float) maxStretch;
-            rPeakBot = rPeakBot > 1f ? 1f : rPeakBot;
-            rBotPeak = 1 - rPeakBot;
+            wPeakBot = (float) (now - peak) / (float) maxStretch;
+            wPeakBot = wPeakBot > 1f ? 1f : wPeakBot;
+            wBotPeak = 1 - wPeakBot;
             wPlatBase = 0.6f;
-            wBasePlat = 1-wPlatBase;
+            wBasePlat = 1 - wPlatBase;
         } else {
             peak = now;
             bot = now + curveLength;
-            rPeakBot = (float) (now - peak) / (float) maxStretch;
-            rPeakBot = rPeakBot > 1f ? 1f : rPeakBot;
-            rBotPeak = 1 - rPeakBot;
+            wPeakBot = (float) (now - peak) / (float) maxStretch;
+            wPeakBot = wPeakBot > 1f ? 1f : wPeakBot;
+            wBotPeak = 1 - wPeakBot;
             wPlatBase = 0.99f;
-            wBasePlat = 1-wPlatBase;
+            wBasePlat = 1 - wPlatBase;
         }
         midn = prevMidn(now) + 86399L;
         if (bot < midn) {
@@ -362,9 +362,9 @@ class CalendarWin {
                 Path tip = new Path();
                     tip.moveTo(xpL, y0b);
                     tip.lineTo(xpR, y0b);
-                    tip.cubicTo(xpR, y0b * rBotPeak + y1b * rPeakBot, xbR, y0b*wPlatBase + y1b*wBasePlat, xbR, y1b);
+                    tip.cubicTo(xpR, y0b * wBotPeak + y1b * wPeakBot, xbR, y0b*wPlatBase + y1b*wBasePlat, xbR, y1b);
                     tip.lineTo(xbL, y1b);
-                    tip.cubicTo(xbL, y0b*wPlatBase + y1b*wBasePlat, xpL, y0b * rBotPeak + y1b * rPeakBot, xpL, y0b);
+                    tip.cubicTo(xbL, y0b*wPlatBase + y1b*wBasePlat, xpL, y0b * wBotPeak + y1b * wPeakBot, xpL, y0b);
                     tip.close();
                 mCanvas.drawPath(tip, gridStyle);
             }
@@ -406,9 +406,9 @@ class CalendarWin {
                 Path tip = new Path();
                 tip.moveTo(xpL, y0b);
                 tip.lineTo(xpR, y0b);
-                tip.cubicTo(xpR, y0b * rBotPeak + y1b * rPeakBot, xbR, y0b*wPlatBase + y1b*wBasePlat, xbR, y1b);
+                tip.cubicTo(xpR, y0b * wBotPeak + y1b * wPeakBot, xbR, y0b*wPlatBase + y1b*wBasePlat, xbR, y1b);
                 tip.lineTo(xbL, y1b);
-                tip.cubicTo(xbL, y0b*wPlatBase + y1b*wBasePlat, xpL, y0b * rBotPeak + y1b * rPeakBot, xpL, y0b);
+                tip.cubicTo(xbL, y0b*wPlatBase + y1b*wBasePlat, xpL, y0b * wBotPeak + y1b * wPeakBot, xpL, y0b);
                 tip.close();
                 mCanvas.drawPath(tip, gridStyle);
             }

@@ -1,4 +1,5 @@
 package com.q335.r49.squaredays;
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -7,78 +8,40 @@ import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 public class HelpScroller extends DialogFragment {
-    private static final int NUM_PAGES = 6;
-    private ViewPager mPager;
-    private PagerAdapter mPagerAdapter;
+    private WebView wv;
+
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-    private String mParam1;
-    private String mParam2;
+    public void onCreate(Bundle savedInstanceState) { super.onCreate(savedInstanceState); }
     public HelpScroller() {
         // Required empty public constructor
     }
-    public static HelpScroller newInstance(String param1, String param2) {
-        HelpScroller fragment = new HelpScroller();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public static HelpScroller newInstance() { return new HelpScroller(); }
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null)
+        {
+            int width = ViewGroup.LayoutParams.MATCH_PARENT;
+            int height = ViewGroup.LayoutParams.MATCH_PARENT;
+            dialog.getWindow().setLayout(width, height);
+        }
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View mView = inflater.inflate(R.layout.fragment_help_scroller, container, false);
-        mPager = (ViewPager) mView.findViewById(R.id.pager);
-        mPagerAdapter = new ScreenSlidePagerAdapter(getContext());
-        mPager.setAdapter(mPagerAdapter);
+        wv = (WebView) mView.findViewById(R.id.webView);
+        wv.loadUrl("file:///android_asset/help.html");
         return mView;
     }
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-    }
+    public void onAttach(Context context) { super.onAttach(context); }
     @Override
     public void onDetach() { super.onDetach(); }
-    private class ScreenSlidePagerAdapter extends PagerAdapter {
-        int[] Pages = {
-                R.drawable.p1,
-                R.drawable.p2,
-                R.drawable.p3,
-                R.drawable.p4,
-                R.drawable.p5,
-                R.drawable.p6
-        };
-        Context mContext;
-        LayoutInflater mInflater;
-        public ScreenSlidePagerAdapter(Context context) {
-            mContext = context;
-            mInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        }
-        @Override
-        public int getCount() { return NUM_PAGES; }
-        @Override
-        public boolean isViewFromObject(View view, Object object) { return view == ((LinearLayout) object); }
-        @Override
-        public Object instantiateItem(ViewGroup container, int position) {
-            View itemView = mInflater.inflate(R.layout.pager_item, container, false);
-            ImageView imageView = (ImageView) itemView.findViewById(R.id.imageView);
-            imageView.setImageResource(Pages[position]);
-            container.addView(itemView);
-            return itemView;
-        }
-        @Override
-        public void destroyItem(ViewGroup container, int position, Object object) { container.removeView((LinearLayout) object); }
-    }
 }

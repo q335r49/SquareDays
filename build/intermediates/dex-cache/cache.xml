@@ -34,7 +34,7 @@
         jumboMode="true"
         optimize="true"
         revision="24.0.3"
-        sha1="d2b4151ffbd70280b697bcc9895149ae9c6acb2d">
+        sha1="373c1ca38fcfdfd9a18f8d4c7b2ba0c581cd967e">
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run_663453e67cea5d45adabc5f7de907d4b2f087d86\classes.dex" />
     </item>
     <item
@@ -43,7 +43,7 @@
         jumboMode="true"
         optimize="true"
         revision="24.0.3"
-        sha1="2ec90d783b4a8311ffb23699ee4379f44325436f">
+        sha1="b0a69b47606555842168e7d94e87680074ffc04a">
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\debug\folders\1000\10\instant-run-bootstrap_d2e9c8f4d9e06af04103fbcf466ea7838ad80480\classes.dex" />
     </item>
     <item
@@ -219,21 +219,21 @@
     </item>
     <item
         is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-vector-drawable\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="d29714cc76b38157e3cbd034c66e1ec808eb4c19">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-vector-drawable-25.0.0_f5261f9c5af4071cc4f03cc88e32f5d635ba5d20\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
         jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-core-ui\25.0.0\jars\libs\internal_impl-25.0.0.jar"
         jumboMode="true"
         optimize="true"
         revision="24.0.3"
         sha1="e5343c9d19cb19ff55f6b268c7f3fe8c9d224f6f">
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\debug\folders\1000\10\internal_impl-25.0.0_42b1d64b17d5baf6ac7adcd7f7bc5fd44483447f\classes.dex" />
+    </item>
+    <item
+        is-multidex="true"
+        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-vector-drawable\25.0.0\jars\classes.jar"
+        jumboMode="true"
+        optimize="true"
+        revision="24.0.3"
+        sha1="d29714cc76b38157e3cbd034c66e1ec808eb4c19">
+        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\debug\folders\1000\10\com.android.support-support-vector-drawable-25.0.0_f5261f9c5af4071cc4f03cc88e32f5d635ba5d20\classes.dex" />
     </item>
     <item
         is-multidex="true"

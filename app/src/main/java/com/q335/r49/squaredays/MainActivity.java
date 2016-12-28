@@ -495,7 +495,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             }
             case R.id.menuItemHelp: {
                 FragmentManager fm = getSupportFragmentManager();
-                HelpScroller helpV = HelpScroller.newInstance("","");
+                HelpScroller helpV = HelpScroller.newInstance();
                 helpV.show(fm, "fragment_edit_name");
                 return true;
             }

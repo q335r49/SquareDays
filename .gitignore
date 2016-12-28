@@ -9,5 +9,4 @@
 .externalNativeBuild
 /keystore
 libs/
-src/main/res/drawable/
 !/apk/app-release.apk
