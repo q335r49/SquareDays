@@ -30,7 +30,6 @@ public class ScaleView extends View {
     private Context appContext;
     private PaletteRing palette;
 
-    public logEntry getCurTask() { return CW == null? null : CW.getCurTask(); }
     public logEntry procTask(logEntry le) {
         invalidate();
         return CW.procCmd(le);

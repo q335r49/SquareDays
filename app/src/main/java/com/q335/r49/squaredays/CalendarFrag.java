@@ -39,7 +39,6 @@ public class CalendarFrag extends Fragment {
         mListener.setPermABState(ret);
         return ret;
     }
-    logEntry getCurrentTask() {return inputLayer == null ? null : inputLayer.getCurTask();}
     List<String> getWritableShapes() {return inputLayer.getWritableShapes(); }
     boolean activityCreated;
     @Override
@@ -85,8 +84,6 @@ class CalendarWin {
     void setStatusText(String s) { statusText = s; }
     @Nullable
     private logEntry curTask;
-        @Nullable
-        logEntry getCurTask() { return curTask; }
     private TreeSet<logEntry> shapeIndex;
     CalendarWin(long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         this.orig = tsOrigin;
