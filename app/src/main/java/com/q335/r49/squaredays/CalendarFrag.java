@@ -455,7 +455,8 @@ class CalendarWin {
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
     private void drawOngoingInterval(logEntry iv, float scaleB) {
-        if (iv.start == -1 || now <= iv.start)
+        Log.d("X", iv.toString(true));
+        if (!iv.isValidInterval())
             return;
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;

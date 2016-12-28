@@ -73,6 +73,7 @@ class logEntry {
                 le.paint.setColor(color);
             le.start = start;
             le.comment = comment;
+            le.command = ONGOING;
         return le;
     }
     static logEntry newCompletedTask(int color, long start, long duration, String comment) {
