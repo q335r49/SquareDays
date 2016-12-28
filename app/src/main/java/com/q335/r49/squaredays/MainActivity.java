@@ -218,8 +218,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             Task = GF.procTask(logEntry.newCommentCmd(""));
         else for (logEntry le = logQ.poll(); le != null; le = logQ.poll())
             Task = GF.procTask(le);
-        if (Task != null)
-            BF.setActiveTask(Task);
+        BF.setActiveTask(Task);
     }
 
     private Toolbar AB;
