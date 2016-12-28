@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import java.util.NavigableSet;
 import java.util.TreeSet;
 
 //TODO: $$$ Change background color deeper into the past
@@ -155,7 +154,7 @@ class CalendarWin {
         gy = (gy-cy)/RECT_SCALING_FACTOR_Y;
         return gy > 0.5f ? 0.5f + cy : gy < -0.5f? -0.5f + cy : gy + cy;
     }
-    long screenToTs(float sx, float sy) { return gridToTs(screenToGridX(sx), screenToGridY(sy)); }
+    private long screenToTs(float sx, float sy) { return gridToTs(screenToGridX(sx), screenToGridY(sy)); }
     private long gridToTs(float gx, float gy) { return (long) (((float) Math.floor(gy)*7 + (gx < 0f ?  0f : gx >= 6f ? 6f : (float) Math.floor(gx)) + (gy - (float) Math.floor(gy)))*86400f) + orig; }
     void shift(float x, float y) {
         g0y -= y * rGridScreenH;
@@ -496,7 +495,7 @@ class CalendarWin {
                 return curTask;
             case logEntry.CMD_END_TASK:
                 if (curTask != null) {
-                    curTask.setEnd(a.end);
+                    curTask.end = a.end;
                     c = curTask;
                     curTask = null;
                 } else
@@ -517,10 +516,14 @@ class CalendarWin {
                     }
                 }
                 break;
+            case logEntry.CMD_CLEAR_LOG:
+                curTask = null;
+                shapeIndex.clear();
+                return null;
             default:
                 c = a;
         }
-        if (c.end > c.start)
+        if (c.end <= c.start)
             return curTask;
         List<logEntry> removalList = new ArrayList<>();
         for (logEntry p : shapeIndex) {
@@ -534,12 +537,12 @@ class CalendarWin {
                 break;
             else if (c.end < p.end) {
                 logEntry newLog = new logEntry(p);
-                newLog.setEnd(c.start);
+                newLog.end = c.start;
                 shapeIndex.add(newLog);
                 p.start = c.end;
                 break;
             } else {
-                p.setEnd(c.start);
+                p.end = c.start;
                 break;
             }
         }
@@ -553,28 +556,28 @@ class CalendarWin {
         List<String> LogList = new ArrayList<>();
         String entry;
         for (logEntry r : shapeIndex) {
-            entry = r.toString();
+            entry = r.toLogLine(false);
             if (entry != null)
                 LogList.add(entry);
         }
+        entry = curTask.toLogLine(true);
+        if (entry != null)
+            LogList.add(entry);
         return LogList;
     }
     private logEntry selection;
         void setSelected(logEntry selection) { this.selection = selection; }
         logEntry getSelection() { return selection; }
-        public void removeSelection() {
+        void removeSelection() {
             if (!shapeIndex.remove(selection))
                 Log.d("SquareDays","Cannot remove selection: " + selection.toString());
             selection = null;
             setStatusText("");
         }
-    void clearShapes() {
-        shapeIndex.clear();
-    }
     void updateEntry(logEntry selection, long start, long end) {
         if (shapeIndex.remove(selection)) {
             selection.start = start;
-            selection.setEnd(end);
+            selection.end = end;
             procCmd(selection);
         } else
             Log.d("SquareDays","Cannot remove selection: " + selection.toString());

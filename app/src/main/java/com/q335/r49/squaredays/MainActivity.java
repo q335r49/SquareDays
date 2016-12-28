@@ -42,17 +42,15 @@ import java.util.Queue;
 
 //TODO: $$$ Instant tasks & Spending tracking
 //TODO: pop-init called twice
-//TODO: No color in cur-task drawing
 class logEntry {
     static final int ONGOING = 1;
     static final int CMD_ADD_COMMENT = 10;
     static final int CMD_END_TASK = 11;
-    static final int MESS_CLEAR_LOG = 100;
+    static final int CMD_CLEAR_LOG = 100;
     int command;
     Paint paint;
     long start;
     long end;
-        void setEnd(long end) { this.end = end; };
     String comment;
 
     private logEntry() {}
@@ -100,7 +98,7 @@ class logEntry {
     }
     static logEntry newClearMess() {
         logEntry le = new logEntry();
-            le.command = MESS_CLEAR_LOG;
+            le.command = CMD_CLEAR_LOG;
         return le;
     }
     static logEntry newFromString(String s) throws IllegalArgumentException {
@@ -122,18 +120,19 @@ class logEntry {
         le.comment = args[4];
         return le;
     }
-    public String toString(boolean onGoing) {
-        if (paint == null)
+    String toLogLine(boolean onGoing) {
+        if (paint == null || comment == null) {
+            Log.d("SquareDays", "---- Null paint or comment");
             return null;
-        else if (onGoing)
+        } else if (onGoing)
             return (new Date(start*1000L)).toString() + ">"
                     + String.format("#%06X", 0xFFFFFF & paint.getColor()) + ">"
                     + Long.toString(start) + ">"
                     + ">"
                     + comment;
-        else if (end - start < 60)
+        else if (end - start < 60) {
             return null;
-        else
+        } else
             return (new Date(start*1000L)).toString() + ">"
                     + String.format("#%06X", 0xFFFFFF & paint.getColor()) + ">"
                     + Long.toString(start) + ">"
@@ -320,7 +319,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
-                                    Files.write(sprefs.getString("commands", ""),cmdFile, Charsets.UTF_8); //TODO: Check not appending
+                                    Files.write(sprefs.getString("commands", ""),cmdFile, Charsets.UTF_8);
                                     Toast.makeText(context, "Commands exported to " + extStorPath + COMMANDS_FILE, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Log.d("SquareDays",e.toString());

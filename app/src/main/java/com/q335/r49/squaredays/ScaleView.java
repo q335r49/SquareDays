@@ -32,14 +32,8 @@ public class ScaleView extends View {
 
     public logEntry getCurTask() { return CW == null? null : CW.getCurTask(); }
     public logEntry procTask(logEntry le) {
-            if (le.command == logEntry.MESS_CLEAR_LOG) {
-                CW.clearShapes();
-                invalidate();
-                return null;
-            } else {
-                invalidate();
-                return CW.procCmd(le);
-            }
+        invalidate();
+        return CW.procCmd(le);
     }
     List<String> getWritableShapes() {return CW.getWritableShapes(); }
 
