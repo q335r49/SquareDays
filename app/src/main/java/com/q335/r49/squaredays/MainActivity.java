@@ -41,8 +41,6 @@ import java.util.Locale;
 import java.util.Queue;
 
 //TODO: $$$ Instant tasks & Spending tracking
-//TODO: $$$ Better help
-
 class logEntry {
     private static final int CMD_ADD_COMMENT = 10;
     private static final int CMD_END_TASK = 11;

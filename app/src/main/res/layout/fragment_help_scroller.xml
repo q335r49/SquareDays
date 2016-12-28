@@ -1,14 +1,11 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@android:style/Theme.Dialog"
     tools:context="com.q335.r49.squaredays.HelpScroller">
     <WebView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:adjustViewBounds="true"
-        android:scaleType="fitXY"
-        android:id="@+id/webView"
-        android:background="@color/background"/>
-</LinearLayout>
+        android:id="@+id/webView"/>
+</RelativeLayout>
