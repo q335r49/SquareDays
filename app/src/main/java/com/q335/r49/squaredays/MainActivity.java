@@ -100,7 +100,7 @@ class logEntry {
             le.command = CMD_CLEAR_LOG;
         return le;
     }
-    static logEntry newFromString(String s) throws IllegalArgumentException {
+    static logEntry newFromLogLine(String s) throws IllegalArgumentException {
         String[] args = s.split(">",-1);
         if (args.length < 5)
             throw new IllegalArgumentException("Unparsable string, need at least 6 arguments: " + s);
@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 try {
-                    pushTask(logEntry.newFromString(line));
+                    pushTask(logEntry.newFromLogLine(line));
                 } catch (Exception E) {
                     Log.d("SquareDays", E.toString());
                 }
@@ -228,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         AB.setTitle(text);
         AB_curText = text;
     }
-    public void setPermABState(logEntry le) {
+    private void setPermABState(logEntry le) {
         String text = le != null ? le.comment + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
         AB.setTitle(text);
         AB_curText = text;
@@ -456,12 +456,9 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             public void onClick(DialogInterface dialog, int which) {
                                 File logFile = new File(context.getFilesDir(), LOG_FILE);
                                 if (logFile.exists()) {
-                                    if (logFile.delete()) {
+                                    if (logFile.delete())
                                         pushTask(logEntry.newClearMess());
-                                        setPermABState(null);
-                                        if (GF.isVisible())
-                                            popTasks();
-                                    } else
+                                    else
                                         Log.d("SquareDays", "Log clear failed!");
                                 } else
                                     pushTask(logEntry.newClearMess());
