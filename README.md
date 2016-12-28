@@ -8,7 +8,7 @@
 ## Installation
  **[APK Download](/apk)**
  
- **[Google Play](https://play.google.com/store/apps/details?id=com.q335.r49.tracker&hl=en)**
+ **[Google Play](https://play.google.com/store/apps/details?id=com.q335.r49.tracker&hl=en)** (Preferred)
 ## Directions
 <table style="width:100%">
     <tr>
