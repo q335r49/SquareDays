@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Queue;
 
-//TODO: $$$ Instant tasks & Spending tracking
 class logEntry {
     static final int ONGOING = 1;
     static final int CMD_ADD_COMMENT = 10;

@@ -120,7 +120,7 @@ class CalendarWin {
         statusBarStyle.setTextSize(LINE_WIDTH*2f);
         selectionStyle.setStrokeWidth(LINE_WIDTH/4f);
         nowLineStyle.setStrokeWidth(LINE_WIDTH/4f);
-        gridRadius = LINE_WIDTH;
+        gridRadius = LINE_WIDTH*2;
     }
 
     private long orig;
