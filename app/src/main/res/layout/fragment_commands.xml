@@ -16,6 +16,7 @@
             android:layout_marginStart="10dp"
             android:ellipsize="end"
             android:textStyle="bold"
+            android:textSize="18sp"
             android:layout_gravity="start"
             android:textColor="@color/statusBarTextColor"
             android:layout_width="wrap_content"
@@ -25,6 +26,7 @@
     <TextView
         android:text="...  "
         android:layout_marginEnd="10dp"
+        android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@color/settingsButtonTextColor"
         android:layout_width="wrap_content"
