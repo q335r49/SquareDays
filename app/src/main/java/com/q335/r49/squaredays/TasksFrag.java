@@ -12,10 +12,13 @@ import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -76,6 +79,17 @@ public class TasksFrag extends Fragment {
         buttons = (FlexboxLayout) view.findViewById(R.id.GV);
         statusBar = (TextView) view.findViewById(R.id.status);
         settings = (TextView) view.findViewById(R.id.settings);
+        settings.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PopupMenu popup = new PopupMenu(context, v);
+                popup.inflate(R.menu.menu_settings);
+                popup.setOnMenuItemClickListener((PopupMenu.OnMenuItemClickListener) getActivity());
+                popup.show();
+            }
+        });
+
+
         sprefs = context.getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
         String jsonText = sprefs.getString("commands", "");
         loadCommands(jsonText);

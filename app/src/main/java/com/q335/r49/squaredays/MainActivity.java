@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -139,7 +140,7 @@ class logEntry {
                     + comment;
     }
 }
-public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener, PopupMenu.OnMenuItemClickListener  {
     static int COLOR_BACKGROUND;
     static int COLOR_ERROR;
     static Typeface CommandFont;
@@ -283,7 +284,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         return true;
     }
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onMenuItemClick(MenuItem item) {
         final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + EXT_STORAGE_DIR + File.separator;
         final File cmdFile = new File(extStorPath, COMMANDS_FILE);
         final File logFile = new File(extStorPath, LOG_FILE);
