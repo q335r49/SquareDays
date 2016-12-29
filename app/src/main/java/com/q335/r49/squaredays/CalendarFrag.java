@@ -27,7 +27,7 @@ public class CalendarFrag extends Fragment {
     private ScaleView inputLayer;
     public interface OnFragmentInteractionListener {
         void setGF(CalendarFrag cf);
-        void onCalProcLoaded();
+        void popAll();
         PaletteRing getPalette();
     }
     private OnFragmentInteractionListener mListener;
@@ -43,7 +43,7 @@ public class CalendarFrag extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mListener.onCalProcLoaded();
+        mListener.popAll();
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

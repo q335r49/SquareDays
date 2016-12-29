@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     }
 
     private Queue<logEntry> logQ = new LinkedList<>();
-    public void pushTask(logEntry log) {
+    public void pushProc(logEntry log) {
         if (logQ.isEmpty()) {
             if (GF.activityCreated)
                 GF.procTask(log);
@@ -208,33 +208,33 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         } else {
             logQ.add(log);
             if (GF.activityCreated)
-                onCalProcLoaded();
+                popAll();
         }
     }
     public void pushOnly(logEntry log) { logQ.add(log); }
-    public void onCalProcLoaded() {
+    public void popAll() {
         Log.d("SquareDays","Init!");
         logEntry onGoing = null;
         if (logQ.isEmpty())
             onGoing = GF.procTask(logEntry.newCommentCmd(""));
         else for (logEntry le = logQ.poll(); le != null; le = logQ.poll())
             onGoing = GF.procTask(le);
-        setPermABState(onGoing);
+        setSavedAB(onGoing);
         BF.setActiveTask(onGoing);
     }
 
     private Toolbar AB;
     String AB_curText = "";
     String AB_savedText = "";
-    public void setABState(String text) {
+    public void setAB(String text) {
         AB.setTitle(text);
         AB_curText = text;
     }
-    public void restoreABState() {
+    public void restoreAB() {
         AB.setTitle(AB_savedText);
         AB_curText = AB_savedText;
     }
-    private void setPermABState(logEntry le) {
+    private void setSavedAB(logEntry le) {
         String text = le != null ? le.comment + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
         AB.setTitle(text);
         AB_curText = text;
@@ -397,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                             pushOnly(logEntry.newClearMess());
                                             readLogsFromFile(context, LOG_FILE);
                                             if (GF.activityCreated)
-                                                onCalProcLoaded();
+                                                popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.d("SquareDays",e.toString());
@@ -429,7 +429,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                             pushOnly(logEntry.newClearMess());
                                             readLogsFromFile(context, LOG_FILE);
                                             if (GF.activityCreated)
-                                                onCalProcLoaded();
+                                                popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.d("SquareDays",e.toString());
@@ -465,7 +465,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                 } else
                                     pushOnly(logEntry.newClearMess());
                                 if (GF.activityCreated)
-                                    onCalProcLoaded();
+                                    popAll();
                             }
                         })
                         .show();

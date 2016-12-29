@@ -35,9 +35,9 @@ public class TasksFrag extends Fragment {
     static int COLOR_END_BOX;
     SharedPreferences sprefs;
     public interface OnFragmentInteractionListener {
-        void pushTask(logEntry log);
-        void restoreABState();
-        void setABState(String comment);
+        void pushProc(logEntry log);
+        void restoreAB();
+        void setAB(String comment);
         void setBF(TasksFrag bf);
         PaletteRing getPalette();
     }
@@ -183,11 +183,11 @@ public class TasksFrag extends Fragment {
                             ((GradientDrawable) v.getBackground()).setColor(bg_Press);
                             final View finalView = v;
                             hasRun = hasDragged = false;
-                            mListener.setABState(comF[iCOMMENT]);
+                            mListener.setAB(comF[iCOMMENT]);
                             mLongPressed = new Runnable() {
                                 public void run() {
                                     hasRun = true;
-                                    mListener.restoreABState();
+                                    mListener.restoreAB();
                                     ((GradientDrawable) finalView.getBackground()).setColor(bg_Norm);
                                     View promptView = inflater.inflate(R.layout.prompts, null);
                                     final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
@@ -297,9 +297,9 @@ public class TasksFrag extends Fragment {
                                 if (duration != 0)
                                     abString += " for " + Integer.toString(duration / 60) + ":" + String.format(Locale.US, "%02d", duration % 60)
                                             + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
-                                mListener.setABState(abString.isEmpty()? comF[iCOMMENT] : abString);
+                                mListener.setAB(abString.isEmpty()? comF[iCOMMENT] : abString);
                             } else if (hasDragged)
-                                mListener.setABState("Cancel");
+                                mListener.setAB("Cancel");
                             return true;
                         case MotionEvent.ACTION_UP:
                             if (hasRun)
@@ -312,12 +312,12 @@ public class TasksFrag extends Fragment {
                             duration = duration > 50 ? duration - 50 : 0;
                             if (delay != 0 || duration != 0 || !hasDragged) {
                                 if (duration == 0) {
-                                    mListener.pushTask(logEntry.newOngoingTask(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L - delay * 60, comF[iCOMMENT]));
+                                    mListener.pushProc(logEntry.newOngoingTask(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L - delay * 60, comF[iCOMMENT]));
                                     setActiveTask(v);
                                 } else
-                                    mListener.pushTask(logEntry.newCompletedTask(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[iCOMMENT]));
+                                    mListener.pushProc(logEntry.newCompletedTask(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[iCOMMENT]));
                             } else
-                                mListener.restoreABState();
+                                mListener.restoreAB();
                             return false;
                         case MotionEvent.ACTION_CANCEL:
                             handler.removeCallbacks(mLongPressed);
@@ -358,7 +358,7 @@ public class TasksFrag extends Fragment {
                         mLongPressed = new Runnable() {
                             public void run() {
                                 hasRun = true;
-                                mListener.restoreABState();
+                                mListener.restoreAB();
                                 ((GradientDrawable) endButton.getBackground()).setColor(bg_Norm);
                                 View promptView = inflater.inflate(R.layout.prompts, null);
                                 final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
@@ -460,9 +460,9 @@ public class TasksFrag extends Fragment {
                             if (delay != 0)
                                 abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
                                         + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay))) + ")";
-                            mListener.setABState(abString.isEmpty()? "End Task" : abString);
+                            mListener.setAB(abString.isEmpty()? "End Task" : abString);
                         } else if (hasDragged)
-                            mListener.setABState("Cancel");
+                            mListener.setAB("Cancel");
                         return true;
                     case MotionEvent.ACTION_UP:
                         if (hasRun)
@@ -473,7 +473,7 @@ public class TasksFrag extends Fragment {
                         duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
                         delay = delay > 50 ? delay - 50 : 0;
                         duration = duration > 50 ? duration - 50 : 0;
-                        mListener.restoreABState();
+                        mListener.restoreAB();
                         if (duration != 0) {
                             LayoutInflater inflater = LayoutInflater.from(getContext());
                             View commentView = inflater.inflate(R.layout.comment_prompt, null);
@@ -487,9 +487,9 @@ public class TasksFrag extends Fragment {
                                     .setTitle("Comment:")
                                     .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-                                            mListener.pushTask(logEntry.newCommentCmd(" " + commentEntry.getText().toString()));
+                                            mListener.pushProc(logEntry.newCommentCmd(" " + commentEntry.getText().toString()));
                                             if (finalDelay != 0) {
-                                                mListener.pushTask(logEntry.newEndCommand(System.currentTimeMillis() / 1000L - finalDelay * 60));
+                                                mListener.pushProc(logEntry.newEndCommand(System.currentTimeMillis() / 1000L - finalDelay * 60));
                                                 clearActiveTask();
 
                                             }
@@ -502,7 +502,7 @@ public class TasksFrag extends Fragment {
                                     })
                                     .create().show();
                         } else if (delay != 0 || !hasDragged) {
-                            mListener.pushTask(logEntry.newEndCommand(System.currentTimeMillis()/1000L - delay * 60));
+                            mListener.pushProc(logEntry.newEndCommand(System.currentTimeMillis()/1000L - delay * 60));
                             clearActiveTask();
                         }
                         return false;
