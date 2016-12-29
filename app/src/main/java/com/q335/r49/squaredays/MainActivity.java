@@ -154,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     private static boolean LOG_CHANGED;
         static void setLogChanged() {LOG_CHANGED = true;}
 
-    public void loadLogsFromFile(Context context, String filename) {
+    public void readLogsFromFile(Context context, String filename) {
         try {
             FileInputStream fis = context.openFileInput(filename);
             InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             String line;
             while ((line = bufferedReader.readLine()) != null) {
                 try {
-                    pushTask(logEntry.newFromLogLine(line));
+                    pushOnly(logEntry.newFromLogLine(line));
                 } catch (Exception E) {
                     Log.d("SquareDays", E.toString());
                 }
@@ -200,25 +200,27 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
 
     private Queue<logEntry> logQ = new LinkedList<>();
     public void pushTask(logEntry log) {
-        if (log != null)
+        if (logQ.isEmpty()) {
+            if (GF.activityCreated)
+                GF.procTask(log);
+            else
+                logQ.add(log);
+        } else {
             logQ.add(log);
-        if (GF.activityCreated)
-            popTasks();
+            if (GF.activityCreated)
+                onCalProcLoaded();
+        }
     }
-    public void popTasks() {
-        Log.d("SquareDays","Pop!");
-        for(logEntry le = logQ.poll(); le != null; le = logQ.poll())
-            setPermABState(GF.procTask(le));
-    }
+    public void pushOnly(logEntry log) { logQ.add(log); }
     public void onCalProcLoaded() {
         Log.d("SquareDays","Init!");
-        logEntry Task = null;
+        logEntry onGoing = null;
         if (logQ.isEmpty())
-            Task = GF.procTask(logEntry.newCommentCmd(""));
+            onGoing = GF.procTask(logEntry.newCommentCmd(""));
         else for (logEntry le = logQ.poll(); le != null; le = logQ.poll())
-            Task = GF.procTask(le);
-        setPermABState(Task);
-        BF.setActiveTask(Task);
+            onGoing = GF.procTask(le);
+        setPermABState(onGoing);
+        BF.setActiveTask(onGoing);
     }
 
     private Toolbar AB;
@@ -228,15 +230,15 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         AB.setTitle(text);
         AB_curText = text;
     }
+    public void restoreABState() {
+        AB.setTitle(AB_savedText);
+        AB_curText = AB_savedText;
+    }
     private void setPermABState(logEntry le) {
         String text = le != null ? le.comment + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
         AB.setTitle(text);
         AB_curText = text;
         AB_savedText = AB_curText;
-    }
-    public void restoreABState() {
-        AB.setTitle(AB_savedText);
-        AB_curText = AB_savedText;
     }
 
     static final String LOG_FILE = "log.txt";
@@ -291,7 +293,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         mSectionsPagerAdapter = new SectionsPagerAdapter(FM,BF,GF);
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        loadLogsFromFile(context, LOG_FILE);
+        readLogsFromFile(context, LOG_FILE);
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -392,10 +394,10 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                     else {
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
-                                            pushTask(logEntry.newClearMess());
-                                            loadLogsFromFile(context, LOG_FILE);
-                                            if (GF.isVisible())
-                                                popTasks();
+                                            pushOnly(logEntry.newClearMess());
+                                            readLogsFromFile(context, LOG_FILE);
+                                            if (GF.activityCreated)
+                                                onCalProcLoaded();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.d("SquareDays",e.toString());
@@ -424,10 +426,10 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                     else {
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
-                                            pushTask(logEntry.newClearMess());
-                                            loadLogsFromFile(context, LOG_FILE);
-                                            if (GF.isVisible())
-                                                popTasks();
+                                            pushOnly(logEntry.newClearMess());
+                                            readLogsFromFile(context, LOG_FILE);
+                                            if (GF.activityCreated)
+                                                onCalProcLoaded();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.d("SquareDays",e.toString());
@@ -457,11 +459,13 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                 File logFile = new File(context.getFilesDir(), LOG_FILE);
                                 if (logFile.exists()) {
                                     if (logFile.delete())
-                                        pushTask(logEntry.newClearMess());
+                                        pushOnly(logEntry.newClearMess());
                                     else
                                         Log.d("SquareDays", "Log clear failed!");
                                 } else
-                                    pushTask(logEntry.newClearMess());
+                                    pushOnly(logEntry.newClearMess());
+                                if (GF.activityCreated)
+                                    onCalProcLoaded();
                             }
                         })
                         .show();
