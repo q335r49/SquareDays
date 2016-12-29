@@ -10,12 +10,14 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
@@ -36,13 +38,18 @@ public class TasksFrag extends Fragment {
     SharedPreferences sprefs;
     public interface OnFragmentInteractionListener {
         void pushProc(logEntry log);
-        void restoreAB();
-        void setAB(String comment);
         void setBF(TasksFrag bf);
         PaletteRing getPalette();
     }
     private OnFragmentInteractionListener mListener;
     private FlexboxLayout buttons;
+    private TextView statusBar;
+        private String savedStatusText = "";
+        void setSavedAB(logEntry le) {
+            savedStatusText = le != null ? le.comment + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
+            statusBar.setText(savedStatusText);
+        }
+    private TextView settings;
     private List<String[]> commands = new ArrayList<>();
     private final static int iCOMMENT = 0;
     private final static int iCOLOR = 1;
@@ -67,6 +74,8 @@ public class TasksFrag extends Fragment {
         this.inflater = inflater;
         View view = this.inflater.inflate(R.layout.fragment_commands,container, false);
         buttons = (FlexboxLayout) view.findViewById(R.id.GV);
+        statusBar = (TextView) view.findViewById(R.id.status);
+        settings = (TextView) view.findViewById(R.id.settings);
         sprefs = context.getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
         String jsonText = sprefs.getString("commands", "");
         loadCommands(jsonText);
@@ -183,11 +192,11 @@ public class TasksFrag extends Fragment {
                             ((GradientDrawable) v.getBackground()).setColor(bg_Press);
                             final View finalView = v;
                             hasRun = hasDragged = false;
-                            mListener.setAB(comF[iCOMMENT]);
+                            statusBar.setText(comF[iCOMMENT]);
                             mLongPressed = new Runnable() {
                                 public void run() {
                                     hasRun = true;
-                                    mListener.restoreAB();
+                                    statusBar.setText(savedStatusText);
                                     ((GradientDrawable) finalView.getBackground()).setColor(bg_Norm);
                                     View promptView = inflater.inflate(R.layout.prompts, null);
                                     final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
@@ -297,9 +306,9 @@ public class TasksFrag extends Fragment {
                                 if (duration != 0)
                                     abString += " for " + Integer.toString(duration / 60) + ":" + String.format(Locale.US, "%02d", duration % 60)
                                             + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
-                                mListener.setAB(abString.isEmpty()? comF[iCOMMENT] : abString);
+                                statusBar.setText(abString.isEmpty()? comF[iCOMMENT] : abString);
                             } else if (hasDragged)
-                                mListener.setAB("Cancel");
+                                statusBar.setText("Cancel");
                             return true;
                         case MotionEvent.ACTION_UP:
                             if (hasRun)
@@ -317,7 +326,7 @@ public class TasksFrag extends Fragment {
                                 } else
                                     mListener.pushProc(logEntry.newCompletedTask(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[iCOMMENT]));
                             } else
-                                mListener.restoreAB();
+                                statusBar.setText(savedStatusText);
                             return false;
                         case MotionEvent.ACTION_CANCEL:
                             handler.removeCallbacks(mLongPressed);
@@ -358,7 +367,7 @@ public class TasksFrag extends Fragment {
                         mLongPressed = new Runnable() {
                             public void run() {
                                 hasRun = true;
-                                mListener.restoreAB();
+                                statusBar.setText(savedStatusText);
                                 ((GradientDrawable) endButton.getBackground()).setColor(bg_Norm);
                                 View promptView = inflater.inflate(R.layout.prompts, null);
                                 final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
@@ -460,9 +469,9 @@ public class TasksFrag extends Fragment {
                             if (delay != 0)
                                 abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
                                         + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay))) + ")";
-                            mListener.setAB(abString.isEmpty()? "End Task" : abString);
+                            statusBar.setText(abString.isEmpty()? "End Task" : abString);
                         } else if (hasDragged)
-                            mListener.setAB("Cancel");
+                            statusBar.setText("Cancel");
                         return true;
                     case MotionEvent.ACTION_UP:
                         if (hasRun)
@@ -473,7 +482,7 @@ public class TasksFrag extends Fragment {
                         duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
                         delay = delay > 50 ? delay - 50 : 0;
                         duration = duration > 50 ? duration - 50 : 0;
-                        mListener.restoreAB();
+                        statusBar.setText(savedStatusText);
                         if (duration != 0) {
                             LayoutInflater inflater = LayoutInflater.from(getContext());
                             View commentView = inflater.inflate(R.layout.comment_prompt, null);

@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -201,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     public void pushProc(logEntry log) {
         if (logQ.isEmpty()) {
             if (GF.activityCreated)
-                GF.procTask(log);
+                BF.setSavedAB(GF.procTask(log));
             else
                 logQ.add(log);
         } else {
@@ -218,28 +219,9 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             onGoing = GF.procTask(logEntry.newCommentCmd(""));
         else for (logEntry le = logQ.poll(); le != null; le = logQ.poll())
             onGoing = GF.procTask(le);
-        setSavedAB(onGoing);
+        BF.setSavedAB(onGoing);
         BF.setActiveTask(onGoing);
     }
-
-    private Toolbar AB;
-    String AB_curText = "";
-    String AB_savedText = "";
-    public void setAB(String text) {
-        AB.setTitle(text);
-        AB_curText = text;
-    }
-    public void restoreAB() {
-        AB.setTitle(AB_savedText);
-        AB_curText = AB_savedText;
-    }
-    private void setSavedAB(logEntry le) {
-        String text = le != null ? le.comment + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
-        AB.setTitle(text);
-        AB_curText = text;
-        AB_savedText = AB_curText;
-    }
-
     static final String LOG_FILE = "log.txt";
     static final String COMMANDS_FILE = "commands.json";
     static final String EXT_STORAGE_DIR = "tracker";
@@ -283,9 +265,10 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         setContentView(R.layout.activity_main);
         context = getApplicationContext();
         sprefs = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
-        AB = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(AB);
-        AB.setBackgroundColor(COLOR_BACKGROUND);
+        //AB = (Toolbar) findViewById(R.id.toolbar);
+        //setSupportActionBar(AB);
+
+        //AB.setBackgroundColor(COLOR_BACKGROUND);
         FM = getSupportFragmentManager();
         BF = new TasksFrag();
         GF = new CalendarFrag();
