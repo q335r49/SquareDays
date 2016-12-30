@@ -19,7 +19,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.PopupMenu;
 import android.widget.Toast;
@@ -40,6 +39,7 @@ import java.util.Queue;
 
 class logEntry {
     static final int ONGOING = 1;
+    static final int EXPENSE = 2;
     static final int CMD_ADD_COMMENT = 10;
     static final int CMD_END_TASK = 11;
     static final int CMD_CLEAR_LOG = 100;
@@ -69,6 +69,15 @@ class logEntry {
             le.start = start;
             le.comment = comment;
             le.command = ONGOING;
+        return le;
+    }
+    static logEntry newExpense(int color, long start, String comment) {
+        logEntry le = new logEntry();
+        le.paint = new Paint();
+            le.paint.setColor(color);
+        le.start = start;
+        le.comment = comment;
+        le.command = EXPENSE;
         return le;
     }
     static logEntry newCompletedTask(int color, long start, long duration, String comment) {
@@ -107,7 +116,9 @@ class logEntry {
             le.paint.setColor(MainActivity.parseColor(args[1]));
         le.start = Long.parseLong(args[2]);
         if (args[3].isEmpty())
-            le.command = logEntry.ONGOING;
+            le.command = ONGOING;
+        else if (args[3].equals("E"))
+            le.command = EXPENSE;
         else {
             le.end = le.start + Long.parseLong(args[3]) * 60L;
             if (le.start > le.end)
@@ -116,16 +127,20 @@ class logEntry {
         le.comment = args[4];
         return le;
     }
-    String toLogLine(boolean onGoing) {
+    String toLogLine(int command) {
         if (paint == null || comment == null) {
             Log.d("SquareDays", "---- Null paint or comment");
             return null;
-        } else if (onGoing)
-            return (new Date(start*1000L)).toString() + ">"
-                    + String.format("#%06X", 0xFFFFFF & paint.getColor()) + ">"
-                    + Long.toString(start) + ">"
-                    + ">"
-                    + comment;
+        } else if (command == ONGOING)
+            return (new Date(start*1000L)).toString()
+                    + ">" + String.format("#%06X", 0xFFFFFF & paint.getColor())
+                    + ">" + Long.toString(start)
+                    + ">>" + comment;
+        else if (command == EXPENSE)
+            return (new Date(start*1000L)).toString()
+                    + ">" + String.format("#%06X", 0xFFFFFF & paint.getColor())
+                    + ">" + Long.toString(start)
+                    + ">E>" + comment;
         else if (end - start < 60) {
             return null;
         } else
@@ -136,7 +151,7 @@ class logEntry {
                     + comment;
     }
 }
-public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener, PopupMenu.OnMenuItemClickListener  {
+public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener, ExpenseFrag.OnFragmentInteractionListener, PopupMenu.OnMenuItemClickListener  {
     static int COLOR_BACKGROUND;
     static int COLOR_ERROR;
     static Typeface CommandFont;
@@ -148,6 +163,10 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             return COLOR_ERROR;
         }
     }
+    static final String LOG_FILE = "log.txt";
+    static final String COMMANDS_FILE = "commands.json";
+    static final String EXT_STORAGE_DIR = "tracker";
+    static final int PALETTE_LENGTH = 24;
     private static boolean LOG_CHANGED;
         static void setLogChanged() {LOG_CHANGED = true;}
 
@@ -210,6 +229,8 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     }
     public void pushOnly(logEntry log) { logQ.add(log); }
     public void popAll() {
+        if (!GF.activityCreated)
+            return;
         Log.d("SquareDays","Init!");
         logEntry onGoing = null;
         if (logQ.isEmpty())
@@ -219,14 +240,10 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         BF.setSavedAB(onGoing);
         BF.setActiveTask(onGoing);
     }
-    static final String LOG_FILE = "log.txt";
-    static final String COMMANDS_FILE = "commands.json";
-    static final String EXT_STORAGE_DIR = "tracker";
     Context context;
     SharedPreferences sprefs;
 
     PaletteRing palette;
-    static final int PALETTE_LENGTH = 24;
     public PaletteRing getPalette() {
         return palette;
     }
@@ -235,6 +252,8 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         public void setGF(CalendarFrag GF) { this.GF = GF; }
     TasksFrag BF;
         public void setBF(TasksFrag BF) { this.BF = BF; }
+    ExpenseFrag EF;
+        public void setEF(ExpenseFrag EF) { this.EF  = EF; }
     FragmentManager FM;
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
@@ -269,16 +288,14 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         FM = getSupportFragmentManager();
         BF = new TasksFrag();
         GF = new CalendarFrag();
-        mSectionsPagerAdapter = new SectionsPagerAdapter(FM,BF,GF);
+        EF = new ExpenseFrag();
+
+        mSectionsPagerAdapter = new SectionsPagerAdapter(FM,EF,BF,GF);
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         readLogsFromFile(context, LOG_FILE);
     }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_settings, menu);
-        return true;
-    }
+
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + EXT_STORAGE_DIR + File.separator;
@@ -463,15 +480,26 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
         Fragment F0;
         Fragment F1;
-        SectionsPagerAdapter(FragmentManager fm, Fragment F0, Fragment F1) {
+        Fragment F2;
+        SectionsPagerAdapter(FragmentManager fm, Fragment F0, Fragment F1, Fragment F2) {
             super(fm);
             this.F0 = F0;
             this.F1 = F1;
+            this.F2 = F2;
         }
         @Override
-        public Fragment getItem(int pos) { return pos == 0 ? F0 : F1; }
+        public Fragment getItem(int pos) {
+            switch (pos) {
+                case 0:
+                    return F0;
+                case 1:
+                    return F1;
+                default:
+                    return F2;
+            }
+        }
         @Override
-        public int getCount() { return 2; }
+        public int getCount() { return 3; }
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
@@ -479,6 +507,8 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                     return "SECTION 1";
                 case 1:
                     return "SECTION 2";
+                case 2:
+                    return "SECTION 3";
             }
             return null;
         }
