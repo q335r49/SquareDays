@@ -117,7 +117,7 @@ class logEntry {
         le.start = Long.parseLong(args[2]);
         if (args[3].isEmpty())
             le.command = ONGOING;
-        else if (args[3].equals("E"))
+        else if (args[3].charAt(0) == 'E')
             le.command = EXPENSE;
         else {
             le.end = le.start + Long.parseLong(args[3]) * 60L;
@@ -127,7 +127,7 @@ class logEntry {
         le.comment = args[4];
         return le;
     }
-    String toLogLine(int command) {
+    String toLogLine() {
         if (paint == null || comment == null) {
             Log.d("SquareDays", "---- Null paint or comment");
             return null;
@@ -140,15 +140,16 @@ class logEntry {
             return (new Date(start*1000L)).toString()
                     + ">" + String.format("#%06X", 0xFFFFFF & paint.getColor())
                     + ">" + Long.toString(start)
-                    + ">E>" + comment;
-        else if (end - start < 60) {
+                    + ">E"+ Long.toString(end)
+                    + ">" + comment;
+        else if (end - start < 60)
             return null;
-        } else
-            return (new Date(start*1000L)).toString() + ">"
-                    + String.format("#%06X", 0xFFFFFF & paint.getColor()) + ">"
-                    + Long.toString(start) + ">"
-                    + Long.toString((end-start)/60) + ">"
-                    + comment;
+        else
+            return (new Date(start*1000L)).toString()
+                    + ">" + String.format("#%06X", 0xFFFFFF & paint.getColor())
+                    + ">" + Long.toString(start)
+                    + ">" + Long.toString((end-start)/60)
+                    + ">" + comment;
     }
 }
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener, ExpenseFrag.OnFragmentInteractionListener, PopupMenu.OnMenuItemClickListener  {

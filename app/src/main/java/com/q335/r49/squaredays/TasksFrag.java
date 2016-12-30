@@ -196,7 +196,7 @@ public class TasksFrag extends Fragment {
                 boolean isExpense = comF.length > 2;
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if (isExpense) {
+                    if (isExpense) {    //TODO: Allow for delay (e.g., yesterday)
                         switch (event.getActionMasked()) {
                             case MotionEvent.ACTION_DOWN:
                                 actionDownX = event.getX();

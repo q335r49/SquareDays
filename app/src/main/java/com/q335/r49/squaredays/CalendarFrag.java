@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
@@ -71,10 +72,188 @@ public class CalendarFrag extends Fragment {
         mListener = null;
     }
 }
+
+class DailyExpense {
+    ArrayList<logEntry> expenses;
+    ArrayList<Float> alreadySpent;
+    float amountSpent;
+    DailyExpense() {
+        expenses = new ArrayList<>();
+        alreadySpent = new ArrayList<>();
+        amountSpent = 0f;
+    }
+    DailyExpense(logEntry le) { add(le); }
+    void add(logEntry le) {
+        expenses.add(le);
+        alreadySpent.add(amountSpent);
+        amountSpent += le.end;
+    }
+}
+
+class ExpenseWin extends CalendarWin {
+    private float rSecondsExpense;
+    public ExpenseWin(long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
+        super(tsOrigin, widthDays, heightWeeks, xMin, yMin);
+        rSecondsExpense = 86400/100;
+    }
+    private HashMap<Long,DailyExpense> DE = new HashMap<>(); //TODO: Long sparse array?
+    void drawDailyExpense(DailyExpense de) {
+        int size = de.expenses.size();
+        logEntry le;
+        long start, end;
+        for (int i = 0; i < size; i++) {
+            le = de.expenses.get(i);
+            start = (long) (de.alreadySpent.get(i) * rSecondsExpense);
+            end = (long) ((de.alreadySpent.get(i) + le.end) * rSecondsExpense);
+
+            float scaleX = end < expansionComplete ? scaleB : end > now ? scaleA : (float) (end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
+            long corner = start;
+            long midn = start - (start - orig + 864000000000000000L) % 86400L + 86399L;
+            float[] a, b, c;
+            for (; midn < end; midn += 86400L) {
+                a = tsToScreen(corner, 0);
+                b = tsToScreen(midn, 1f);
+                c = tsToScreen(midn-43199L, 0.5f);
+                mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
+                        (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                        (b[0]-c[0])*scaleX+c[0],
+                        (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],le.paint);
+                corner = midn+1;
+            }
+            a = tsToScreen(corner, 0);
+            b = tsToScreen(end, 1f);
+            c = tsToScreen(midn-43199L, 0.5f);
+            mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
+                    (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                    (b[0]-c[0])*scaleX+c[0],
+                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],le.paint);
+       }
+    }
+    @Override
+    logEntry procCmd(logEntry a) {  //TODO: Deal with modifying log (not too hard)
+        DailyExpense currentExpenses = DE.get(a.start);
+        if (currentExpenses == null)
+            DE.put(a.start, new DailyExpense(a));
+        else
+            currentExpenses.add(a);
+        return null;
+    }
+    @Override
+    void draw(Canvas canvas) {
+        mCanvas = canvas;
+        Log.d("SquareDays","Draw Calendar");
+        screenH = canvas.getHeight();
+        screenW = canvas.getWidth();
+        rGridScreenW = gridW/screenW;
+        rGridScreenH = gridH/screenH;
+        RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH * rGridScreenH;
+
+        expansionComplete = now - expansionTime;
+
+        now = System.currentTimeMillis() / 1000L;   //TODO: Set now to next midnight
+        drawBackgroundGrid();
+
+        for (HashMap.Entry<Long,DailyExpense> e : DE.entrySet())
+            drawDailyExpense(e.getValue());
+
+        float gridSize;
+        String timeFormat;
+        if (gridH > 3f) {
+            gridSize = 1f;
+            timeFormat = "M.d";
+            float scaledMark = 0;
+            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
+            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
+                scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
+                if (scaledMark > 0f) {
+                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, majorTickStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.6f, majorTickStyle);
+                }
+            }
+        } else if (gridH > 1f) {
+            gridSize = 1f/6f;
+            float scaledMark = 0;
+            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
+            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
+                if (startGrid - Math.floor(startGrid) < 0.01f) {
+                    scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
+                    if (scaledMark > 0f) {
+                        canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, majorTickStyle);
+                        canvas.drawText((new SimpleDateFormat("M.d",Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.6f, majorTickStyle);
+                    }
+                } else {
+                    scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
+                    if (scaledMark > 0f) {
+                        canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
+                        canvas.drawText((new SimpleDateFormat(" h:mm",Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
+                    }
+                }
+            }
+        } else if (gridH > 1f/6f) {
+            gridSize = 1f/24f;
+            timeFormat = " h:mm";
+            float scaledMark = 0;
+            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
+            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
+                scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
+                if (scaledMark > 0f) {
+                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
+                }
+            }
+        } else if (gridH > 1f/24f) {
+            gridSize = 1f/144f;
+            timeFormat = " h:mm";
+            float scaledMark = 0;
+            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
+            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
+                scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
+                if (scaledMark > 0f) {
+                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
+                }
+            }
+        } else if (gridH > 1f/144f) {
+            gridSize = 1f/720f;
+            timeFormat = " h:mm";
+            float scaledMark = 0;
+            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
+            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
+                scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
+                if (scaledMark > 0f) {
+                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
+                }
+            }
+        } else {
+            gridSize = 1f/2880f;
+            timeFormat = " h:mm:ss";
+            float scaledMark = 0;
+            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
+            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
+                scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
+                if (scaledMark > 0f) {
+                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
+                }
+            }
+        }
+        if (selection!=null)
+            drawInterval(selection,selectionStyle);
+        drawNowLine(now);
+        if (!statusText.isEmpty())
+            canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
+    }
+
+}
+
+
+
+
 class CalendarWin {
     static int COLOR_SCALE_TEXT, COLOR_GRID_BACKGROUND, COLOR_NOW_LINE, COLOR_STATUS_BAR, COLOR_SELECTION;
-    private Paint minorTickStyle, majorTickStyle, nowLineStyle, statusBarStyle, selectionStyle, ongoingStyle, gridStyle;
-    private String statusText;
+    Paint minorTickStyle, majorTickStyle, nowLineStyle, statusBarStyle, selectionStyle, ongoingStyle, gridStyle;
+    String statusText;
     void setStatusText(String s) { statusText = s; }
     @Nullable
     private logEntry curTask;
@@ -110,7 +289,7 @@ class CalendarWin {
             gridStyle.setStyle(Paint.Style.FILL);
         statusText = "";
     }
-    private static float LINE_WIDTH = 10;
+    static float LINE_WIDTH = 10;
     void setDPIScaling(float f) {
         LINE_WIDTH = f;
         minorTickStyle.setTextSize(LINE_WIDTH*2f);
@@ -123,13 +302,13 @@ class CalendarWin {
         gridRadius = LINE_WIDTH*2;
     }
 
-    private long orig;
-    private float g0x, g0y;
-    private float gridW, gridH;
-    private float rGridScreenW, rGridScreenH;
+    long orig;
+    float g0x, g0y;
+    float gridW, gridH;
+    float rGridScreenW, rGridScreenH;
     private static float RECT_SCALING_FACTOR_X = 0.86f;
-    private static float RECT_SCALING_FACTOR_Y = 0.94f;
-    private float[] tsToScreen(long ts, float offset) {
+    static float RECT_SCALING_FACTOR_Y = 0.94f;
+    float[] tsToScreen(long ts, float offset) {
         long days = ts >= orig ? (ts - orig)/86400L : (ts - orig + 1) / 86400L - 1L;
         float dow = (float) ((days + 4611686018427387900L)%7);
         float weeks = (float) (days >= 0? days/7 : (days + 1) / 7 - 1) + ((float) ((ts - orig +4611686018427360000L)%86400) / 86400);
@@ -149,7 +328,7 @@ class CalendarWin {
         return gy > 0.5f ? 0.5f + cy : gy < -0.5f? -0.5f + cy : gy + cy;
     }
     private long screenToTs(float sx, float sy) { return gridToTs(screenToGridX(sx), screenToGridY(sy)); }
-    private long gridToTs(float gx, float gy) { return (long) (((float) Math.floor(gy)*7 + (gx < 0f ?  0f : gx >= 6f ? 6f : (float) Math.floor(gx)) + (gy - (float) Math.floor(gy)))*86400f) + orig; }
+    long gridToTs(float gx, float gy) { return (long) (((float) Math.floor(gy)*7 + (gx < 0f ?  0f : gx >= 6f ? 6f : (float) Math.floor(gx)) + (gy - (float) Math.floor(gy)))*86400f) + orig; }
     void shift(float x, float y) {
         g0y -= y * rGridScreenH;
     }
@@ -168,13 +347,13 @@ class CalendarWin {
         return closest == null? null : closest.end < ts ? null : closest;
     }
 
-    private Canvas mCanvas;
-    private static final float scaleA = 0.25f;
-    private static final float scaleB = 1f;
+    Canvas mCanvas;
+    static final float scaleA = 0.25f;
+    static final float scaleB = 1f;
     private static final float scaleGrid = 0.85f;
-    private static final long expansionTime = 86400L * 5L;
-    private long now, expansionComplete;
-    private int screenW, screenH;
+    static final long expansionTime = 86400L * 5L;
+    long now, expansionComplete;
+    int screenW, screenH;
     void draw(Canvas canvas) {
         mCanvas = canvas;
         Log.d("SquareDays","Draw Calendar");
@@ -281,7 +460,7 @@ class CalendarWin {
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
-    private void drawNowLine(long ts) {
+    void drawNowLine(long ts) {
         nowLineStyle.setColor(COLOR_NOW_LINE);
         long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
         float[] a = tsToScreen(ts,0f);
@@ -295,8 +474,8 @@ class CalendarWin {
     private static final long curveLength = 86400/24;
     private static float gridRadius = 10f;
     private static final long maxStretch = 86400/40;
-    private long prevMidn(long ts) {return ts - (ts - orig + 864000000000000000L) % 86400L;}
-    private void drawBackgroundGrid() {
+    long prevMidn(long ts) {return ts - (ts - orig + 864000000000000000L) % 86400L;}
+    void drawBackgroundGrid() {
         long start = Math.max(screenToTs(0f,0f),now);
         long end = screenToTs(screenW, screenH);
         if (end <= start)
@@ -422,7 +601,7 @@ class CalendarWin {
             corner = midn + 1;
         }
     }
-    private void drawInterval(logEntry iv, Paint paint) {
+    void drawInterval(logEntry iv, Paint paint) {
         float scaleX = iv.end < expansionComplete ? scaleB : iv.end > now ? scaleA : (float) (iv.end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
         if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
@@ -550,18 +729,18 @@ class CalendarWin {
         List<String> LogList = new ArrayList<>();
         String entry;
         for (logEntry r : shapeIndex) {
-            entry = r.toLogLine(false);
+            entry = r.toLogLine();
             if (entry != null)
                 LogList.add(entry);
         }
         if (curTask != null) {
-            entry = curTask.toLogLine(true);
+            entry = curTask.toLogLine();
             if (entry != null)
                 LogList.add(entry);
         }
         return LogList;
     }
-    private logEntry selection;
+    logEntry selection;
         void setSelected(logEntry selection) { this.selection = selection; }
         logEntry getSelection() { return selection; }
         void removeSelection() {
