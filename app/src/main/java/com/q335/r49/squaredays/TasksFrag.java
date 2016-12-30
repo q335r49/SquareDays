@@ -52,7 +52,6 @@ public class TasksFrag extends Fragment {
             savedStatusText = le != null ? le.comment + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
             statusBar.setText(savedStatusText);
         }
-    private TextView settings;
     private List<String[]> commands = new ArrayList<>();
     private final static int iCOMMENT = 0;
     private final static int iCOLOR = 1;
@@ -78,8 +77,7 @@ public class TasksFrag extends Fragment {
         View view = this.inflater.inflate(R.layout.fragment_commands,container, false);
         buttons = (FlexboxLayout) view.findViewById(R.id.GV);
         statusBar = (TextView) view.findViewById(R.id.status);
-        settings = (TextView) view.findViewById(R.id.settings);
-        settings.setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.settings).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 PopupMenu popup = new PopupMenu(context, v);
@@ -88,8 +86,6 @@ public class TasksFrag extends Fragment {
                 popup.show();
             }
         });
-
-
         sprefs = context.getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
         String jsonText = sprefs.getString("commands", "");
         loadCommands(jsonText);

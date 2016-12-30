@@ -1,8 +1,5 @@
 package com.q335.r49.squaredays;
 
-import android.graphics.Color;
-import android.util.Log;
-
 class PaletteRing {
     private int length;
     private int size;
