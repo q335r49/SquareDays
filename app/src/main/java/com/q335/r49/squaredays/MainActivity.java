@@ -218,7 +218,10 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     public void pushProc(logEntry log) {
         if (logQ.isEmpty()) {
             if (GF.activityCreated)
-                BF.setSavedAB(GF.procTask(log));
+                if (log.command == logEntry.EXPENSE) {
+                    EF.procTask(log);
+                } else
+                    BF.setSavedAB(GF.procTask(log));
             else
                 logQ.add(log);
         } else {
@@ -235,8 +238,12 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         logEntry onGoing = null;
         if (logQ.isEmpty())
             onGoing = GF.procTask(logEntry.newCommentCmd(""));
-        else for (logEntry le = logQ.poll(); le != null; le = logQ.poll())
-            onGoing = GF.procTask(le);
+        else for (logEntry le = logQ.poll(); le != null; le = logQ.poll()) {
+            if (le.command == logEntry.EXPENSE) {
+                EF.procTask(le);
+            } else
+                onGoing = GF.procTask(le);
+        }
         BF.setSavedAB(onGoing);
         BF.setActiveTask(onGoing);
     }
