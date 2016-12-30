@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
@@ -523,13 +524,14 @@ public class TasksFrag extends Fragment {
                                 hasRun = true;
                                 statusBar.setText(savedStatusText);
                                 ((GradientDrawable) endButton.getBackground()).setColor(bg_Norm);
-                                View promptView = inflater.inflate(R.layout.prompts, null);
+                                final View promptView = inflater.inflate(R.layout.prompt_new_task, null);
                                 final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
                                 final View curColorV = promptView.findViewById(R.id.CurColor);
                                 final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                                 final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
                                 final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
                                 final SeekBar seekBlue = (SeekBar) promptView.findViewById(R.id.seekBlue);
+                                final CheckBox checkbox = (CheckBox) promptView.findViewById(R.id.expenseCheck);
                                 seekRed.setProgress(Color.red(curColor));
                                 seekRed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                                     @Override
@@ -588,7 +590,7 @@ public class TasksFrag extends Fragment {
                                         .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-                                                commands.add(new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), "0", ""});
+                                                commands.add(new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), checkbox.isEnabled()? "E" : ""});
                                                 palette.add(newColor);
                                                 makeView();
                                             }

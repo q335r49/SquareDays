@@ -150,7 +150,7 @@ class ExpenseWin extends CalendarWin {
 
         expansionComplete = now - expansionTime;
 
-        now = System.currentTimeMillis() / 1000L;   //TODO: Set now to next midnight
+        now = prevMidn(System.currentTimeMillis() / 1000L) + 86400;
         drawBackgroundGrid();
 
         for (HashMap.Entry<Long,DailyExpense> e : DE.entrySet())
