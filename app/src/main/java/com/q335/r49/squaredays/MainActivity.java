@@ -37,122 +37,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-class logEntry {
-    static final int ONGOING = 1;
-    static final int EXPENSE = 2;
-    static final int CMD_ADD_COMMENT = 10;
-    static final int CMD_END_TASK = 11;
-    static final int CMD_CLEAR_LOG = 100;
-    int command;
-    Paint paint;
-    long start;
-    long end;
-    String comment;
-
-    private logEntry() {}
-    logEntry(logEntry e) {
-        command = e.command;
-        paint = new Paint(e.paint);
-        comment = e.comment;
-        start = e.start;
-        end = e.end;
-    }
-    static logEntry newStartTime(long start) {
-        logEntry le = new logEntry();
-            le.start = start;
-        return le;
-    }
-    static logEntry newOngoingTask(int color, long start, String comment) {
-        logEntry le = new logEntry();
-            le.paint = new Paint();
-                le.paint.setColor(color);
-            le.start = start;
-            le.comment = comment;
-            le.command = ONGOING;
-        return le;
-    }
-    static logEntry newExpense(int color, long start, String comment) {
-        logEntry le = new logEntry();
-        le.paint = new Paint();
-            le.paint.setColor(color);
-        le.start = start;
-        le.comment = comment;
-        le.command = EXPENSE;
-        return le;
-    }
-    static logEntry newCompletedTask(int color, long start, long duration, String comment) {
-        logEntry le = new logEntry();
-            le.paint = new Paint();
-                le.paint.setColor(color);
-            le.start = start;
-            le.end = le.start + duration;
-            le.comment = comment;
-        return le;
-    }
-    static logEntry newEndCommand(long end) {
-        logEntry le = new logEntry();
-            le.command = CMD_END_TASK;
-            le.end = end;
-        return le;
-    }
-    static logEntry newCommentCmd(String s) {
-        logEntry le = new logEntry();
-        le.command = CMD_ADD_COMMENT;
-        le.comment = s;
-        return le;
-    }
-    static logEntry newClearMess() {
-        logEntry le = new logEntry();
-            le.command = CMD_CLEAR_LOG;
-        return le;
-    }
-    static logEntry newFromLogLine(String s) throws IllegalArgumentException {
-        String[] args = s.split(">",-1);
-        if (args.length < 5)
-            throw new IllegalArgumentException("Unparsable string, need at least 6 arguments: " + s);
-        logEntry le = new logEntry();
-        // le.readableTimePos = args[0];
-        le.paint = new Paint();
-            le.paint.setColor(MainActivity.parseColor(args[1]));
-        le.start = Long.parseLong(args[2]);
-        if (args[3].isEmpty())
-            le.command = ONGOING;
-        else if (args[3].charAt(0) == 'E')
-            le.command = EXPENSE;
-        else {
-            le.end = le.start + Long.parseLong(args[3]) * 60L;
-            if (le.start > le.end)
-                throw new IllegalArgumentException("Starting after end time: " + s);
-        }
-        le.comment = args[4];
-        return le;
-    }
-    String toLogLine() {
-        if (paint == null || comment == null) {
-            Log.d("SquareDays", "---- Null paint or comment");
-            return null;
-        } else if (command == ONGOING)
-            return (new Date(start*1000L)).toString()
-                    + ">" + String.format("#%06X", 0xFFFFFF & paint.getColor())
-                    + ">" + Long.toString(start)
-                    + ">>" + comment;
-        else if (command == EXPENSE)
-            return (new Date(start*1000L)).toString()
-                    + ">" + String.format("#%06X", 0xFFFFFF & paint.getColor())
-                    + ">" + Long.toString(start)
-                    + ">E"+ Long.toString(end)
-                    + ">" + comment;
-        else if (end - start < 60)
-            return null;
-        else
-            return (new Date(start*1000L)).toString()
-                    + ">" + String.format("#%06X", 0xFFFFFF & paint.getColor())
-                    + ">" + Long.toString(start)
-                    + ">" + Long.toString((end-start)/60)
-                    + ">" + comment;
-    }
-}
-public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener, ExpenseFrag.OnFragmentInteractionListener, PopupMenu.OnMenuItemClickListener  {
+public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,  PopupMenu.OnMenuItemClickListener  {
     static int COLOR_BACKGROUND;
     static int COLOR_ERROR;
     static Typeface CommandFont;
@@ -195,7 +80,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     public void writeLogsToFile() {
         if (!LOG_CHANGED)
             return;
-        List<String> entries = GF.getWritableShapes();
+        List<String> entries = CW.getWritableShapes();
         File log = new File(context.getFilesDir(), MainActivity.LOG_FILE);
         try {
             if (log.exists()) {
@@ -217,33 +102,31 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
 
     private Queue<logEntry> logQ = new LinkedList<>();
     public void pushProc(logEntry log) {
-        if (logQ.isEmpty()) {
-            if (GF.activityCreated)
-                if (log.command == logEntry.EXPENSE) {
-                    EF.procTask(log);
-                } else
-                    BF.setSavedAB(GF.procTask(log));
-            else
-                logQ.add(log);
+        if (CW == null || EW == null)
+            logQ.add(log);
+        else if (logQ.isEmpty()) {
+            if (log.command == logEntry.EXPENSE) {
+                EW.procTask(log);
+            } else
+                BF.setSavedAB(CW.procTask(log));
         } else {
             logQ.add(log);
-            if (GF.activityCreated)
-                popAll();
+            popAll();
         }
     }
     public void pushOnly(logEntry log) { logQ.add(log); }
     public void popAll() {
-        if (!GF.activityCreated)
+        if (CW == null || BF == null || EW == null)
             return;
         Log.d("SquareDays","Init!");
         logEntry onGoing = null;
         if (logQ.isEmpty())
-            onGoing = GF.procTask(logEntry.newCommentCmd(""));
+            onGoing = CW.procTask(logEntry.newCommentCmd(""));
         else for (logEntry le = logQ.poll(); le != null; le = logQ.poll()) {
-            if (le.command == logEntry.EXPENSE) {
-                EF.procTask(le);
-            } else
-                onGoing = GF.procTask(le);
+            if (le.command == logEntry.EXPENSE)
+                EW.procTask(le);
+            else
+                onGoing = CW.procTask(le);
         }
         BF.setSavedAB(onGoing);
         BF.setActiveTask(onGoing);
@@ -256,13 +139,23 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         return palette;
     }
 
-    CalendarFrag GF;
-        public void setGF(CalendarFrag GF) { this.GF = GF; }
-    TasksFrag BF;
-        public void setBF(TasksFrag BF) { this.BF = BF; }
-    ExpenseFrag EF;
-        public void setEF(ExpenseFrag EF) { this.EF  = EF; }
     FragmentManager FM;
+    TasksFrag BF;
+    public void setBF(TasksFrag BF) { this.BF = BF; }
+    CalendarFrag<TimeWin> CF;
+    TimeWin CW;
+    CalendarFrag<ExpenseWin> EF;
+    ExpenseWin EW;
+    public <T extends TimeWin> void setDisplay(CalendarFrag<T> frag, T disp, String code) {
+        Log.d("XXX",code);
+        if (code.equals(CalendarFrag.CODE_CAL)) {
+            CF = (CalendarFrag<TimeWin>) frag;
+            CW = disp;
+        } else {
+            EF = (CalendarFrag<ExpenseWin>) frag;
+            EW = (ExpenseWin) disp;
+        }
+    }
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
@@ -276,11 +169,11 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        CalendarWin.COLOR_SCALE_TEXT = ResourcesCompat.getColor(getResources(), R.color.scale_text, null);
-        CalendarWin.COLOR_GRID_BACKGROUND = ResourcesCompat.getColor(getResources(), R.color.grid_background, null);
-        CalendarWin.COLOR_NOW_LINE = ResourcesCompat.getColor(getResources(), R.color.now_line, null);
-        CalendarWin.COLOR_STATUS_BAR = ResourcesCompat.getColor(getResources(), R.color.status_bar, null);
-        CalendarWin.COLOR_SELECTION = ResourcesCompat.getColor(getResources(), R.color.selection, null);
+        TimeWin.COLOR_SCALE_TEXT = ResourcesCompat.getColor(getResources(), R.color.scale_text, null);
+        TimeWin.COLOR_GRID_BACKGROUND = ResourcesCompat.getColor(getResources(), R.color.grid_background, null);
+        TimeWin.COLOR_NOW_LINE = ResourcesCompat.getColor(getResources(), R.color.now_line, null);
+        TimeWin.COLOR_STATUS_BAR = ResourcesCompat.getColor(getResources(), R.color.status_bar, null);
+        TimeWin.COLOR_SELECTION = ResourcesCompat.getColor(getResources(), R.color.selection, null);
         TasksFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
         COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
         COLOR_BACKGROUND =  ResourcesCompat.getColor(getResources(), R.color.background, null);
@@ -295,10 +188,10 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         //AB.setBackgroundColor(COLOR_BACKGROUND);
         FM = getSupportFragmentManager();
         BF = new TasksFrag();
-        GF = new CalendarFrag();
-        EF = new ExpenseFrag();
+        CF = CalendarFrag.newInstance(CalendarFrag.CODE_CAL);
+        EF = CalendarFrag.newInstance(CalendarFrag.CODE_EXP);
 
-        mSectionsPagerAdapter = new SectionsPagerAdapter(FM,EF,BF,GF);
+        mSectionsPagerAdapter = new SectionsPagerAdapter(FM,EF,BF, CF);
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.setOffscreenPageLimit(2);
@@ -401,8 +294,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
                                             pushOnly(logEntry.newClearMess());
                                             readLogsFromFile(context, LOG_FILE);
-                                            if (GF.activityCreated)
-                                                popAll();
+                                            popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.d("SquareDays",e.toString());
@@ -433,8 +325,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
                                             pushOnly(logEntry.newClearMess());
                                             readLogsFromFile(context, LOG_FILE);
-                                            if (GF.activityCreated)
-                                                popAll();
+                                            popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.d("SquareDays",e.toString());
@@ -469,8 +360,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                         Log.d("SquareDays", "Log clear failed!");
                                 } else
                                     pushOnly(logEntry.newClearMess());
-                                if (GF.activityCreated)
-                                    popAll();
+                                popAll();
                             }
                         })
                         .show();

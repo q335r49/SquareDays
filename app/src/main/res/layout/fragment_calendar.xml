@@ -3,10 +3,10 @@ xmlns:tools="http://schemas.android.com/tools"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
 tools:context="com.q335.r49.squaredays.CalendarFrag">
-    <com.q335.r49.squaredays.ScaleView
+    <com.q335.r49.squaredays.TouchView
         android:id="@+id/drawing"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:background="@color/background" >
-    </com.q335.r49.squaredays.ScaleView>
+    </com.q335.r49.squaredays.TouchView>
 </FrameLayout>

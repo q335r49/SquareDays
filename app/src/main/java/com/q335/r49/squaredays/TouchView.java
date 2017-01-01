@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Handler;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -19,39 +18,31 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-public class ScaleView extends View {
-    private CalendarWin CW;
+public class TouchView<T extends TimeWin> extends View {
+    private T CW;
     private ScaleListener SL;
     private ScaleGestureDetector mScaleDetector;
     private Context appContext;
     private PaletteRing palette;
 
-    public logEntry procTask(logEntry le) {
-        invalidate();
-        return CW.procCmd(le);
-    }
-    List<String> getWritableShapes() {return CW.getWritableShapes(); }
-
-    public ScaleView(Context context) {
+    public TouchView(Context context) {
         super(context);
         SL = new ScaleListener();
         mScaleDetector = new ScaleGestureDetector(context, SL);
         appContext = context;
     }
-    public ScaleView(Context context, AttributeSet attrs) {
+    public TouchView(Context context, AttributeSet attrs) {
         super(context, attrs);
         SL = new ScaleListener();
         mScaleDetector = new ScaleGestureDetector(context, SL);
         appContext = context;
     }
-    void loadCalendarView(PaletteRing pal, CalendarWin cw) {
+    void setDisplay(PaletteRing pal, T cw) {
         palette = pal;
         this.CW = cw;
-        CW.setDPIScaling(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
     }
 
     public static long dateToTs(String s) {
@@ -73,7 +64,7 @@ public class ScaleView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        CW.draw(canvas); //XTODO: Investigate why draw is happening multiple times
+        CW.draw(canvas);
     }
     private float lastTouchX, lastTouchY, firstTouchX, firstTouchY;
     private boolean has_run, has_dragged;
