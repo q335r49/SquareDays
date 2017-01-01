@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 class ExpenseWin extends TimeWin {
@@ -25,6 +26,12 @@ class ExpenseWin extends TimeWin {
             alreadySpent.add(amountSpent);
             amountSpent += le.end;
         }
+        List<String> getWritableShapes() {
+            List<String> entries = new ArrayList<>();
+            for (LogEntry le : expenses)
+                entries.add(le.toLogLine());
+            return entries;
+        }
     }
     private float rSecondsExpense;
     public ExpenseWin(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
@@ -33,7 +40,6 @@ class ExpenseWin extends TimeWin {
     }
     private HashMap<Long,DailyExpense> DE = new HashMap<>(); //TODO: Long sparse array?
     void drawDailyExpense(DailyExpense de) {
-        Log.d("XX","drawn");
         int size = de.expenses.size();
         LogEntry le;
         long start, end;
@@ -67,6 +73,7 @@ class ExpenseWin extends TimeWin {
     }
     @Override
     LogEntry procTask(LogEntry a) {  //TODO: Deal with modifying log (not too hard)
+        MainActivity.setLogChanged();
         long midn = prevMidn(a.start);
         DailyExpense currentExpenses = DE.get(midn);
         if (currentExpenses == null)
@@ -74,6 +81,13 @@ class ExpenseWin extends TimeWin {
         else
             currentExpenses.add(a);
         return null;
+    }
+    @Override
+    List<String> getWritableShapes() {
+        List<String> LogList = new ArrayList<>();
+        for (HashMap.Entry<Long,DailyExpense> e : DE.entrySet())
+            LogList.addAll(e.getValue().getWritableShapes());
+        return LogList;
     }
     @Override
     void draw(Canvas canvas) {

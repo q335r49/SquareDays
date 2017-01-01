@@ -23,6 +23,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import java.io.File;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {
@@ -54,8 +55,9 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             return;
         try {
             File file = new File(getFilesDir(), LOG_FILE);
-            Files.asCharSink(file, Charsets.UTF_8).writeLines(CW.getWritableShapes());
-            Files.asCharSink(file, Charsets.UTF_8).writeLines(EW.getWritableShapes());
+            List<String> fullLog = CW.getWritableShapes();
+            fullLog.addAll(EW.getWritableShapes());
+            Files.asCharSink(file, Charsets.UTF_8).writeLines(fullLog);
             logChanged = false;
         } catch (Exception e) {
             Log.d("SquareDays", "File write error: " + e.toString());

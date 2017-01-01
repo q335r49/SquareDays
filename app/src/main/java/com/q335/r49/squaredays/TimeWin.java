@@ -425,6 +425,7 @@ class TimeWin {
     }
     LogEntry procTask(LogEntry a) {
         //TODO: request invalidate() ?
+        MainActivity.setLogChanged();
         LogEntry c;
         switch (a.command) {
             case LogEntry.CMD_ADD_COMMENT:
@@ -491,7 +492,6 @@ class TimeWin {
         for (LogEntry l : removalList)
             shapeIndex.remove(l);
         shapeIndex.add(c);
-        MainActivity.setLogChanged();
         return curTask;
     }
     List<String> getWritableShapes() {
