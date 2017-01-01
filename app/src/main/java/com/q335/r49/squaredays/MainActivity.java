@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -23,6 +22,7 @@ import android.view.MenuItem;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 import com.google.common.base.Charsets;
+import com.google.common.io.CharSink;
 import com.google.common.io.Files;
 import java.io.BufferedReader;
 import java.io.File;
@@ -32,7 +32,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -49,54 +48,32 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             return COLOR_ERROR;
         }
     }
-    static final String LOG_FILE = "log.txt";
-    static final String COMMANDS_FILE = "commands.json";
-    static final String EXT_STORAGE_DIR = "tracker";
-    static final int PALETTE_LENGTH = 24;
-    private static boolean LOG_CHANGED;
-        static void setLogChanged() {LOG_CHANGED = true;}
+    private static final String LOG_FILE = "log.txt";
+    private static final String COMMANDS_FILE = "commands.json";
+    private static final String EXT_STORAGE_DIR = "tracker";
+    private static final int PALETTE_LENGTH = 24;
+    private static boolean logChanged;
+        static void setLogChanged() { logChanged = true;}
 
-    public void readLogsFromFile(Context context, String filename) {
-        try {
-            FileInputStream fis = context.openFileInput(filename);
-            InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
-            BufferedReader bufferedReader = new BufferedReader(isr);
-            String line;
-            while ((line = bufferedReader.readLine()) != null) {
-                try {
-                    pushOnly(logEntry.newFromLogLine(line));
-                } catch (Exception E) {
-                    Log.d("SquareDays", E.toString());
-                }
-            }
-        } catch (FileNotFoundException e) {
-            Log.d("SquareDays","Log file not found!");
-        } catch (UnsupportedEncodingException e) {
-            Log.d("SquareDays","Log file bad encoding!");
-        } catch (IOException e) {
-            Log.d("SquareDays","Log file IO exception!");
-        }
-    }
-    public void writeLogsToFile() {
-        if (!LOG_CHANGED)
+    private void readLogsFromFile() {
+        List<String> entries;
+        try { entries = Files.readLines(new File(LOG_FILE), Charsets.UTF_8); }
+        catch (Exception e) {
+            Log.d("SquareDays","Log read exception: " + e.toString());
             return;
-        List<String> entries = CW.getWritableShapes();
-        File log = new File(context.getFilesDir(), MainActivity.LOG_FILE);
-        try {
-            if (log.exists()) {
-                if (!log.delete())
-                    Log.d("SquareDays", "Cannot delete log file");
+        }
+        for (String l : entries)
+            pushOnly(logEntry.newFromLogLine(l));
+    }
+    private void writeLogsToFile() {
+        if (logChanged) {
+            try {
+                Files.asCharSink(new File(LOG_FILE), Charsets.UTF_8).writeLines(CW.getWritableShapes());
+                logChanged = false;
+            } catch (Exception e) {
+                Log.d("SquareDays", "File write error: " + e.toString());
+                Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
             }
-            FileOutputStream out = new FileOutputStream(log, true);
-            for (String s : entries) {
-                out.write(s.getBytes());
-                out.write(System.getProperty("line.separator").getBytes());
-            }
-            out.close();
-            LOG_CHANGED = false;
-        } catch (Exception e) {
-            Log.d("SquareDays", "File write error: " + e.toString());
-            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -217,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
-                                    Files.write(sprefs.getString("commands", ""),cmdFile, Charsets.UTF_8);
+                                    Files.write(sprefs.getString("commands", ""),cmdFile,Charsets.UTF_8);
                                     Toast.makeText(context, "Commands exported to " + extStorPath + COMMANDS_FILE, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Log.d("SquareDays",e.toString());

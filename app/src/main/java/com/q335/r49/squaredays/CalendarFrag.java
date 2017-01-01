@@ -1,35 +1,18 @@
 package com.q335.r49.squaredays;
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.LinearGradient;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.RectF;
-import android.graphics.Shader;
-import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.TreeSet;
 
 public class CalendarFrag<T extends TimeWin> extends Fragment {
     static String CODE_CAL = "cal";
     static String CODE_EXP = "exp";
-    String code;
+    private String gClass;
     public interface OnFragmentInteractionListener {
         <T extends TimeWin> void setDisplay(CalendarFrag<T> frag, T disp, String code);
         void popAll();
@@ -53,27 +36,25 @@ public class CalendarFrag<T extends TimeWin> extends Fragment {
             cal.set(Calendar.SECOND, 0);
             cal.set(Calendar.MILLISECOND, 0);
 
-        if (code.equals(CODE_CAL)) {
+        if (gClass.equals(CODE_CAL)) {
             TimeWin drawLayer = TimeWin.newWindowClass(inputLayer, cal.getTimeInMillis() / 1000L, 8f, 1.5f, -0.8f, -0.1f);
             drawLayer.setDPIScaling(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
-            mListener.setDisplay(this, (T) drawLayer, code);
+            mListener.setDisplay(this, (T) drawLayer, gClass);
             inputLayer.setDisplay(mListener.getPalette(), drawLayer);
         } else {
             ExpenseWin drawLayer = ExpenseWin.newWindowClass(inputLayer, cal.getTimeInMillis() / 1000L, 8f, 1.5f, -0.8f, -0.1f);
             drawLayer.setDPIScaling(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
-            mListener.setDisplay(this, (T) drawLayer, code);
+            mListener.setDisplay(this, (T) drawLayer, gClass);
             inputLayer.setDisplay(mListener.getPalette(), drawLayer);
         }
         return frame;
     }
     public CalendarFrag() { }
-
-    private static final String CODE_PARAM = "code";
-    private String mParam1;
-    public static <T extends TimeWin> CalendarFrag<T> newInstance(String param1) {
+    private static final String CLASS_PARAM = "gClass";
+    public static <T extends TimeWin> CalendarFrag<T> newInstance(String genericClass) {
         CalendarFrag<T> fragment = new CalendarFrag<T>();
         Bundle args = new Bundle();
-        args.putString(CODE_PARAM, param1);
+        args.putString(CLASS_PARAM, genericClass);
         fragment.setArguments(args);
         return fragment;
     }
@@ -81,7 +62,7 @@ public class CalendarFrag<T extends TimeWin> extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null)
-            code = getArguments().getString(CODE_PARAM);
+            gClass = getArguments().getString(CLASS_PARAM);
     }
     @Override
     public void onAttach(Context context) {
