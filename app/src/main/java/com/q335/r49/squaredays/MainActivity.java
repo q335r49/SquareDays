@@ -22,18 +22,9 @@ import android.view.MenuItem;
 import android.widget.PopupMenu;
 import android.widget.Toast;
 import com.google.common.base.Charsets;
-import com.google.common.io.CharSink;
 import com.google.common.io.Files;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,  PopupMenu.OnMenuItemClickListener  {
@@ -55,25 +46,23 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     private static boolean logChanged;
         static void setLogChanged() { logChanged = true;}
 
-    private void readLogsFromFile() {
-        List<String> entries;
-        try { entries = Files.readLines(new File(LOG_FILE), Charsets.UTF_8); }
-        catch (Exception e) {
+    private void readLogFile() {
+        try {
+            for (String l : Files.readLines(new File(getFilesDir(), LOG_FILE), Charsets.UTF_8))
+                pushOnly(logEntry.newFromLogLine(l));
+        } catch (Exception e) {
             Log.d("SquareDays","Log read exception: " + e.toString());
-            return;
         }
-        for (String l : entries)
-            pushOnly(logEntry.newFromLogLine(l));
     }
-    private void writeLogsToFile() {
-        if (logChanged) {
-            try {
-                Files.asCharSink(new File(LOG_FILE), Charsets.UTF_8).writeLines(CW.getWritableShapes());
-                logChanged = false;
-            } catch (Exception e) {
-                Log.d("SquareDays", "File write error: " + e.toString());
-                Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
-            }
+    private void writeLogFile() {
+        if (!logChanged)
+            return;
+        try {
+            Files.asCharSink(new File(getFilesDir(), LOG_FILE), Charsets.UTF_8).writeLines(CW.getWritableShapes());
+            logChanged = false;
+        } catch (Exception e) {
+            Log.d("SquareDays", "File write error: " + e.toString());
+            Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -140,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     @Override
     protected void onPause() {
         super.onPause();
-        writeLogsToFile();
+        writeLogFile();
         Log.d("Squaredays","File written");
     }
     @Override
@@ -172,7 +161,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.setOffscreenPageLimit(2);
-        readLogsFromFile(context, LOG_FILE);
+        readLogFile();
     }
 
     @Override
@@ -206,8 +195,8 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
-                                    writeLogsToFile();
-                                    Files.copy(new File(getFilesDir(), "log.txt"),logFile);
+                                    writeLogFile();
+                                    Files.copy(new File(getFilesDir(), LOG_FILE),logFile);
                                     Toast.makeText(context, "Log entries exported to " + extStorPath + LOG_FILE, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Log.d("SquareDays",e.toString());
@@ -219,8 +208,8 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
-                                    writeLogsToFile();
-                                    Files.copy(new File(getFilesDir(), "log.txt"),logFile);
+                                    writeLogFile();
+                                    Files.copy(new File(getFilesDir(), LOG_FILE),logFile);
                                     Files.write(sprefs.getString("commands", ""),cmdFile,Charsets.UTF_8);
                                     Toast.makeText(context, "Commands exported to " + extStorPath + COMMANDS_FILE + System.getProperty("line.separator")
                                             + "Log entries exported to " + extStorPath + LOG_FILE, Toast.LENGTH_LONG).show();
@@ -270,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
                                             pushOnly(logEntry.newClearMess());
-                                            readLogsFromFile(context, LOG_FILE);
+                                            readLogFile();
                                             popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
@@ -301,7 +290,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
                                             pushOnly(logEntry.newClearMess());
-                                            readLogsFromFile(context, LOG_FILE);
+                                            readLogFile();
                                             popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
