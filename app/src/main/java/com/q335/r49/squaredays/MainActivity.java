@@ -6,11 +6,9 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -27,29 +25,26 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,  PopupMenu.OnMenuItemClickListener  {
-    static int COLOR_BACKGROUND;
-    static int COLOR_ERROR;
-    static Typeface CommandFont;
+public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {
+    Context context;
+    SharedPreferences prefs;
     static int parseColor(String s) {
         try {
             return Color.parseColor(s);
         } catch (Exception e) {
             Log.d("SquareDays","Bad color: " + s);
-            return COLOR_ERROR;
+            return Globals.COLOR_ERROR;
         }
     }
     private static final String LOG_FILE = "log.txt";
     private static final String COMMANDS_FILE = "commands.json";
     private static final String EXT_STORAGE_DIR = "tracker";
-    private static final int PALETTE_LENGTH = 24;
     private static boolean logChanged;
         static void setLogChanged() { logChanged = true;}
-
     private void readLogFile() {
         try {
             for (String l : Files.readLines(new File(getFilesDir(), LOG_FILE), Charsets.UTF_8))
-                pushOnly(logEntry.newFromLogLine(l));
+                pushOnly(LogEntry.newFromLogLine(l));
         } catch (Exception e) {
             Log.d("SquareDays","Log read exception: " + e.toString());
         }
@@ -65,31 +60,35 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
         }
     }
-
-    private Queue<logEntry> logQ = new LinkedList<>();
-    public void pushProc(logEntry log) {
-        if (CW == null || EW == null)
-            logQ.add(log);
-        else if (logQ.isEmpty()) {
-            if (log.command == logEntry.EXPENSE) {
-                EW.procTask(log);
-            } else
-                BF.setSavedAB(CW.procTask(log));
+    private Queue<LogEntry> logQ;
+    public void pushProc(LogEntry log) {
+        if (logQ.isEmpty()) {
+            if (log.command == LogEntry.EXPENSE) {
+                if (EW != null)
+                    EW.procTask(log);
+                else
+                    logQ.add(log);
+            } else {
+                if (CW != null)
+                    BF.setSavedAB(CW.procTask(log));
+                else
+                    logQ.add(log);
+            }
         } else {
             logQ.add(log);
             popAll();
         }
     }
-    public void pushOnly(logEntry log) { logQ.add(log); }
+    public void pushOnly(LogEntry log) { logQ.add(log); }
     public void popAll() {
         if (CW == null || BF == null || EW == null)
             return;
         Log.d("SquareDays","Init!");
-        logEntry onGoing = null;
+        LogEntry onGoing = null;
         if (logQ.isEmpty())
-            onGoing = CW.procTask(logEntry.newCommentCmd(""));
-        else for (logEntry le = logQ.poll(); le != null; le = logQ.poll()) {
-            if (le.command == logEntry.EXPENSE)
+            onGoing = CW.procTask(LogEntry.newCommentCmd(""));
+        else for (LogEntry le = logQ.poll(); le != null; le = logQ.poll()) {
+            if (le.command == LogEntry.EXPENSE)
                 EW.procTask(le);
             else
                 onGoing = CW.procTask(le);
@@ -97,23 +96,15 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         BF.setSavedAB(onGoing);
         BF.setActiveTask(onGoing);
     }
-    Context context;
-    SharedPreferences sprefs;
-
-    PaletteRing palette;
-    public PaletteRing getPalette() {
-        return palette;
-    }
 
     FragmentManager FM;
     TasksFrag BF;
-    public void setBF(TasksFrag BF) { this.BF = BF; }
+        public void setBF(TasksFrag BF) { this.BF = BF; }
     CalendarFrag<TimeWin> CF;
     TimeWin CW;
     CalendarFrag<ExpenseWin> EF;
     ExpenseWin EW;
-    public <T extends TimeWin> void setDisplay(CalendarFrag<T> frag, T disp, String code) {
-        Log.d("XXX",code);
+        public <T extends TimeWin> void setWin(CalendarFrag<T> frag, T disp, String code) {
         if (code.equals(CalendarFrag.CODE_CAL)) {
             CF = (CalendarFrag<TimeWin>) frag;
             CW = disp;
@@ -122,9 +113,6 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             EW = (ExpenseWin) disp;
         }
     }
-
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-    private ViewPager mViewPager;
 
     @Override
     protected void onPause() {
@@ -135,31 +123,18 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        TimeWin.COLOR_SCALE_TEXT = ResourcesCompat.getColor(getResources(), R.color.scale_text, null);
-        TimeWin.COLOR_GRID_BACKGROUND = ResourcesCompat.getColor(getResources(), R.color.grid_background, null);
-        TimeWin.COLOR_NOW_LINE = ResourcesCompat.getColor(getResources(), R.color.now_line, null);
-        TimeWin.COLOR_STATUS_BAR = ResourcesCompat.getColor(getResources(), R.color.status_bar, null);
-        TimeWin.COLOR_SELECTION = ResourcesCompat.getColor(getResources(), R.color.selection, null);
-        TasksFrag.COLOR_END_BOX = ResourcesCompat.getColor(getResources(), R.color.end_box, null);
-        COLOR_ERROR = ResourcesCompat.getColor(getResources(), R.color.error, null);
-        COLOR_BACKGROUND =  ResourcesCompat.getColor(getResources(), R.color.background, null);
-        CommandFont = Typeface.createFromAsset(getAssets(),  "fonts/22203___.TTF");
-        palette = new PaletteRing(PALETTE_LENGTH);
-        setContentView(R.layout.activity_main);
         context = getApplicationContext();
-        sprefs = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
-        //AB = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(AB);
+        prefs = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
+        Globals.init(context);
+        logQ = new LinkedList<>();
 
-        //AB.setBackgroundColor(COLOR_BACKGROUND);
-        FM = getSupportFragmentManager();
-        BF = new TasksFrag();
-        CF = CalendarFrag.newInstance(CalendarFrag.CODE_CAL);
-        EF = CalendarFrag.newInstance(CalendarFrag.CODE_EXP);
-
-        mSectionsPagerAdapter = new SectionsPagerAdapter(FM,EF,BF, CF);
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        setContentView(R.layout.activity_main);
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
+            FM = getSupportFragmentManager();
+            BF = new TasksFrag();
+            CF = CalendarFrag.newInstance(CalendarFrag.CODE_CAL);
+            EF = CalendarFrag.newInstance(CalendarFrag.CODE_EXP);
+        mViewPager.setAdapter(new SectionsPagerAdapter(FM,EF,BF,CF));
         mViewPager.setOffscreenPageLimit(2);
         readLogFile();
     }
@@ -183,7 +158,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
-                                    Files.write(sprefs.getString("commands", ""),cmdFile,Charsets.UTF_8);
+                                    Files.write(prefs.getString("commands", ""),cmdFile,Charsets.UTF_8);
                                     Toast.makeText(context, "Commands exported to " + extStorPath + COMMANDS_FILE, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Log.d("SquareDays",e.toString());
@@ -210,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                 try {
                                     writeLogFile();
                                     Files.copy(new File(getFilesDir(), LOG_FILE),logFile);
-                                    Files.write(sprefs.getString("commands", ""),cmdFile,Charsets.UTF_8);
+                                    Files.write(prefs.getString("commands", ""),cmdFile,Charsets.UTF_8);
                                     Toast.makeText(context, "Commands exported to " + extStorPath + COMMANDS_FILE + System.getProperty("line.separator")
                                             + "Log entries exported to " + extStorPath + LOG_FILE, Toast.LENGTH_LONG).show();
                                 } catch (Exception e) {
@@ -258,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                     else {
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
-                                            pushOnly(logEntry.newClearMess());
+                                            pushOnly(LogEntry.newClearMess());
                                             readLogFile();
                                             popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
@@ -289,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                     else {
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
-                                            pushOnly(logEntry.newClearMess());
+                                            pushOnly(LogEntry.newClearMess());
                                             readLogFile();
                                             popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
@@ -318,14 +293,14 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                File logFile = new File(context.getFilesDir(), LOG_FILE);
+                                File logFile = new File(getFilesDir(), LOG_FILE);
                                 if (logFile.exists()) {
                                     if (logFile.delete())
-                                        pushOnly(logEntry.newClearMess());
+                                        pushOnly(LogEntry.newClearMess());
                                     else
                                         Log.d("SquareDays", "Log clear failed!");
                                 } else
-                                    pushOnly(logEntry.newClearMess());
+                                    pushOnly(LogEntry.newClearMess());
                                 popAll();
                             }
                         })
@@ -334,7 +309,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             }
             case R.id.menuItemHelp: {
                 FragmentManager fm = getSupportFragmentManager();
-                HelpScroller helpV = HelpScroller.newInstance();
+                HelpFrag helpV = HelpFrag.newInstance();
                 helpV.show(fm, "fragment_edit_name");
                 return true;
             }
@@ -342,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                 return super.onOptionsItemSelected(item);
         }
     }
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+    class SectionsPagerAdapter extends FragmentPagerAdapter {
         Fragment F0;
         Fragment F1;
         Fragment F2;

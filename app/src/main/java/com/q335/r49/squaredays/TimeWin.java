@@ -12,197 +12,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
 
-class ExpenseWin extends TimeWin {
-    private float rSecondsExpense;
-    public ExpenseWin(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
-        super(sv, tsOrigin, widthDays, heightWeeks, xMin, yMin);
-        rSecondsExpense = 86400/100;
-    }
-    private HashMap<Long,DailyExpense> DE = new HashMap<>(); //TODO: Long sparse array?
-    void drawDailyExpense(DailyExpense de) {
-        int size = de.expenses.size();
-        logEntry le;
-        long start, end;
-        for (int i = 0; i < size; i++) {
-            le = de.expenses.get(i);
-            start = (long) (de.alreadySpent.get(i) * rSecondsExpense);
-            end = (long) ((de.alreadySpent.get(i) + le.end) * rSecondsExpense);
-
-            float scaleX = end < expansionComplete ? scaleB : end > now ? scaleA : (float) (end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
-            long corner = start;
-            long midn = start - (start - orig + 864000000000000000L) % 86400L + 86399L;
-            float[] a, b, c;
-            for (; midn < end; midn += 86400L) {
-                a = tsToScreen(corner, 0);
-                b = tsToScreen(midn, 1f);
-                c = tsToScreen(midn-43199L, 0.5f);
-                mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
-                        (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                        (b[0]-c[0])*scaleX+c[0],
-                        (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],le.paint);
-                corner = midn+1;
-            }
-            a = tsToScreen(corner, 0);
-            b = tsToScreen(end, 1f);
-            c = tsToScreen(midn-43199L, 0.5f);
-            mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
-                    (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                    (b[0]-c[0])*scaleX+c[0],
-                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],le.paint);
-        }
-    }
-    @Override
-    logEntry procTask(logEntry a) {  //TODO: Deal with modifying log (not too hard)
-        DailyExpense currentExpenses = DE.get(a.start);
-        if (currentExpenses == null)
-            DE.put(a.start, new DailyExpense(a));
-        else
-            currentExpenses.add(a);
-        return null;
-    }
-    @Override
-    void draw(Canvas canvas) {
-        mCanvas = canvas;
-        Log.d("SquareDays","Draw Calendar");
-        screenH = canvas.getHeight();
-        screenW = canvas.getWidth();
-        rGridScreenW = gridW/screenW;
-        rGridScreenH = gridH/screenH;
-        RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH * rGridScreenH;
-
-        expansionComplete = now - expansionTime;
-
-        now = prevMidn(System.currentTimeMillis() / 1000L) + 86400;
-        drawBackgroundGrid();
-
-        for (HashMap.Entry<Long,DailyExpense> e : DE.entrySet())
-            drawDailyExpense(e.getValue());
-
-        float gridSize;
-        String timeFormat;
-        if (gridH > 3f) {
-            gridSize = 1f;
-            timeFormat = "M.d";
-            float scaledMark = 0;
-            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
-            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
-                scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
-                if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, majorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat, Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.6f, majorTickStyle);
-                }
-            }
-        } else if (gridH > 1f) {
-            gridSize = 1f/6f;
-            float scaledMark = 0;
-            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
-            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
-                if (startGrid - Math.floor(startGrid) < 0.01f) {
-                    scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
-                    if (scaledMark > 0f) {
-                        canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, majorTickStyle);
-                        canvas.drawText((new SimpleDateFormat("M.d",Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.6f, majorTickStyle);
-                    }
-                } else {
-                    scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
-                    if (scaledMark > 0f) {
-                        canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
-                        canvas.drawText((new SimpleDateFormat(" h:mm",Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
-                    }
-                }
-            }
-        } else if (gridH > 1f/6f) {
-            gridSize = 1f/24f;
-            timeFormat = " h:mm";
-            float scaledMark = 0;
-            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
-            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
-                scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
-                if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
-                }
-            }
-        } else if (gridH > 1f/24f) {
-            gridSize = 1f/144f;
-            timeFormat = " h:mm";
-            float scaledMark = 0;
-            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
-            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
-                scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
-                if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
-                }
-            }
-        } else if (gridH > 1f/144f) {
-            gridSize = 1f/720f;
-            timeFormat = " h:mm";
-            float scaledMark = 0;
-            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
-            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
-                scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
-                if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
-                }
-            }
-        } else {
-            gridSize = 1f/2880f;
-            timeFormat = " h:mm:ss";
-            float scaledMark = 0;
-            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
-            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
-                scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
-                if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
-                }
-            }
-        }
-        if (selection!=null)
-            drawInterval(selection,selectionStyle);
-        drawNowLine(now);
-        if (!statusText.isEmpty())
-            canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
-    }
-
-    public static ExpenseWin newWindowClass(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
-        return new ExpenseWin(sv, tsOrigin,widthDays,heightWeeks,xMin,yMin);
-    }
-
-    static class DailyExpense {
-        ArrayList<logEntry> expenses;
-        ArrayList<Float> alreadySpent;
-        float amountSpent;
-        DailyExpense() {
-            expenses = new ArrayList<>();
-            alreadySpent = new ArrayList<>();
-            amountSpent = 0f;
-        }
-        DailyExpense(logEntry le) { this(); add(le); }
-        void add(logEntry le) {
-            expenses.add(le);
-            alreadySpent.add(amountSpent);
-            amountSpent += le.end;
-        }
-    }
-}
-
-
 class TimeWin {
-    static int COLOR_SCALE_TEXT, COLOR_GRID_BACKGROUND, COLOR_NOW_LINE, COLOR_STATUS_BAR, COLOR_SELECTION;
     Paint minorTickStyle, majorTickStyle, nowLineStyle, statusBarStyle, selectionStyle, ongoingStyle, gridStyle;
     String statusText;
     void setStatusText(String s) { statusText = s; }
     @Nullable
-    private logEntry curTask;
-    private TreeSet<logEntry> shapeIndex;
+    private LogEntry curTask;
+    private TreeSet<LogEntry> shapeIndex;
     TouchView parent;
     public static TimeWin newWindowClass(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         return new TimeWin(sv, tsOrigin,widthDays,heightWeeks,xMin,yMin);
@@ -213,28 +33,28 @@ class TimeWin {
         this.gridH = heightWeeks;
         g0x = xMin;
         g0y = yMin;
-        shapeIndex = new TreeSet<>(new Comparator<logEntry>() {
+        shapeIndex = new TreeSet<>(new Comparator<LogEntry>() {
             @Override
-            public int compare(logEntry o1, logEntry o2) { return o1.start > o2.start ? -1 : o1.start == o2.start ? 0 : 1; }
+            public int compare(LogEntry o1, LogEntry o2) { return o1.start > o2.start ? -1 : o1.start == o2.start ? 0 : 1; }
         });
         minorTickStyle = new Paint();
-            minorTickStyle.setColor(COLOR_SCALE_TEXT);
+            minorTickStyle.setColor(Globals.COLOR_SCALE_TEXT);
         majorTickStyle = new Paint();
-            majorTickStyle.setColor(COLOR_SCALE_TEXT);
+            majorTickStyle.setColor(Globals.COLOR_SCALE_TEXT);
             majorTickStyle.setTypeface(Typeface.DEFAULT_BOLD);
         nowLineStyle = new Paint();
-            nowLineStyle.setColor(COLOR_NOW_LINE);
+            nowLineStyle.setColor(Globals.COLOR_NOW_LINE);
         statusBarStyle = new Paint();
-            statusBarStyle.setColor(COLOR_STATUS_BAR);
+            statusBarStyle.setColor(Globals.COLOR_STATUS_BAR);
             statusBarStyle.setTextAlign(Paint.Align.LEFT);
         selectionStyle = new Paint();
             selectionStyle.setStyle(Paint.Style.STROKE);
-            selectionStyle.setColor(COLOR_SELECTION);
+            selectionStyle.setColor(Globals.COLOR_SELECTION);
         ongoingStyle = new Paint();
-            ongoingStyle.setColor(COLOR_NOW_LINE);
+            ongoingStyle.setColor(Globals.COLOR_NOW_LINE);
             ongoingStyle.setStyle(Paint.Style.FILL);
         gridStyle = new Paint();
-            gridStyle.setColor(COLOR_GRID_BACKGROUND);
+            gridStyle.setColor(Globals.COLOR_GRID_BACKGROUND);
             gridStyle.setStyle(Paint.Style.FILL);
         statusText = "";
     }
@@ -290,9 +110,9 @@ class TimeWin {
             RECT_SCALING_FACTOR_Y *= borderScale;
         }
     }
-    logEntry getSelectedShape(float sx, float sy) {
+    LogEntry getSelectedShape(float sx, float sy) {
         long ts = screenToTs(sx, sy);
-        logEntry closest = shapeIndex.ceiling(logEntry.newStartTime(ts));
+        LogEntry closest = shapeIndex.ceiling(LogEntry.newStartTime(ts));
         return closest == null? null : closest.end < ts ? null : closest;
     }
 
@@ -316,7 +136,7 @@ class TimeWin {
 
         drawBackgroundGrid();
 
-        for (logEntry s : shapeIndex)
+        for (LogEntry s : shapeIndex)
             drawInterval(s, s.paint);
 
         float gridSize;
@@ -410,7 +230,7 @@ class TimeWin {
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
     void drawNowLine(long ts) {
-        nowLineStyle.setColor(COLOR_NOW_LINE);
+        nowLineStyle.setColor(Globals.COLOR_NOW_LINE);
         long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
         float[] a = tsToScreen(ts,0f);
         float[] b = tsToScreen(ts,1f);
@@ -550,7 +370,7 @@ class TimeWin {
             corner = midn + 1;
         }
     }
-    void drawInterval(logEntry iv, Paint paint) {
+    void drawInterval(LogEntry iv, Paint paint) {
         float scaleX = iv.end < expansionComplete ? scaleB : iv.end > now ? scaleA : (float) (iv.end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
         if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
@@ -575,7 +395,7 @@ class TimeWin {
                 (b[0]-c[0])*scaleX+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
-    private void drawOngoingInterval(logEntry iv, float scaleB) {
+    private void drawOngoingInterval(LogEntry iv, float scaleB) {
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
         float[] a, b, c;
@@ -600,15 +420,15 @@ class TimeWin {
         pp.lineTo((b[0]-c[0])*scaleB+c[0],y2);
         pp.lineTo((a[0]-c[0])*scaleB+c[0],y2);
         pp.close();
-        Shader shader = new LinearGradient(0, y1, 0, y2, iv.paint.getColor(), COLOR_GRID_BACKGROUND, Shader.TileMode.CLAMP);
+        Shader shader = new LinearGradient(0, y1, 0, y2, iv.paint.getColor(), Globals.COLOR_GRID_BACKGROUND, Shader.TileMode.CLAMP);
         ongoingStyle.setShader(shader);
         mCanvas.drawPath(pp, ongoingStyle);
     }
-    logEntry procTask(logEntry a) {
+    LogEntry procTask(LogEntry a) {
         //TODO: request invalidate() ?
-        logEntry c;
+        LogEntry c;
         switch (a.command) {
-            case logEntry.CMD_ADD_COMMENT:
+            case LogEntry.CMD_ADD_COMMENT:
                 if (curTask != null) {
                     if (curTask.comment != null)
                         curTask.comment += a.comment == null ? "" : a.comment;
@@ -616,7 +436,7 @@ class TimeWin {
                         curTask.comment = a.comment;
                 }
                 return curTask;
-            case logEntry.CMD_END_TASK:
+            case LogEntry.CMD_END_TASK:
                 if (curTask != null) {
                     curTask.end = a.end;
                     c = curTask;
@@ -624,7 +444,7 @@ class TimeWin {
                 } else
                     return null;
                 break;
-            case logEntry.ONGOING:
+            case LogEntry.ONGOING:
                 if (curTask == null) {
                     curTask = a;
                     return curTask;
@@ -639,7 +459,7 @@ class TimeWin {
                     }
                 }
                 break;
-            case logEntry.CMD_CLEAR_LOG:
+            case LogEntry.CMD_CLEAR_LOG:
                 curTask = null;
                 shapeIndex.clear();
                 return null;
@@ -648,8 +468,8 @@ class TimeWin {
         }
         if (c.end <= c.start)
             return curTask;
-        List<logEntry> removalList = new ArrayList<>();
-        for (logEntry p : shapeIndex) {
+        List<LogEntry> removalList = new ArrayList<>();
+        for (LogEntry p : shapeIndex) {
             if (c.start <= p.start) {
                 if (c.end > p.start)
                     if (c.end >= p.end)
@@ -659,7 +479,7 @@ class TimeWin {
             } else if (c.start > p.end)
                 break;
             else if (c.end < p.end) {
-                logEntry newLog = new logEntry(p);
+                LogEntry newLog = new LogEntry(p);
                 newLog.end = c.start;
                 shapeIndex.add(newLog);
                 p.start = c.end;
@@ -669,7 +489,7 @@ class TimeWin {
                 break;
             }
         }
-        for (logEntry l : removalList)
+        for (LogEntry l : removalList)
             shapeIndex.remove(l);
         shapeIndex.add(c);
         MainActivity.setLogChanged();
@@ -678,7 +498,7 @@ class TimeWin {
     List<String> getWritableShapes() {
         List<String> LogList = new ArrayList<>();
         String entry;
-        for (logEntry r : shapeIndex) {
+        for (LogEntry r : shapeIndex) {
             entry = r.toLogLine();
             if (entry != null)
                 LogList.add(entry);
@@ -690,16 +510,16 @@ class TimeWin {
         }
         return LogList;
     }
-    logEntry selection;
-        void setSelected(logEntry selection) { this.selection = selection; }
-        logEntry getSelection() { return selection; }
+    LogEntry selection;
+        void setSelected(LogEntry selection) { this.selection = selection; }
+        LogEntry getSelection() { return selection; }
         void removeSelection() {
             if (!shapeIndex.remove(selection))
                 Log.d("SquareDays","Cannot remove selection: " + selection.toString());
             selection = null;
             setStatusText("");
         }
-    void updateEntry(logEntry selection, long start, long end) {
+    void updateEntry(LogEntry selection, long start, long end) {
         if (shapeIndex.remove(selection)) {
             selection.start = start;
             selection.end = end;

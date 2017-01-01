@@ -26,7 +26,6 @@ public class TouchView<T extends TimeWin> extends View {
     private ScaleListener SL;
     private ScaleGestureDetector mScaleDetector;
     private Context appContext;
-    private PaletteRing palette;
 
     public TouchView(Context context) {
         super(context);
@@ -40,10 +39,7 @@ public class TouchView<T extends TimeWin> extends View {
         mScaleDetector = new ScaleGestureDetector(context, SL);
         appContext = context;
     }
-    void setDisplay(PaletteRing pal, T cw) {
-        palette = pal;
-        this.CW = cw;
-    }
+    void setDisplay(T cw) { this.CW = cw; }
 
     public static long dateToTs(String s) {
         int minPos = s.indexOf(':');
@@ -71,7 +67,7 @@ public class TouchView<T extends TimeWin> extends View {
     private final Handler handler = new Handler();
     private Runnable mLongPressed = new Runnable() { public void run() {
         has_run = true;
-        final logEntry selection = CW.getSelection();
+        final LogEntry selection = CW.getSelection();
         if (selection != null) {
             LayoutInflater inflater = LayoutInflater.from(appContext);
             View promptView = inflater.inflate(R.layout.edit_interval, null);
@@ -86,7 +82,7 @@ public class TouchView<T extends TimeWin> extends View {
             endEntry.setText(tsToDate(selection.end));
             final View curColorV = promptView.findViewById(R.id.CurColor);
             try { curColorV.setBackgroundColor(selection.paint.getColor());
-            } catch (Exception e) { curColorV.setBackgroundColor(MainActivity.COLOR_ERROR); }
+            } catch (Exception e) { curColorV.setBackgroundColor(Globals.COLOR_ERROR); }
 
             final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
             final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
@@ -130,7 +126,7 @@ public class TouchView<T extends TimeWin> extends View {
             final int childCount = paletteView.getChildCount();
             for (int i = 0; i < childCount ; i++) {
                 View v = paletteView.getChildAt(i);
-                v.setBackgroundColor(palette.get(i));
+                v.setBackgroundColor(Globals.palette.get(i));
                 final int bg = ((ColorDrawable) v.getBackground()).getColor();
                 v.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -174,7 +170,7 @@ public class TouchView<T extends TimeWin> extends View {
                 handler.postDelayed(mLongPressed,1200);
                 firstTouchX = lastTouchX = x;
                 firstTouchY = lastTouchY = y;
-                logEntry selection = CW.getSelectedShape(x,y);
+                LogEntry selection = CW.getSelectedShape(x,y);
                 if (selection != null) {
                     long duration = 1000L* (selection.end - selection.start);
                     CW.setStatusText(selection.comment + ":"

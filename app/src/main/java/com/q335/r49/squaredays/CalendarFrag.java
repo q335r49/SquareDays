@@ -14,9 +14,8 @@ public class CalendarFrag<T extends TimeWin> extends Fragment {
     static String CODE_EXP = "exp";
     private String gClass;
     public interface OnFragmentInteractionListener {
-        <T extends TimeWin> void setDisplay(CalendarFrag<T> frag, T disp, String code);
+        <T extends TimeWin> void setWin(CalendarFrag<T> frag, T disp, String code);
         void popAll();
-        PaletteRing getPalette();
     }
     private OnFragmentInteractionListener mListener;
     @Override
@@ -39,20 +38,20 @@ public class CalendarFrag<T extends TimeWin> extends Fragment {
         if (gClass.equals(CODE_CAL)) {
             TimeWin drawLayer = TimeWin.newWindowClass(inputLayer, cal.getTimeInMillis() / 1000L, 8f, 1.5f, -0.8f, -0.1f);
             drawLayer.setDPIScaling(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
-            mListener.setDisplay(this, (T) drawLayer, gClass);
-            inputLayer.setDisplay(mListener.getPalette(), drawLayer);
+            mListener.setWin(this, (T) drawLayer, gClass);
+            inputLayer.setDisplay(drawLayer);
         } else {
             ExpenseWin drawLayer = ExpenseWin.newWindowClass(inputLayer, cal.getTimeInMillis() / 1000L, 8f, 1.5f, -0.8f, -0.1f);
             drawLayer.setDPIScaling(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
-            mListener.setDisplay(this, (T) drawLayer, gClass);
-            inputLayer.setDisplay(mListener.getPalette(), drawLayer);
+            mListener.setWin(this, (T) drawLayer, gClass);
+            inputLayer.setDisplay(drawLayer);
         }
         return frame;
     }
     public CalendarFrag() { }
     private static final String CLASS_PARAM = "gClass";
     public static <T extends TimeWin> CalendarFrag<T> newInstance(String genericClass) {
-        CalendarFrag<T> fragment = new CalendarFrag<T>();
+        CalendarFrag<T> fragment = new CalendarFrag<>();
         Bundle args = new Bundle();
         args.putString(CLASS_PARAM, genericClass);
         fragment.setArguments(args);

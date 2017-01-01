@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@android:style/Theme.Dialog"
-    tools:context="com.q335.r49.squaredays.HelpScroller">
+    tools:context="com.q335.r49.squaredays.HelpFrag">
     <WebView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

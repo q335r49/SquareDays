@@ -30,7 +30,5 @@ class PaletteRing {
         for (String c:colors)
             add(MainActivity.parseColor(c));
     }
-    int get(int i) {
-        return ring[(pos - 1 - i + 10*length) % length];
-    }
+    int get(int i) { return ring[(pos - 1 - i + 10*length) % length]; }
 }
