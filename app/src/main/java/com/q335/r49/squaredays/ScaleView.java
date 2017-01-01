@@ -48,16 +48,9 @@ public class ScaleView extends View {
         mScaleDetector = new ScaleGestureDetector(context, SL);
         appContext = context;
     }
-    void loadCalendarView(PaletteRing pal) {
+    void loadCalendarView(PaletteRing pal, CalendarWin cw) {
         palette = pal;
-        Calendar cal = new GregorianCalendar();
-            cal.setTimeInMillis(System.currentTimeMillis());
-            cal.set(Calendar.DAY_OF_WEEK,1);
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-        CW = new CalendarWin(cal.getTimeInMillis()/1000L,8f,1.5f,-0.8f,-0.1f);
+        this.CW = cw;
         CW.setDPIScaling(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
     }
 

@@ -16,8 +16,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -52,7 +54,15 @@ public class CalendarFrag extends Fragment {
         inputLayer = (ScaleView) (frame.findViewById(R.id.drawing));
         mListener.setGF(this);
         palette = mListener.getPalette();
-        inputLayer.loadCalendarView(palette);
+        //TODO: Finally! call CW directly from procCmd
+        Calendar cal = new GregorianCalendar();
+            cal.setTimeInMillis(System.currentTimeMillis());
+            cal.set(Calendar.DAY_OF_WEEK,1);
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+        inputLayer.loadCalendarView(palette, new CalendarWin(cal.getTimeInMillis()/1000L,8f,1.5f,-0.8f,-0.1f));
         return frame;
     }
     public CalendarFrag() { }
@@ -82,7 +92,7 @@ class DailyExpense {
         alreadySpent = new ArrayList<>();
         amountSpent = 0f;
     }
-    DailyExpense(logEntry le) { add(le); }
+    DailyExpense(logEntry le) { this(); add(le); }
     void add(logEntry le) {
         expenses.add(le);
         alreadySpent.add(amountSpent);

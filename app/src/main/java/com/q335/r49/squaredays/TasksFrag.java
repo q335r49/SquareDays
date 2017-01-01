@@ -10,10 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -194,7 +191,7 @@ public class TasksFrag extends Fragment {
                 private final Handler handler = new Handler();
                 private Runnable mLongPressed;
                 private final float ratio_dp_px = 1000f /(float) dpToPx(1000);
-                boolean isExpense = comF.length > 2;
+                boolean isExpense = comF.length > 2 && comF[2].equals("E");
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     if (isExpense) {    //TODO: Allow for delay (e.g., yesterday)
@@ -656,7 +653,6 @@ public class TasksFrag extends Fragment {
                                             if (finalDelay != 0) {
                                                 mListener.pushProc(logEntry.newEndCommand(System.currentTimeMillis() / 1000L - finalDelay * 60));
                                                 clearActiveTask();
-
                                             }
                                         }
                                     })

@@ -301,6 +301,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         mSectionsPagerAdapter = new SectionsPagerAdapter(FM,EF,BF,GF);
         mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setOffscreenPageLimit(2);
         readLogsFromFile(context, LOG_FILE);
     }
 
