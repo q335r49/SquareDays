@@ -78,15 +78,18 @@ class LogEntry {
         if (args.length < 5)
             throw new IllegalArgumentException("Unparsable string, need at least 6 arguments: " + s);
         LogEntry le = new LogEntry();
-        // le.readableTimePos = args[0];
         le.paint = new Paint();
             le.paint.setColor(MainActivity.parseColor(args[1]));
         le.start = Long.parseLong(args[2]);
         if (args[3].isEmpty())
             le.command = ONGOING;
-        else if (args[3].charAt(0) == 'E')
+        else if (args[3].charAt(0) == 'E') {
             le.command = EXPENSE;
-        else {
+            if (args[3].length() > 1)
+                le.end = Long.parseLong(args[3].substring(1));
+            else
+                throw new IllegalArgumentException("Bad expenses format: " + s);
+        } else {
             le.end = le.start + Long.parseLong(args[3]) * 60L;
             if (le.start > le.end)
                 throw new IllegalArgumentException("Starting after end time: " + s);
@@ -94,7 +97,7 @@ class LogEntry {
         le.comment = args[4];
         return le;
     }
-    String toLogLine() {
+    String toLogLine() {    //TODO: remove zero expenses
         if (paint == null || comment == null) {
             Log.d("SquareDays", "---- Null paint or comment");
             return null;

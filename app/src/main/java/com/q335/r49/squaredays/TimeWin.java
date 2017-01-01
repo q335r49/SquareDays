@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
 
-class TimeWin {
+class TimeWin { //TODO: Reevaluate static variables
     Paint minorTickStyle, majorTickStyle, nowLineStyle, statusBarStyle, selectionStyle, ongoingStyle, gridStyle;
     String statusText;
     void setStatusText(String s) { statusText = s; }
@@ -95,7 +95,7 @@ class TimeWin {
         gy = (gy-cy)/RECT_SCALING_FACTOR_Y;
         return gy > 0.5f ? 0.5f + cy : gy < -0.5f? -0.5f + cy : gy + cy;
     }
-    private long screenToTs(float sx, float sy) { return gridToTs(screenToGridX(sx), screenToGridY(sy)); }
+    long screenToTs(float sx, float sy) { return gridToTs(screenToGridX(sx), screenToGridY(sy)); }
     long gridToTs(float gx, float gy) { return (long) (((float) Math.floor(gy)*7 + (gx < 0f ?  0f : gx >= 6f ? 6f : (float) Math.floor(gx)) + (gy - (float) Math.floor(gy)))*86400f) + orig; }
     void shift(float x, float y) {
         g0y -= y * rGridScreenH;
@@ -224,7 +224,7 @@ class TimeWin {
             drawInterval(selection,selectionStyle);
         if (curTask != null)
             drawOngoingInterval(curTask,scaleA);
-        drawNowLine(now);
+        drawNowLine(now);   //TODO: fix now line location
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }

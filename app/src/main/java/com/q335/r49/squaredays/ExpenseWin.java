@@ -1,5 +1,6 @@
 package com.q335.r49.squaredays;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.util.Log;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.List;
 import java.util.Locale;
 
 class ExpenseWin extends TimeWin {
-    static class DailyExpense { //TODO: merge K V
+    private static class DailyExpense {
         long midn;
         ArrayList<LogEntry> expenses;
         ArrayList<Float> alreadySpent;
@@ -36,10 +37,40 @@ class ExpenseWin extends TimeWin {
     private float rSecondsExpense;
     public ExpenseWin(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         super(sv, tsOrigin, widthDays, heightWeeks, xMin, yMin);
-        rSecondsExpense = 86400/100; //TODO: use static global
+        rSecondsExpense = 86400/100;
     }
-    private HashMap<Long,DailyExpense> DE = new HashMap<>(); //TODO: Long sparse array?
-    void drawDailyExpense(DailyExpense de) {
+    private HashMap<Long,DailyExpense> DE = new HashMap<>();
+    private void drawExpenseInterval(DailyExpense de, int index, Paint paint) {
+        int size = de.expenses.size();
+        LogEntry le;
+        long start, end;
+        le = de.expenses.get(index);
+        start = de.midn + (long) (de.alreadySpent.get(index) * rSecondsExpense);
+        end = de.midn + (long) ((de.alreadySpent.get(index) + le.end) * rSecondsExpense);
+
+        float scaleX = end < expansionComplete ? scaleB : end > now ? scaleA : (float) (end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
+        long corner = start;
+        long midn = start - (start - orig + 864000000000000000L) % 86400L + 86399L;
+        float[] a, b, c;
+        for (; midn < end; midn += 86400L) {
+            a = tsToScreen(corner, 0);
+            b = tsToScreen(midn, 1f);
+            c = tsToScreen(midn-43199L, 0.5f);
+            mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
+                    (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                    (b[0]-c[0])*scaleX+c[0],
+                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
+            corner = midn+1;
+        }
+        a = tsToScreen(corner, 0);
+        b = tsToScreen(end, 1f);
+        c = tsToScreen(midn-43199L, 0.5f);
+        mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
+                (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                (b[0]-c[0])*scaleX+c[0],
+                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
+    }
+    private void drawDailyExpense(DailyExpense de) {
         int size = de.expenses.size();
         LogEntry le;
         long start, end;
@@ -72,7 +103,7 @@ class ExpenseWin extends TimeWin {
         }
     }
     @Override
-    LogEntry procTask(LogEntry a) {  //TODO: Deal with modifying log (not too hard)
+    LogEntry procTask(LogEntry a) {  //TODO: Deal with modification commands
         MainActivity.setLogChanged();
         long midn = prevMidn(a.start);
         DailyExpense currentExpenses = DE.get(midn);
@@ -98,7 +129,6 @@ class ExpenseWin extends TimeWin {
         rGridScreenW = gridW/screenW;
         rGridScreenH = gridH/screenH;
         RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH * rGridScreenH;
-
         expansionComplete = now - expansionTime;
 
         now = prevMidn(System.currentTimeMillis() / 1000L) + 86400;
@@ -190,7 +220,7 @@ class ExpenseWin extends TimeWin {
             }
         }
         if (selection!=null)
-            drawInterval(selection,selectionStyle);
+            drawExpenseInterval(selected, selectedIndex, selectionStyle);
         drawNowLine(now);
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
@@ -198,5 +228,25 @@ class ExpenseWin extends TimeWin {
 
     public static ExpenseWin newWindowClass(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         return new ExpenseWin(sv, tsOrigin,widthDays,heightWeeks,xMin,yMin);
+    }
+
+    private DailyExpense selected;
+    private int selectedIndex;
+    @Override
+    LogEntry getSelectedShape(float sx, float sy) {
+        long ts = screenToTs(sx, sy);
+        long midn = prevMidn(ts);
+        DailyExpense de = DE.get(midn);
+        if (de != null) {
+            float exp = (ts - midn) / rSecondsExpense;
+            for (int i = 0; i < de.alreadySpent.size(); i++)
+                if (de.alreadySpent.get(i) + de.expenses.get(i).end > exp) {
+                    selected = de;
+                    selectedIndex = i;
+                    return de.expenses.get(i);
+                }
+        }
+        selected = null;
+        return null;
     }
 }
