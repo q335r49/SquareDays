@@ -8,20 +8,39 @@ import java.util.HashMap;
 import java.util.Locale;
 
 class ExpenseWin extends TimeWin {
+    static class DailyExpense { //TODO: merge K V
+        long midn;
+        ArrayList<LogEntry> expenses;
+        ArrayList<Float> alreadySpent;
+        float amountSpent;
+        DailyExpense(long midn) {
+            expenses = new ArrayList<>();
+            alreadySpent = new ArrayList<>();
+            amountSpent = 0f;
+            this.midn = midn;
+        }
+        DailyExpense(LogEntry le, long midn) { this(midn); add(le); }
+        void add(LogEntry le) {
+            expenses.add(le);
+            alreadySpent.add(amountSpent);
+            amountSpent += le.end;
+        }
+    }
     private float rSecondsExpense;
     public ExpenseWin(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         super(sv, tsOrigin, widthDays, heightWeeks, xMin, yMin);
-        rSecondsExpense = 86400/100;
+        rSecondsExpense = 86400/100; //TODO: use static global
     }
     private HashMap<Long,DailyExpense> DE = new HashMap<>(); //TODO: Long sparse array?
     void drawDailyExpense(DailyExpense de) {
+        Log.d("XX","drawn");
         int size = de.expenses.size();
         LogEntry le;
         long start, end;
         for (int i = 0; i < size; i++) {
             le = de.expenses.get(i);
-            start = (long) (de.alreadySpent.get(i) * rSecondsExpense);
-            end = (long) ((de.alreadySpent.get(i) + le.end) * rSecondsExpense);
+            start = de.midn + (long) (de.alreadySpent.get(i) * rSecondsExpense);
+            end = de.midn + (long) ((de.alreadySpent.get(i) + le.end) * rSecondsExpense);
 
             float scaleX = end < expansionComplete ? scaleB : end > now ? scaleA : (float) (end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
             long corner = start;
@@ -48,9 +67,10 @@ class ExpenseWin extends TimeWin {
     }
     @Override
     LogEntry procTask(LogEntry a) {  //TODO: Deal with modifying log (not too hard)
-        DailyExpense currentExpenses = DE.get(a.start);
+        long midn = prevMidn(a.start);
+        DailyExpense currentExpenses = DE.get(midn);
         if (currentExpenses == null)
-            DE.put(a.start, new DailyExpense(a));
+            DE.put(prevMidn(a.start), new DailyExpense(a,midn));
         else
             currentExpenses.add(a);
         return null;
@@ -164,22 +184,5 @@ class ExpenseWin extends TimeWin {
 
     public static ExpenseWin newWindowClass(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         return new ExpenseWin(sv, tsOrigin,widthDays,heightWeeks,xMin,yMin);
-    }
-
-    static class DailyExpense {
-        ArrayList<LogEntry> expenses;
-        ArrayList<Float> alreadySpent;
-        float amountSpent;
-        DailyExpense() {
-            expenses = new ArrayList<>();
-            alreadySpent = new ArrayList<>();
-            amountSpent = 0f;
-        }
-        DailyExpense(LogEntry le) { this(); add(le); }
-        void add(LogEntry le) {
-            expenses.add(le);
-            alreadySpent.add(amountSpent);
-            amountSpent += le.end;
-        }
     }
 }

@@ -1,14 +1,9 @@
 package com.q335.r49.squaredays;
-
 import android.graphics.Paint;
 import android.util.Log;
-
 import java.util.Date;
 
-/**
- * Created by q335r on 1/1/2017.
- */
-class logEntry {
+class LogEntry {
     static final int ONGOING = 1;
     static final int EXPENSE = 2;
     static final int CMD_ADD_COMMENT = 10;
@@ -20,21 +15,21 @@ class logEntry {
     long end;
     String comment;
 
-    private logEntry() {}
-    logEntry(logEntry e) {
+    private LogEntry() {}
+    LogEntry(LogEntry e) {
         command = e.command;
         paint = new Paint(e.paint);
         comment = e.comment;
         start = e.start;
         end = e.end;
     }
-    static logEntry newStartTime(long start) {
-        logEntry le = new logEntry();
+    static LogEntry newStartTime(long start) {
+        LogEntry le = new LogEntry();
             le.start = start;
         return le;
     }
-    static logEntry newOngoingTask(int color, long start, String comment) {
-        logEntry le = new logEntry();
+    static LogEntry newOngoingTask(int color, long start, String comment) {
+        LogEntry le = new LogEntry();
             le.paint = new Paint();
                 le.paint.setColor(color);
             le.start = start;
@@ -42,17 +37,18 @@ class logEntry {
             le.command = ONGOING;
         return le;
     }
-    static logEntry newExpense(int color, long start, String comment) {
-        logEntry le = new logEntry();
+    static LogEntry newExpense(int color, long start, long amount, String comment) {
+        LogEntry le = new LogEntry();
         le.paint = new Paint();
             le.paint.setColor(color);
         le.start = start;
+        le.end = amount;
         le.comment = comment;
         le.command = EXPENSE;
         return le;
     }
-    static logEntry newCompletedTask(int color, long start, long duration, String comment) {
-        logEntry le = new logEntry();
+    static LogEntry newCompletedTask(int color, long start, long duration, String comment) {
+        LogEntry le = new LogEntry();
             le.paint = new Paint();
                 le.paint.setColor(color);
             le.start = start;
@@ -60,28 +56,28 @@ class logEntry {
             le.comment = comment;
         return le;
     }
-    static logEntry newEndCommand(long end) {
-        logEntry le = new logEntry();
+    static LogEntry newEndCommand(long end) {
+        LogEntry le = new LogEntry();
             le.command = CMD_END_TASK;
             le.end = end;
         return le;
     }
-    static logEntry newCommentCmd(String s) {
-        logEntry le = new logEntry();
+    static LogEntry newCommentCmd(String s) {
+        LogEntry le = new LogEntry();
         le.command = CMD_ADD_COMMENT;
         le.comment = s;
         return le;
     }
-    static logEntry newClearMess() {
-        logEntry le = new logEntry();
+    static LogEntry newClearMess() {
+        LogEntry le = new LogEntry();
             le.command = CMD_CLEAR_LOG;
         return le;
     }
-    static logEntry newFromLogLine(String s) throws IllegalArgumentException {
+    static LogEntry newFromLogLine(String s) throws IllegalArgumentException {
         String[] args = s.split(">",-1);
         if (args.length < 5)
             throw new IllegalArgumentException("Unparsable string, need at least 6 arguments: " + s);
-        logEntry le = new logEntry();
+        LogEntry le = new LogEntry();
         // le.readableTimePos = args[0];
         le.paint = new Paint();
             le.paint.setColor(MainActivity.parseColor(args[1]));

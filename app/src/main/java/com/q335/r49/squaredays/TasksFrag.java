@@ -307,7 +307,7 @@ public class TasksFrag extends Fragment {
                                 delay = delay > 50 ? delay - 50 : 0;
                                 duration = duration > 50 ? duration - 50 : 0;
                                 if (delay != 0 || duration != 0 || !hasDragged) {
-                                    mListener.pushProc(LogEntry.newExpense(MainActivity.parseColor(comF[iCOLOR]),delay + duration,comF[iCOMMENT]));
+                                    mListener.pushProc(LogEntry.newExpense(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L, delay + duration,comF[iCOMMENT]));
                                 } else
                                     statusBar.setText(savedStatusText);
                                 return false;

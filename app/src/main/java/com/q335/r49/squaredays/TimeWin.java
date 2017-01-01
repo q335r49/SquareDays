@@ -23,8 +23,7 @@ class TimeWin {
     @Nullable
     private LogEntry curTask;
     private TreeSet<LogEntry> shapeIndex;
-    TouchView parent;
-    public static TimeWin newWindowClass(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
+    static TimeWin newWindowClass(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         return new TimeWin(sv, tsOrigin,widthDays,heightWeeks,xMin,yMin);
     }
     TimeWin(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {

@@ -53,7 +53,9 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         if (!logChanged)
             return;
         try {
-            Files.asCharSink(new File(getFilesDir(), LOG_FILE), Charsets.UTF_8).writeLines(CW.getWritableShapes());
+            File file = new File(getFilesDir(), LOG_FILE);
+            Files.asCharSink(file, Charsets.UTF_8).writeLines(CW.getWritableShapes());
+            Files.asCharSink(file, Charsets.UTF_8).writeLines(EW.getWritableShapes());
             logChanged = false;
         } catch (Exception e) {
             Log.d("SquareDays", "File write error: " + e.toString());
