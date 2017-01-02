@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             popAll();
         }
     }
-    public void pushOnly(cInterval log) { logQ.add(log); }
+    public void pushOnly(cInterval log) { if (log != null) logQ.add(log); }
     public void popAll() {
         if (CW == null || BF == null || EW == null)
             return;
