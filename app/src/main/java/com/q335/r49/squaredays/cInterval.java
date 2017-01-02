@@ -11,6 +11,7 @@ class cInterval {
     static final int CMD_ADD_COMMENT = 10;
     static final int CMD_END_TASK = 11;
     static final int CMD_CLEAR_LOG = 100;
+    static final int CMD_CLEAR_EXP = 101;
     int command;
     Paint paint;
     long start;
@@ -120,6 +121,7 @@ class cInterval {
             le.label = args[pLabel];
         } else
             return logNull("Empty time label",s);
+
         le.comment = args[pComment];
 
         if (args[pEnd].isEmpty()) {

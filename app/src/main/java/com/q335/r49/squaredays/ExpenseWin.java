@@ -113,6 +113,10 @@ class ExpenseWin extends TimeWin {
 
     @Override
     cInterval procTask(cInterval a) {  //TODO: Deal with modification commands
+        if (a.command == cInterval.CMD_CLEAR_EXP) {
+            DE.clear();
+            return null;
+        }
         MainActivity.setLogChanged();
         long midn = prevMidn(a.start);
         DailyExpense currentExpenses = DE.get(midn);

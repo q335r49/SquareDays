@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     private Queue<cInterval> logQ;
     public void pushProc(cInterval log) {
         if (logQ.isEmpty()) {
-            if (log.command == cInterval.EXPENSE) {
+            if (log.command == cInterval.EXPENSE || log.command == cInterval.CMD_CLEAR_EXP) {
                 if (EW != null)
                     EW.procTask(log);
                 else
