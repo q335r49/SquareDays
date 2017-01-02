@@ -15,7 +15,7 @@ class ExpenseWin extends TimeWin {
     private static final float expCornerRadius = 5;
     private static class DailyExpense {
         long midn;
-        ArrayList<LogEntry> expenses;
+        ArrayList<CalInterval> expenses;
         ArrayList<Float> alreadySpent;
         float amountSpent;
         DailyExpense(long midn) {
@@ -24,15 +24,15 @@ class ExpenseWin extends TimeWin {
             amountSpent = 0f;
             this.midn = midn;
         }
-        DailyExpense(LogEntry le, long midn) { this(midn); add(le); }
-        void add(LogEntry le) {
+        DailyExpense(CalInterval le, long midn) { this(midn); add(le); }
+        void add(CalInterval le) {
             expenses.add(le);
             alreadySpent.add(amountSpent);
             amountSpent += le.end;
         }
         List<String> getWritableShapes() {
             List<String> entries = new ArrayList<>();
-            for (LogEntry le : expenses)
+            for (CalInterval le : expenses)
                 entries.add(le.toLogLine());
             return entries;
         }
@@ -44,7 +44,7 @@ class ExpenseWin extends TimeWin {
     }
     private HashMap<Long,DailyExpense> DE = new HashMap<>();
     private void drawExpenseInterval(DailyExpense de, int index, Paint paint) {
-        LogEntry le;
+        CalInterval le;
         long start, end;
         le = de.expenses.get(index);
         start = de.midn + (long) (de.alreadySpent.get(index) * rSecondsExpense);
@@ -77,7 +77,7 @@ class ExpenseWin extends TimeWin {
     }
     private void drawDailyExpense(DailyExpense de) {
         int size = de.expenses.size();
-        LogEntry le;
+        CalInterval le;
         long start, end;
         for (int i = 0; i < size; i++) {
             le = de.expenses.get(i);
@@ -112,7 +112,7 @@ class ExpenseWin extends TimeWin {
     }
 
     @Override
-    LogEntry procTask(LogEntry a) {  //TODO: Deal with modification commands
+    CalInterval procTask(CalInterval a) {  //TODO: Deal with modification commands
         MainActivity.setLogChanged();
         long midn = prevMidn(a.start);
         DailyExpense currentExpenses = DE.get(midn);
@@ -242,7 +242,7 @@ class ExpenseWin extends TimeWin {
     private DailyExpense selected;
     private int selectedIndex;
     @Override
-    LogEntry getSelectedShape(float sx, float sy) {
+    CalInterval getSelectedShape(float sx, float sy) {
         long ts = screenToTs(sx, sy);
         long midn = prevMidn(ts);
         DailyExpense de = DE.get(midn);

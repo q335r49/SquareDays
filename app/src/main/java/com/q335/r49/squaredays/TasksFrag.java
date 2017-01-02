@@ -39,7 +39,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class TasksFrag extends Fragment {
     SharedPreferences prefs;
     public interface OnFragmentInteractionListener {
-        void pushProc(LogEntry log);
+        void pushProc(CalInterval log);
         void setBF(TasksFrag bf);
         boolean onMenuItemClick(MenuItem item);
     }
@@ -47,7 +47,7 @@ public class TasksFrag extends Fragment {
     private FlexboxLayout buttons;
     private TextView statusBar;
         private String savedStatusText = "";
-        void setSavedAB(LogEntry le) {
+        void setSavedAB(CalInterval le) {
             savedStatusText = le != null ? le.label + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
             statusBar.setText(savedStatusText);
         }
@@ -102,7 +102,7 @@ public class TasksFrag extends Fragment {
             Globals.palette.add(MainActivity.parseColor(sa[iCOLOR]));
         makeView();
     }
-    public void setActiveTask(LogEntry le) { //TODO: Handle special case of expense name  = task name
+    public void setActiveTask(CalInterval le) { //TODO: Handle special case of expense name  = task name
         if (le == null)
             setActiveTask(endButtonMonogram);
         else {
@@ -308,7 +308,7 @@ public class TasksFrag extends Fragment {
                                 delay = delay > 50 ? delay - 50 : 0;
                                 duration = duration > 50 ? duration - 50 : 0;
                                 if (delay != 0)
-                                    mListener.pushProc(LogEntry.newExpense(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L, delay,comF[iCOMMENT]));
+                                    mListener.pushProc(CalInterval.newExpense(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L, delay,comF[iCOMMENT]));
                                 else
                                     statusBar.setText(savedStatusText);
                                 return false;
@@ -457,10 +457,10 @@ public class TasksFrag extends Fragment {
                             duration = duration > 50 ? duration - 50 : 0;
                             if (delay != 0 || duration != 0 || !hasDragged) {
                                 if (duration == 0) {
-                                    mListener.pushProc(LogEntry.newOngoingTask(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L - delay * 60, comF[iCOMMENT]));
+                                    mListener.pushProc(CalInterval.newOngoingTask(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L - delay * 60, comF[iCOMMENT]));
                                     setActiveTask(v);
                                 } else
-                                    mListener.pushProc(LogEntry.newCompletedTask(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[iCOMMENT]));
+                                    mListener.pushProc(CalInterval.newCompletedTask(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[iCOMMENT]));
                             } else
                                 statusBar.setText(savedStatusText);
                             return false;
@@ -633,9 +633,9 @@ public class TasksFrag extends Fragment {
                                     .setTitle("Comment:")
                                     .setPositiveButton("Add label", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-                                            mListener.pushProc(LogEntry.newCommentCmd(" " + commentEntry.getText().toString()));
+                                            mListener.pushProc(CalInterval.newCommentCmd(" " + commentEntry.getText().toString()));
                                             if (finalDelay != 0) {
-                                                mListener.pushProc(LogEntry.newEndCommand(System.currentTimeMillis() / 1000L - finalDelay * 60));
+                                                mListener.pushProc(CalInterval.newEndCommand(System.currentTimeMillis() / 1000L - finalDelay * 60));
                                                 clearActiveTask();
                                             }
                                         }
@@ -647,7 +647,7 @@ public class TasksFrag extends Fragment {
                                     })
                                     .create().show();
                         } else if (delay != 0 || !hasDragged) {
-                            mListener.pushProc(LogEntry.newEndCommand(System.currentTimeMillis()/1000L - delay * 60));
+                            mListener.pushProc(CalInterval.newEndCommand(System.currentTimeMillis()/1000L - delay * 60));
                             clearActiveTask();
                         }
                         return false;
