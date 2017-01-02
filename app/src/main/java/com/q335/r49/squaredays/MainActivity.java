@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     private void readLogFile() {
         try {
             for (String l : Files.readLines(new File(getFilesDir(), LOG_FILE), Charsets.UTF_8))
-                pushOnly(CalInterval.newFromLogLine(l));
+                pushOnly(cInterval.newFromLogLine(l));
         } catch (Exception e) {
             Log.d("SquareDays","Log read exception: " + e.toString());
         }
@@ -71,10 +71,10 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
         }
     }
-    private Queue<CalInterval> logQ;
-    public void pushProc(CalInterval log) {
+    private Queue<cInterval> logQ;
+    public void pushProc(cInterval log) {
         if (logQ.isEmpty()) {
-            if (log.command == CalInterval.EXPENSE) {
+            if (log.command == cInterval.EXPENSE) {
                 if (EW != null)
                     EW.procTask(log);
                 else
@@ -90,16 +90,16 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             popAll();
         }
     }
-    public void pushOnly(CalInterval log) { logQ.add(log); }
+    public void pushOnly(cInterval log) { logQ.add(log); }
     public void popAll() {
         if (CW == null || BF == null || EW == null)
             return;
         Log.d("SquareDays","Init!");
-        CalInterval onGoing = null;
+        cInterval onGoing = null;
         if (logQ.isEmpty())
-            onGoing = CW.procTask(CalInterval.newCommentCmd(""));
-        else for (CalInterval le = logQ.poll(); le != null; le = logQ.poll()) {
-            if (le.command == CalInterval.EXPENSE)
+            onGoing = CW.procTask(cInterval.newCommentCmd(""));
+        else for (cInterval le = logQ.poll(); le != null; le = logQ.poll()) {
+            if (le.command == cInterval.EXPENSE)
                 EW.procTask(le);
             else
                 onGoing = CW.procTask(le);
@@ -244,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                     else {
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
-                                            pushOnly(CalInterval.newClearMess());
+                                            pushOnly(cInterval.newClearMess());
                                             readLogFile();
                                             popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
@@ -275,7 +275,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                     else {
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
-                                            pushOnly(CalInterval.newClearMess());
+                                            pushOnly(cInterval.newClearMess());
                                             readLogFile();
                                             popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
@@ -307,11 +307,11 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                 File logFile = new File(getFilesDir(), LOG_FILE);
                                 if (logFile.exists()) {
                                     if (logFile.delete())
-                                        pushOnly(CalInterval.newClearMess());
+                                        pushOnly(cInterval.newClearMess());
                                     else
                                         Log.d("SquareDays", "Log clear failed!");
                                 } else
-                                    pushOnly(CalInterval.newClearMess());
+                                    pushOnly(cInterval.newClearMess());
                                 popAll();
                             }
                         })

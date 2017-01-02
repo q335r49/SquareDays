@@ -21,8 +21,8 @@ class TimeWin { //TODO: Reevaluate static variables
     String statusText;
     void setStatusText(String s) { statusText = s; }
     @Nullable
-    private CalInterval curTask;
-    private TreeSet<CalInterval> shapeIndex;
+    private cInterval curTask;
+    private TreeSet<cInterval> shapeIndex;
     static TimeWin newWindowClass(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         return new TimeWin(sv, tsOrigin,widthDays,heightWeeks,xMin,yMin);
     }
@@ -32,9 +32,9 @@ class TimeWin { //TODO: Reevaluate static variables
         this.gridH = heightWeeks;
         g0x = xMin;
         g0y = yMin;
-        shapeIndex = new TreeSet<>(new Comparator<CalInterval>() {
+        shapeIndex = new TreeSet<>(new Comparator<cInterval>() {
             @Override
-            public int compare(CalInterval o1, CalInterval o2) { return o1.start > o2.start ? -1 : o1.start == o2.start ? 0 : 1; }
+            public int compare(cInterval o1, cInterval o2) { return o1.start > o2.start ? -1 : o1.start == o2.start ? 0 : 1; }
         });
         minorTickStyle = new Paint();
             minorTickStyle.setColor(Globals.COLOR_SCALE_TEXT);
@@ -109,9 +109,9 @@ class TimeWin { //TODO: Reevaluate static variables
             RECT_SCALING_FACTOR_Y *= borderScale;
         }
     }
-    CalInterval getSelectedShape(float sx, float sy) {
+    cInterval getSelectedShape(float sx, float sy) {
         long ts = screenToTs(sx, sy);
-        CalInterval closest = shapeIndex.ceiling(CalInterval.newStartTime(ts));
+        cInterval closest = shapeIndex.ceiling(cInterval.newStartTime(ts));
         return closest == null? null : closest.end < ts ? null : closest;
     }
 
@@ -135,7 +135,7 @@ class TimeWin { //TODO: Reevaluate static variables
 
         drawBackgroundGrid();
 
-        for (CalInterval s : shapeIndex)
+        for (cInterval s : shapeIndex)
             drawInterval(s, s.paint);
 
         float gridSize;
@@ -368,7 +368,7 @@ class TimeWin { //TODO: Reevaluate static variables
             corner = midn + 1;
         }
     }
-    void drawInterval(CalInterval iv, Paint paint) {
+    void drawInterval(cInterval iv, Paint paint) {
         float scaleX = iv.end < expansionComplete ? scaleB : iv.end > now ? scaleA : (float) (iv.end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
         if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
@@ -393,7 +393,7 @@ class TimeWin { //TODO: Reevaluate static variables
                 (b[0]-c[0])*scaleX+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
-    private void drawOngoingInterval(CalInterval iv, float scaleB) {
+    private void drawOngoingInterval(cInterval iv, float scaleB) {
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
         float[] a, b, c;
@@ -422,12 +422,12 @@ class TimeWin { //TODO: Reevaluate static variables
         ongoingStyle.setShader(shader);
         mCanvas.drawPath(pp, ongoingStyle);
     }
-    CalInterval procTask(CalInterval a) {
+    cInterval procTask(cInterval a) {
         //TODO: request invalidate()
         MainActivity.setLogChanged();
-        CalInterval c;
+        cInterval c;
         switch (a.command) {
-            case CalInterval.CMD_ADD_COMMENT:
+            case cInterval.CMD_ADD_COMMENT:
                 if (curTask != null) {
                     if (curTask.label != null)
                         curTask.label += a.label == null ? "" : a.label;
@@ -435,7 +435,7 @@ class TimeWin { //TODO: Reevaluate static variables
                         curTask.label = a.label;
                 }
                 return curTask;
-            case CalInterval.CMD_END_TASK:
+            case cInterval.CMD_END_TASK:
                 if (curTask != null) {
                     curTask.end = a.end;
                     c = curTask;
@@ -443,7 +443,7 @@ class TimeWin { //TODO: Reevaluate static variables
                 } else
                     return null;
                 break;
-            case CalInterval.ONGOING:
+            case cInterval.ONGOING:
                 if (curTask == null) {
                     curTask = a;
                     return curTask;
@@ -458,7 +458,7 @@ class TimeWin { //TODO: Reevaluate static variables
                     }
                 }
                 break;
-            case CalInterval.CMD_CLEAR_LOG:
+            case cInterval.CMD_CLEAR_LOG:
                 curTask = null;
                 shapeIndex.clear();
                 return null;
@@ -467,8 +467,8 @@ class TimeWin { //TODO: Reevaluate static variables
         }
         if (c.end <= c.start)
             return curTask;
-        List<CalInterval> removalList = new ArrayList<>();
-        for (CalInterval p : shapeIndex) {
+        List<cInterval> removalList = new ArrayList<>();
+        for (cInterval p : shapeIndex) {
             if (c.start <= p.start) {
                 if (c.end > p.start)
                     if (c.end >= p.end)
@@ -478,7 +478,7 @@ class TimeWin { //TODO: Reevaluate static variables
             } else if (c.start > p.end)
                 break;
             else if (c.end < p.end) {
-                CalInterval newLog = new CalInterval(p);
+                cInterval newLog = new cInterval(p);
                 newLog.end = c.start;
                 shapeIndex.add(newLog);
                 p.start = c.end;
@@ -488,7 +488,7 @@ class TimeWin { //TODO: Reevaluate static variables
                 break;
             }
         }
-        for (CalInterval l : removalList)
+        for (cInterval l : removalList)
             shapeIndex.remove(l);
         shapeIndex.add(c);
         return curTask;
@@ -496,7 +496,7 @@ class TimeWin { //TODO: Reevaluate static variables
     List<String> getWritableShapes() {
         List<String> LogList = new ArrayList<>();
         String entry;
-        for (CalInterval r : shapeIndex) {
+        for (cInterval r : shapeIndex) {
             entry = r.toLogLine();
             if (entry != null)
                 LogList.add(entry);
@@ -508,16 +508,16 @@ class TimeWin { //TODO: Reevaluate static variables
         }
         return LogList;
     }
-    CalInterval selection;
-        void setSelected(CalInterval selection) { this.selection = selection; }
-        CalInterval getSelection() { return selection; }
+    cInterval selection;
+        void setSelected(cInterval selection) { this.selection = selection; }
+        cInterval getSelection() { return selection; }
         void removeSelection() {
             if (!shapeIndex.remove(selection))
                 Log.d("SquareDays","Cannot remove selection: " + selection.toString());
             selection = null;
             setStatusText("");
         }
-    void updateEntry(CalInterval selection, long start, long end) {
+    void updateEntry(cInterval selection, long start, long end) {
         if (shapeIndex.remove(selection)) {
             selection.start = start;
             selection.end = end;

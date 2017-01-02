@@ -67,7 +67,7 @@ public class TouchView<T extends TimeWin> extends View {
     private final Handler handler = new Handler();
     private Runnable mLongPressed = new Runnable() { public void run() {
         has_run = true;
-        final CalInterval selection = CW.getSelection();
+        final cInterval selection = CW.getSelection();
         if (selection != null) {
             LayoutInflater inflater = LayoutInflater.from(appContext);
             View promptView = inflater.inflate(R.layout.edit_interval, null);
@@ -170,7 +170,7 @@ public class TouchView<T extends TimeWin> extends View {
                 handler.postDelayed(mLongPressed,1200);
                 firstTouchX = lastTouchX = x;
                 firstTouchY = lastTouchY = y;
-                CalInterval selection = CW.getSelectedShape(x,y);
+                cInterval selection = CW.getSelectedShape(x,y);
                 if (selection != null) {
                     long duration = 1000L* (selection.end - selection.start);
                     CW.setStatusText(selection.label + ":"

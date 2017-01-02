@@ -5,7 +5,7 @@ import android.util.Log;
 
 import java.util.Date;
 
-class CalInterval {
+class cInterval {
     static final int ONGOING = 1;
     static final int EXPENSE = 2;
     static final int CMD_ADD_COMMENT = 10;
@@ -21,21 +21,21 @@ class CalInterval {
     String label;
     String comment;
 
-    private CalInterval() {}
-    CalInterval(CalInterval e) {
+    private cInterval() {}
+    cInterval(cInterval e) {
         command = e.command;
         paint = new Paint(e.paint);
         label = e.label;
         start = e.start;
         end = e.end;
     }
-    static CalInterval newStartTime(long start) {
-        CalInterval le = new CalInterval();
+    static cInterval newStartTime(long start) {
+        cInterval le = new cInterval();
             le.start = start;
         return le;
     }
-    static CalInterval newOngoingTask(int color, long start, String comment) {
-        CalInterval le = new CalInterval();
+    static cInterval newOngoingTask(int color, long start, String comment) {
+        cInterval le = new cInterval();
             le.paint = new Paint();
                 le.paint.setColor(color);
             le.start = start;
@@ -43,8 +43,8 @@ class CalInterval {
             le.command = ONGOING;
         return le;
     }
-    static CalInterval newExpense(int color, long start, long amount, String comment) {
-        CalInterval le = new CalInterval();
+    static cInterval newExpense(int color, long start, long amount, String comment) {
+        cInterval le = new cInterval();
         le.paint = new Paint();
             le.paint.setColor(color);
         le.start = start;
@@ -53,8 +53,8 @@ class CalInterval {
         le.command = EXPENSE;
         return le;
     }
-    static CalInterval newCompletedTask(int color, long start, long duration, String comment) {
-        CalInterval le = new CalInterval();
+    static cInterval newCompletedTask(int color, long start, long duration, String comment) {
+        cInterval le = new cInterval();
             le.paint = new Paint();
                 le.paint.setColor(color);
             le.start = start;
@@ -62,20 +62,20 @@ class CalInterval {
             le.label = comment;
         return le;
     }
-    static CalInterval newEndCommand(long end) {
-        CalInterval le = new CalInterval();
+    static cInterval newEndCommand(long end) {
+        cInterval le = new cInterval();
             le.command = CMD_END_TASK;
             le.end = end;
         return le;
     }
-    static CalInterval newCommentCmd(String s) {
-        CalInterval le = new CalInterval();
+    static cInterval newCommentCmd(String s) {
+        cInterval le = new cInterval();
         le.command = CMD_ADD_COMMENT;
         le.label = s;
         return le;
     }
-    static CalInterval newClearMess() {
-        CalInterval le = new CalInterval();
+    static cInterval newClearMess() {
+        cInterval le = new cInterval();
             le.command = CMD_CLEAR_LOG;
         return le;
     }
@@ -89,7 +89,7 @@ class CalInterval {
     private static final int pGroup = 4;
     private static final int pLabel = 5;
     private static final int pComment = 6;
-    private static CalInterval logNull(String errorLabel, String s) {
+    private static cInterval logNull(String errorLabel, String s) {
         Log.d("newFromLogLine", errorLabel + ": " + s);
         return null;
     }
@@ -97,11 +97,11 @@ class CalInterval {
         Log.d("toLogLine", errorLabel + " <" + label + ":" + comment + ">");
         return null;
     }
-    static CalInterval newFromLogLine(String s) throws IllegalArgumentException {
+    static cInterval newFromLogLine(String s) throws IllegalArgumentException {
         String[] args = s.split(SEP, -1);
         if (args.length != nArgs)
             return logNull("Wrong number of args",s);
-        CalInterval le = new CalInterval();
+        cInterval le = new cInterval();
             le.paint = new Paint();
             le.paint.setColor(MainActivity.parseColor(args[pColor]));
             le.start = Long.parseLong(args[pStamp]);
