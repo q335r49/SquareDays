@@ -224,7 +224,6 @@ class TimeWin { //TODO: Reevaluate static variables
             drawInterval(selection,selectionStyle);
         if (curTask != null)
             drawOngoingInterval(curTask,scaleA);
-        drawNowLine(now);   //TODO: fix now line location
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
@@ -424,7 +423,7 @@ class TimeWin { //TODO: Reevaluate static variables
         mCanvas.drawPath(pp, ongoingStyle);
     }
     LogEntry procTask(LogEntry a) {
-        //TODO: request invalidate() ?
+        //TODO: request invalidate()
         MainActivity.setLogChanged();
         LogEntry c;
         switch (a.command) {

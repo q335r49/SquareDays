@@ -25,7 +25,7 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-//TODO: Make expenses pretty
+//TODO: antialiased shapes?
 
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {
     Context context;

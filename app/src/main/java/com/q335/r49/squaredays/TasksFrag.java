@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
-//TODO: Differentiate expenses and tasks
+//TODO: ** Differentiate expenses and tasks
 
 public class TasksFrag extends Fragment {
     SharedPreferences prefs;
@@ -178,7 +178,7 @@ public class TasksFrag extends Fragment {
                 boolean isExpense = comF.length > 2 && comF[2].equals("E");
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if (isExpense) {    //TODO: Allow for delay (e.g., yesterday)
+                    if (isExpense) {    //TODO: ** Allow for delay (e.g., yesterday)
                         switch (event.getActionMasked()) {
                             case MotionEvent.ACTION_DOWN:
                                 actionDownX = event.getX();
@@ -189,7 +189,7 @@ public class TasksFrag extends Fragment {
                                 hasRun = hasDragged = false;
                                 statusBar.setText(comF[iCOMMENT]);
                                 mLongPressed = new Runnable() {
-                                    public void run() { //TODO: Distinguish expense
+                                    public void run() { //TODO: ** Distinguish expense
                                         hasRun = true;
                                         statusBar.setText(savedStatusText);
                                         ((GradientDrawable) finalView.getBackground()).setColor(bg_Norm);
@@ -485,7 +485,7 @@ public class TasksFrag extends Fragment {
         endButtonMonogram = (MonogramView) endButton.findViewById(R.id.text1);
             endButtonMonogram.setColor(bg_Norm);
             endButtonMonogram.setText("!");
-        endButton.setOnTouchListener(new View.OnTouchListener() { //TODO: New Expense
+        endButton.setOnTouchListener(new View.OnTouchListener() {
             private float actionDownX, actionDownY;
             private boolean hasRun, hasDragged;
             private final Handler handler = new Handler();

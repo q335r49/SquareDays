@@ -9,9 +9,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-//TODO: Handle "split budgeting"
+//TODO: *** Handle "split budgeting"
 
 class ExpenseWin extends TimeWin {
+    private static final float expCornerRadius = 5;
     private static class DailyExpense {
         long midn;
         ArrayList<LogEntry> expenses;
@@ -62,7 +63,7 @@ class ExpenseWin extends TimeWin {
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                     (b[0]-c[0])*scaleX+c[0],
                     (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
-            mCanvas.drawRoundRect(rect, TimeWin.gridRadius, TimeWin.gridRadius, paint);
+            mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, paint);
             corner = midn+1;
         }
         a = tsToScreen(corner, 0);
@@ -72,7 +73,7 @@ class ExpenseWin extends TimeWin {
                 (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                 (b[0]-c[0])*scaleX+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
-        mCanvas.drawRoundRect(rect, TimeWin.gridRadius, TimeWin.gridRadius, paint);
+        mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, paint);
     }
     private void drawDailyExpense(DailyExpense de) {
         int size = de.expenses.size();
@@ -96,7 +97,7 @@ class ExpenseWin extends TimeWin {
                         (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                         (b[0]-c[0])*scaleX+c[0],
                         (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
-                mCanvas.drawRoundRect(rect, TimeWin.gridRadius, TimeWin.gridRadius, le.paint);
+                mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, le.paint);
                 corner = midn+1;
             }
             a = tsToScreen(corner, 0);
@@ -106,7 +107,7 @@ class ExpenseWin extends TimeWin {
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                     (b[0]-c[0])*scaleX+c[0],
                     (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
-            mCanvas.drawRoundRect(rect, TimeWin.gridRadius, TimeWin.gridRadius, le.paint);
+            mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, le.paint);
         }
     }
     @Override
