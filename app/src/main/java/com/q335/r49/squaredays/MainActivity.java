@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         if (logQ.isEmpty())
             onGoing = CW.procTask(cInterval.newCommentCmd(""));
         else for (cInterval le = logQ.poll(); le != null; le = logQ.poll()) {
-            if (le.command == cInterval.EXPENSE)
+            if (le.command == cInterval.EXPENSE || le.command == cInterval.CMD_CLEAR_EXP)
                 EW.procTask(le);
             else
                 onGoing = CW.procTask(le);
