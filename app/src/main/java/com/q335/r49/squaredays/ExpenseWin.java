@@ -1,6 +1,7 @@
 package com.q335.r49.squaredays;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.RectF;
 import android.util.Log;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -42,7 +43,6 @@ class ExpenseWin extends TimeWin {
     }
     private HashMap<Long,DailyExpense> DE = new HashMap<>();
     private void drawExpenseInterval(DailyExpense de, int index, Paint paint) {
-        int size = de.expenses.size();
         LogEntry le;
         long start, end;
         le = de.expenses.get(index);
@@ -53,23 +53,26 @@ class ExpenseWin extends TimeWin {
         long corner = start;
         long midn = start - (start - orig + 864000000000000000L) % 86400L + 86399L;
         float[] a, b, c;
+        RectF rect;
         for (; midn < end; midn += 86400L) {
             a = tsToScreen(corner, 0);
             b = tsToScreen(midn, 1f);
             c = tsToScreen(midn-43199L, 0.5f);
-            mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
+            rect = new RectF((a[0]-c[0])*scaleX+c[0],
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                     (b[0]-c[0])*scaleX+c[0],
-                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
+                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
+            mCanvas.drawRoundRect(rect, TimeWin.gridRadius, TimeWin.gridRadius, paint);
             corner = midn+1;
         }
         a = tsToScreen(corner, 0);
         b = tsToScreen(end, 1f);
         c = tsToScreen(midn-43199L, 0.5f);
-        mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
+        rect = new RectF((a[0]-c[0])*scaleX+c[0],
                 (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                 (b[0]-c[0])*scaleX+c[0],
-                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
+                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
+        mCanvas.drawRoundRect(rect, TimeWin.gridRadius, TimeWin.gridRadius, paint);
     }
     private void drawDailyExpense(DailyExpense de) {
         int size = de.expenses.size();
@@ -84,23 +87,26 @@ class ExpenseWin extends TimeWin {
             long corner = start;
             long midn = start - (start - orig + 864000000000000000L) % 86400L + 86399L;
             float[] a, b, c;
+            RectF rect;
             for (; midn < end; midn += 86400L) {
                 a = tsToScreen(corner, 0);
                 b = tsToScreen(midn, 1f);
                 c = tsToScreen(midn-43199L, 0.5f);
-                mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
+                rect = new RectF((a[0]-c[0])*scaleX+c[0],
                         (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                         (b[0]-c[0])*scaleX+c[0],
-                        (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],le.paint);
+                        (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
+                mCanvas.drawRoundRect(rect, TimeWin.gridRadius, TimeWin.gridRadius, le.paint);
                 corner = midn+1;
             }
             a = tsToScreen(corner, 0);
             b = tsToScreen(end, 1f);
             c = tsToScreen(midn-43199L, 0.5f);
-            mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
+            rect = new RectF((a[0]-c[0])*scaleX+c[0],
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                     (b[0]-c[0])*scaleX+c[0],
-                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],le.paint);
+                    (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
+            mCanvas.drawRoundRect(rect, TimeWin.gridRadius, TimeWin.gridRadius, le.paint);
         }
     }
     @Override

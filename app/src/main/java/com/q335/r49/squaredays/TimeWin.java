@@ -240,7 +240,7 @@ class TimeWin { //TODO: Reevaluate static variables
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
     }
     private static final long curveLength = 86400/24;
-    private static float gridRadius = 10f;
+    static float gridRadius = 10f;
     private static final long maxStretch = 86400/40;
     long prevMidn(long ts) {return ts - (ts - orig + 864000000000000000L) % 86400L;}
     void drawBackgroundGrid() {

@@ -85,9 +85,11 @@ class LogEntry {
             le.command = ONGOING;
         else if (args[3].charAt(0) == 'E') {
             le.command = EXPENSE;
-            if (args[3].length() > 1)
+            if (args[3].length() > 1) {
                 le.end = Long.parseLong(args[3].substring(1));
-            else
+                if (le.end == 0)
+                    throw new IllegalArgumentException("Expense can't be 0: " + s);
+            } else
                 throw new IllegalArgumentException("Bad expenses format: " + s);
         } else {
             le.end = le.start + Long.parseLong(args[3]) * 60L;
@@ -97,7 +99,7 @@ class LogEntry {
         le.comment = args[4];
         return le;
     }
-    String toLogLine() {    //TODO: remove zero expenses
+    String toLogLine() {
         if (paint == null || comment == null) {
             Log.d("SquareDays", "---- Null paint or comment");
             return null;
@@ -107,7 +109,7 @@ class LogEntry {
                     + ">" + Long.toString(start)
                     + ">>" + comment;
         else if (command == EXPENSE)
-            return (new Date(start*1000L)).toString()
+            return end == 0 ? null : (new Date(start*1000L)).toString()
                     + ">" + String.format("#%06X", 0xFFFFFF & paint.getColor())
                     + ">" + Long.toString(start)
                     + ">E"+ Long.toString(end)
