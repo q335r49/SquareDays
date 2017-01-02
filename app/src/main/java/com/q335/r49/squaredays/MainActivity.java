@@ -244,7 +244,8 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                     else {
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
-                                            pushOnly(cInterval.newClearMess());
+                                            pushOnly(cInterval.newClearTimeMsg());
+                                            pushOnly(cInterval.newClearExpMess());
                                             readLogFile();
                                             popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
@@ -275,7 +276,8 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                     else {
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
-                                            pushOnly(cInterval.newClearMess());
+                                            pushOnly(cInterval.newClearTimeMsg());
+                                            pushOnly(cInterval.newClearExpMess());
                                             readLogFile();
                                             popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
@@ -306,12 +308,15 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             public void onClick(DialogInterface dialog, int which) {
                                 File logFile = new File(getFilesDir(), LOG_FILE);
                                 if (logFile.exists()) {
-                                    if (logFile.delete())
-                                        pushOnly(cInterval.newClearMess());
-                                    else
+                                    if (logFile.delete()) {
+                                        pushOnly(cInterval.newClearTimeMsg());
+                                        pushOnly(cInterval.newClearExpMess());
+                                    } else
                                         Log.d("SquareDays", "Log clear failed!");
-                                } else
-                                    pushOnly(cInterval.newClearMess());
+                                } else {
+                                    pushOnly(cInterval.newClearTimeMsg());
+                                    pushOnly(cInterval.newClearExpMess());
+                                }
                                 popAll();
                             }
                         })

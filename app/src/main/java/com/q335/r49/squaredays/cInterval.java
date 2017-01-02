@@ -75,9 +75,14 @@ class cInterval {
         le.label = s;
         return le;
     }
-    static cInterval newClearMess() {
+    static cInterval newClearTimeMsg() {
         cInterval le = new cInterval();
             le.command = CMD_CLEAR_LOG;
+        return le;
+    }
+    static cInterval newClearExpMess() {
+        cInterval le = new cInterval();
+        le.command = CMD_CLEAR_EXP;
         return le;
     }
 
