@@ -110,6 +110,7 @@ class ExpenseWin extends TimeWin {
             mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, le.paint);
         }
     }
+
     @Override
     LogEntry procTask(LogEntry a) {  //TODO: Deal with modification commands
         MainActivity.setLogChanged();

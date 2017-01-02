@@ -429,10 +429,10 @@ class TimeWin { //TODO: Reevaluate static variables
         switch (a.command) {
             case LogEntry.CMD_ADD_COMMENT:
                 if (curTask != null) {
-                    if (curTask.comment != null)
-                        curTask.comment += a.comment == null ? "" : a.comment;
+                    if (curTask.label != null)
+                        curTask.label += a.label == null ? "" : a.label;
                     else
-                        curTask.comment = a.comment;
+                        curTask.label = a.label;
                 }
                 return curTask;
             case LogEntry.CMD_END_TASK:

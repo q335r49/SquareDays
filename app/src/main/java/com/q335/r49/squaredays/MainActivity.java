@@ -26,6 +26,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 //TODO: antialiased shapes?
+//TODO: Implement border auto-increment
+//TODO: Convert dollars to cents
+//TODO: Mark boxes with "extra" comments
+//TODO: Roiunded corners in TimeWin
+//TODO: Background fading
+
 
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {
     Context context;

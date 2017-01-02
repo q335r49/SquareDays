@@ -75,7 +75,7 @@ public class TouchView<T extends TimeWin> extends View {
             alertDialogBuilder.setView(promptView);
 
             final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
-            commentEntry.setText(selection.comment);
+            commentEntry.setText(selection.label);
             final EditText startEntry = (EditText) promptView.findViewById(R.id.startEdit);
             startEntry.setText(tsToDate(selection.start));
             final EditText endEntry = (EditText) promptView.findViewById(R.id.endEdit);
@@ -173,7 +173,7 @@ public class TouchView<T extends TimeWin> extends View {
                 LogEntry selection = CW.getSelectedShape(x,y);
                 if (selection != null) {
                     long duration = 1000L* (selection.end - selection.start);
-                    CW.setStatusText(selection.comment + ":"
+                    CW.setStatusText(selection.label + ":"
                             + new SimpleDateFormat(" h:mm-", Locale.US).format(new Date(selection.start*1000L))
                             + new SimpleDateFormat("h:mm", Locale.US).format(new Date(selection.end*1000L))
                             + String.format(Locale.US, " (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),

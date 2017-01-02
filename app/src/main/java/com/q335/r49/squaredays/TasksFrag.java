@@ -48,7 +48,7 @@ public class TasksFrag extends Fragment {
     private TextView statusBar;
         private String savedStatusText = "";
         void setSavedAB(LogEntry le) {
-            savedStatusText = le != null ? le.comment + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
+            savedStatusText = le != null ? le.label + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
             statusBar.setText(savedStatusText);
         }
     private List<String[]> commands = new ArrayList<>();
@@ -107,7 +107,7 @@ public class TasksFrag extends Fragment {
             setActiveTask(endButtonMonogram);
         else {
             for (int i = 0; i < commands.size(); i++) {
-                if (commands.get(i)[iCOMMENT].equals(le.comment)) {
+                if (commands.get(i)[iCOMMENT].equals(le.label)) {
                     View activeV = buttons.getChildAt(i);
                     setActiveTask(activeV);
                     break;
@@ -631,7 +631,7 @@ public class TasksFrag extends Fragment {
                             alertDialogBuilder
                                     .setCancelable(true)
                                     .setTitle("Comment:")
-                                    .setPositiveButton("Add comment", new DialogInterface.OnClickListener() {
+                                    .setPositiveButton("Add label", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
                                             mListener.pushProc(LogEntry.newCommentCmd(" " + commentEntry.getText().toString()));
                                             if (finalDelay != 0) {
