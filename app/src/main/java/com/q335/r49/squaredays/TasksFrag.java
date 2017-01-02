@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
+//TODO: Differentiate expenses and tasks
 
 public class TasksFrag extends Fragment {
     SharedPreferences prefs;
@@ -306,9 +307,9 @@ public class TasksFrag extends Fragment {
                                 duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
                                 delay = delay > 50 ? delay - 50 : 0;
                                 duration = duration > 50 ? duration - 50 : 0;
-                                if (delay != 0 || duration != 0 || !hasDragged) {
-                                    mListener.pushProc(LogEntry.newExpense(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L, delay + duration,comF[iCOMMENT]));
-                                } else
+                                if (delay != 0)
+                                    mListener.pushProc(LogEntry.newExpense(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L, delay,comF[iCOMMENT]));
+                                else
                                     statusBar.setText(savedStatusText);
                                 return false;
                             case MotionEvent.ACTION_CANCEL:

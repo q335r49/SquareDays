@@ -21,6 +21,7 @@ public class CalendarFrag<T extends TimeWin> extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        //TODO: invalidate?
         mListener.popAll();
     }
     @Override
