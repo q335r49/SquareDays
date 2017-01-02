@@ -82,7 +82,7 @@ class cInterval {
 
     private static final String SEP = ">";
     private static final int nArgs = 7;
-    private static final int pFormatedDate = 0;
+    private static final int pFormattedTime = 0;
     private static final int pColor = 1;
     private static final int pStamp = 2;
     private static final int pEnd = 3;
@@ -101,44 +101,55 @@ class cInterval {
         String[] args = s.split(SEP, -1);
         if (args.length != nArgs)
             return logNull("Wrong number of args",s);
+
         cInterval le = new cInterval();
             le.paint = new Paint();
             le.paint.setColor(MainActivity.parseColor(args[pColor]));
-            le.start = Long.parseLong(args[pStamp]);
-        if (args[pEnd].isEmpty())
-            le.command = ONGOING;
-        else
-            le.end = Long.parseLong(args[pEnd]);
-        le.group = Long.parseLong(args[pGroup]);
-        le.label = args[pLabel];
+
+        le.start = Long.parseLong(args[pStamp]);
+
+        le.group = args[pGroup].isEmpty() ? 0 : Long.parseLong(args[pGroup]);
+
+        if (args[pLabel].charAt(0) == '$') {
+            if (args[pLabel].length() > 1) {
+                le.label = args[pLabel].substring(1);
+                le.command = EXPENSE;
+            } else
+                return logNull("Empty expense label",s);
+        } else if (!args[pLabel].isEmpty()) {
+            le.label = args[pLabel];
+        } else
+            return logNull("Empty time label",s);
         le.comment = args[pComment];
 
-        if (le.label.charAt(0) == '$')
-            le.command = EXPENSE;
-        if (le.command == EXPENSE) {
-            if (le.label.length() < 2)
-                return logNull("Empty expense label",s);
+        if (args[pEnd].isEmpty()) {
+            if (le.command == EXPENSE)
+                return logNull("Empty expense value",s);
+            else
+                le.command = ONGOING;
         } else {
-            if (le.label.length() < 1)
-                return logNull("Empty time label",s);
-            if (le.start > le.end)
+            le.end = Long.parseLong(args[pEnd]);
+            if (le.command == EXPENSE) {
+                if (le.end == 0)
+                    return logNull("Zero-valued expense", s);
+            } else if (le.start > le.end)
                 return logNull("start > end",s);
         }
         return le;
     }
     String toLogLine() {
-        if (paint == null || label == null)
-            return logNull("null paint or label");
+        if (paint == null || label == null || label.isEmpty())
+            return logNull("null or empty paint or label");
         if (groupChild)
             return null;
         String[] args = new String[nArgs];
-        args[pFormatedDate] = new Date(start*1000L).toString();
+        args[pFormattedTime] = new Date(start*1000L).toString();
         args[pColor]        = String.format("#%06X", 0xFFFFFF & paint.getColor());
         args[pStamp]        = Long.toString(start);
         args[pEnd]          = command == ONGOING ? "" : Long.toString(end);
-        args[pGroup]        = Long.toString(group);
+        args[pGroup]        = group == 0 ? "" : Long.toString(group);
         args[pLabel]        = command == EXPENSE ? "$" + label : label;
-        args[pComment]      = comment;
+        args[pComment]      = comment == null ? "" : comment;
         if (command == EXPENSE) {
             if (end == 0)
                 return logNull("Zero expense");
