@@ -44,15 +44,15 @@ class Interval {
     static Interval newClearTimeMsg() { return new                                           Interval(cCLEARLOG,tCAL,  Glob.COLOR_ERROR,  0,      0,        0,      null,   null     );}
     static Interval newClearExpMess() { return new                                           Interval(cCLEARLOG,tEXP,  Glob.COLOR_ERROR,  0,      0,        0,      null,   null     );}
 
-    private static final String SEP         = ">";
-    private static final int    nArgs       = 7;
-    private static final int    pStamp      = 0;
-    private static final int    pColor      = 1;
-    private static final int    pUTS        = 2;
-    private static final int    pEnd        = 3;
-    private static final int    pGroup      = 4;
-    private static final int    pLabel      = 5;
-    private static final int    pComment    = 6;
+    private static final String SEP      = ">";
+    private static final int    nArgs    = 7;
+    private static final int    pStamp   = 0;
+    private static final int    pColor   = 1;
+    private static final int    pUTS     = 2;
+    private static final int    pEnd     = 3;
+    private static final int    pGroup   = 4;
+    private static final int    pLabel   = 5;
+    private static final int    pComment = 6;
     private static Interval logNull(String errorLabel, String s) { Log.d("newFromLogLine", errorLabel + ": " + s);   return null;}
     private String logNull(String errorLabel) { Log.d("toLogLine", errorLabel + " <" + label + ":" + comment + ">"); return null;}
     static Interval newFromLogLine(String s) throws IllegalArgumentException {

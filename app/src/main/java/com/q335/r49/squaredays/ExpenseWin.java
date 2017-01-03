@@ -140,6 +140,8 @@ class ExpenseWin extends TimeWin {
             GR.clear();
             return null;
         }
+        if (a.end <= 0)
+            return null;
         MainActivity.setLogChanged();
         long midn = prevMidn(a.start);
         DailyExpense currentExpenses = DE.get(midn);
@@ -315,8 +317,6 @@ class ExpenseWin extends TimeWin {
             return;
         editedInterval.start = start;
         editedInterval.end = amount;
-        //TODO: error handling
         procTask(editedInterval);
-
     }
 }

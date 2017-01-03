@@ -164,11 +164,6 @@ public class TouchView<T extends TimeWin> extends View {
                 });
                 alertDialogBuilder.create().show();
             } else {
-
-
-
-
-
                 LayoutInflater inflater = LayoutInflater.from(appContext);
                 View promptView = inflater.inflate(R.layout.edit_expense, null);
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(appContext);
@@ -258,7 +253,6 @@ public class TouchView<T extends TimeWin> extends View {
                 });
                 alertDialogBuilder.create().show();
             }
-
         }
     }};
     @Override
