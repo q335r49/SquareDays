@@ -15,7 +15,7 @@ class ExpenseWin extends TimeWin {
     private static final float expCornerRadius = 5;
     private static class DailyExpense {
         long midn;
-        ArrayList<cInterval> expenses;
+        ArrayList<Interval> expenses;
         ArrayList<Float> alreadySpent;
         float amountSpent;
 
@@ -26,12 +26,12 @@ class ExpenseWin extends TimeWin {
             this.midn = midn;
         }
 
-        DailyExpense(cInterval le, long midn) {
+        DailyExpense(Interval le, long midn) {
             this(midn);
             add(le);
         }
 
-        void add(cInterval le) {
+        void add(Interval le) {
             expenses.add(le);
             alreadySpent.add(amountSpent);
             amountSpent += le.end;
@@ -39,14 +39,14 @@ class ExpenseWin extends TimeWin {
 
         List<String> getWritableShapes() {
             List<String> entries = new ArrayList<>();
-            for (cInterval le : expenses)
+            for (Interval le : expenses)
                 entries.add(le.toLogLine());
             return entries;
         }
 
-        public cInterval removeIndex(int selectedIndex) {
+        public Interval removeIndex(int selectedIndex) {
             int S = expenses.size();
-            cInterval removed;
+            Interval removed;
             if (selectedIndex < S) {
                 removed = expenses.remove(selectedIndex);
                 alreadySpent.remove(selectedIndex);
@@ -64,9 +64,9 @@ class ExpenseWin extends TimeWin {
         rSecondsExpense = 86400/100;
     }
     private HashMap<Long,DailyExpense> DE = new HashMap<>();
-    private HashMap<Long,ArrayList<cInterval>> GR = new HashMap<>();
+    private HashMap<Long,ArrayList<Interval>> GR = new HashMap<>();
     private void drawExpenseInterval(DailyExpense de, int index, Paint paint) {
-        cInterval le;
+        Interval le;
         long start, end;
         le = de.expenses.get(index);
         start = de.midn + (long) (de.alreadySpent.get(index) * rSecondsExpense);
@@ -99,7 +99,7 @@ class ExpenseWin extends TimeWin {
     }
     private void drawDailyExpense(DailyExpense de) {
         int size = de.expenses.size();
-        cInterval le;
+        Interval le;
         long start, end;
         for (int i = 0; i < size; i++) {
             le = de.expenses.get(i);
@@ -134,8 +134,8 @@ class ExpenseWin extends TimeWin {
     }
 
     @Override
-    cInterval procTask(cInterval a) {  //TODO: Deal with modification commands
-        if (a.command == cInterval.CMD_CLEAR_LOG) {
+    Interval procTask(Interval a) {  //TODO: Deal with modification commands, including modify commment
+        if (a.command == Interval.cCLEARLOG) {
             DE.clear();
             GR.clear();
             return null;
@@ -148,7 +148,7 @@ class ExpenseWin extends TimeWin {
         else
             currentExpenses.add(a);
         if (a.group != 0) {
-            ArrayList<cInterval> gr = GR.get(a.group);
+            ArrayList<Interval> gr = GR.get(a.group);
             if (gr == null) {
                 gr = new ArrayList<>();
                 gr.add(a);
@@ -278,7 +278,7 @@ class ExpenseWin extends TimeWin {
     private DailyExpense selectedDay;
     private int selectedIndex;
     @Override
-    cInterval getSelectedShape(float sx, float sy) {
+    Interval getSelectedShape(float sx, float sy) {
         long ts = screenToTs(sx, sy);
         long midn = prevMidn(ts);
         DailyExpense de = DE.get(midn);
@@ -304,7 +304,7 @@ class ExpenseWin extends TimeWin {
         }
     }
     void updateEntry(long start, long amount) { //TODO: days / group
-        cInterval editedInterval;
+        Interval editedInterval;
         if (selection != null) {
             editedInterval = selectedDay.removeIndex(selectedIndex);
             selection = null;
@@ -315,6 +315,7 @@ class ExpenseWin extends TimeWin {
             return;
         editedInterval.start = start;
         editedInterval.end = amount;
+        //TODO: error handling
         procTask(editedInterval);
 
     }

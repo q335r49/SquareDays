@@ -39,7 +39,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class TasksFrag extends Fragment {
     SharedPreferences prefs;
     public interface OnFragmentInteractionListener {
-        void pushProc(cInterval log);
+        void pushProc(Interval log);
         void setBF(TasksFrag bf);
         boolean onMenuItemClick(MenuItem item);
     }
@@ -47,7 +47,7 @@ public class TasksFrag extends Fragment {
     private FlexboxLayout buttons;
     private TextView statusBar;
         private String savedStatusText = "";
-        void setSavedAB(cInterval le) {
+        void setSavedAB(Interval le) {
             savedStatusText = le != null ? le.label + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
             statusBar.setText(savedStatusText);
         }
@@ -99,10 +99,10 @@ public class TasksFrag extends Fragment {
             commands = new Gson().fromJson(s, listType);
         }
         for (String[] sa : commands)
-            Globals.palette.add(MainActivity.parseColor(sa[iCOLOR]));
+            Glob.palette.add(MainActivity.parseColor(sa[iCOLOR]));
         makeView();
     }
-    public void setActiveTask(cInterval le) { //TODO: Handle special case of expense name  = task name
+    public void setActiveTask(Interval le) { //TODO: Handle special case of expense name  = task name
         if (le == null)
             setActiveTask(endButtonMonogram);
         else {
@@ -161,7 +161,7 @@ public class TasksFrag extends Fragment {
             View child = inflater.inflate(R.layout.gv_list_item, null);
             buttons.addView(child,lp);
             final int bg_Norm = MainActivity.parseColor(comF[iCOLOR]);
-            final int bg_Press = Globals.darkenColor(bg_Norm,0.7f);
+            final int bg_Press = Glob.darkenColor(bg_Norm,0.7f);
             MonogramView mv = (MonogramView) child.findViewById(R.id.text1);
                 mv.setText(comF[iCOMMENT]);
                 mv.setColor(bg_Norm);
@@ -240,7 +240,7 @@ public class TasksFrag extends Fragment {
                                         final int childCount = paletteView.getChildCount();
                                         for (int i = 0; i < childCount ; i++) {
                                             View pv = paletteView.getChildAt(i);
-                                            pv.setBackgroundColor(Globals.palette.get(i));
+                                            pv.setBackgroundColor(Glob.palette.get(i));
                                             final int bg = ((ColorDrawable) pv.getBackground()).getColor();
                                             pv.setOnClickListener(new View.OnClickListener() {
                                                 @Override
@@ -261,7 +261,7 @@ public class TasksFrag extends Fragment {
                                                     public void onClick(DialogInterface dialog, int id) {
                                                         int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                                                         commands.set(ixF, new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), "0", ""});
-                                                        Globals.palette.add(newColor);
+                                                        Glob.palette.add(newColor);
                                                         makeView();
                                                     }
                                                 })
@@ -308,7 +308,7 @@ public class TasksFrag extends Fragment {
                                 delay = delay > 50 ? delay - 50 : 0;
                                 duration = duration > 50 ? duration - 50 : 0;
                                 if (delay != 0)
-                                    mListener.pushProc(cInterval.newExpense(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L, delay,comF[iCOMMENT]));
+                                    mListener.pushProc(Interval.newExpense(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L, delay,comF[iCOMMENT]));
                                 else
                                     statusBar.setText(savedStatusText);
                                 return false;
@@ -381,7 +381,7 @@ public class TasksFrag extends Fragment {
                                     final int childCount = paletteView.getChildCount();
                                     for (int i = 0; i < childCount ; i++) {
                                         View pv = paletteView.getChildAt(i);
-                                        pv.setBackgroundColor(Globals.palette.get(i));
+                                        pv.setBackgroundColor(Glob.palette.get(i));
                                         final int bg = ((ColorDrawable) pv.getBackground()).getColor();
                                         pv.setOnClickListener(new View.OnClickListener() {
                                             @Override
@@ -402,7 +402,7 @@ public class TasksFrag extends Fragment {
                                                 public void onClick(DialogInterface dialog, int id) {
                                                     int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                                                     commands.set(ixF, new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), "0", ""});
-                                                    Globals.palette.add(newColor);
+                                                    Glob.palette.add(newColor);
                                                     makeView();
                                                 }
                                             })
@@ -457,10 +457,10 @@ public class TasksFrag extends Fragment {
                             duration = duration > 50 ? duration - 50 : 0;
                             if (delay != 0 || duration != 0 || !hasDragged) {
                                 if (duration == 0) {
-                                    mListener.pushProc(cInterval.newOngoingTask(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L - delay * 60, comF[iCOMMENT]));
+                                    mListener.pushProc(Interval.newOngoingTask(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L - delay * 60, comF[iCOMMENT]));
                                     setActiveTask(v);
                                 } else
-                                    mListener.pushProc(cInterval.newCompletedTask(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[iCOMMENT]));
+                                    mListener.pushProc(Interval.newCompleteTask(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[iCOMMENT]));
                             } else
                                 statusBar.setText(savedStatusText);
                             return false;
@@ -474,8 +474,8 @@ public class TasksFrag extends Fragment {
                 }
             });
         }
-        final int bg_Norm = Globals.COLOR_END_BOX;
-        final int bg_Press = Globals.darkenColor(bg_Norm,0.7f);
+        final int bg_Norm = Glob.COLOR_END_BOX;
+        final int bg_Press = Glob.darkenColor(bg_Norm,0.7f);
         final View endButton = inflater.inflate(R.layout.gv_list_item, null);
         buttons.addView(endButton,lp);
         GradientDrawable rrect = new GradientDrawable();
@@ -551,7 +551,7 @@ public class TasksFrag extends Fragment {
                                 final int childCount = paletteView.getChildCount();
                                 for (int i = 0; i < childCount ; i++) {
                                     View pv = paletteView.getChildAt(i);
-                                    pv.setBackgroundColor(Globals.palette.get(i));
+                                    pv.setBackgroundColor(Glob.palette.get(i));
                                     final int bg = ((ColorDrawable) pv.getBackground()).getColor();
                                     pv.setOnClickListener(new View.OnClickListener() {
                                         @Override
@@ -572,7 +572,7 @@ public class TasksFrag extends Fragment {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                                                 commands.add(new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), checkbox.isEnabled()? "E" : ""});
-                                                Globals.palette.add(newColor);
+                                                Glob.palette.add(newColor);
                                                 makeView();
                                             }
                                         })
@@ -633,9 +633,9 @@ public class TasksFrag extends Fragment {
                                     .setTitle("Comment:")
                                     .setPositiveButton("Add label", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
-                                            mListener.pushProc(cInterval.newCommentCmd(" " + commentEntry.getText().toString()));
+                                            mListener.pushProc(Interval.newCommentCmd(" " + commentEntry.getText().toString()));
                                             if (finalDelay != 0) {
-                                                mListener.pushProc(cInterval.newEndCommand(System.currentTimeMillis() / 1000L - finalDelay * 60));
+                                                mListener.pushProc(Interval.newEndCommand(System.currentTimeMillis() / 1000L - finalDelay * 60));
                                                 clearActiveTask();
                                             }
                                         }
@@ -647,7 +647,7 @@ public class TasksFrag extends Fragment {
                                     })
                                     .create().show();
                         } else if (delay != 0 || !hasDragged) {
-                            mListener.pushProc(cInterval.newEndCommand(System.currentTimeMillis()/1000L - delay * 60));
+                            mListener.pushProc(Interval.newEndCommand(System.currentTimeMillis()/1000L - delay * 60));
                             clearActiveTask();
                         }
                         return false;

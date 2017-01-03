@@ -34,11 +34,11 @@ public class MonogramView extends TextView {
             mPaint.setStyle(Paint.Style.FILL);
             mPaint.setStrokeWidth(10f);
             mPaint.setTextSize(100f);
-            mPaint.setTypeface(Globals.CommandFont);
+            mPaint.setTypeface(Glob.CommandFont);
             mPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
         ActivePaint = new Paint();
             ActivePaint.setStyle(Paint.Style.FILL);
-            ActivePaint.setTypeface(Globals.CommandFont);
+            ActivePaint.setTypeface(Glob.CommandFont);
             ActivePaint.setFlags(Paint.ANTI_ALIAS_FLAG);
         bounds = new Rect();
     }

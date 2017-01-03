@@ -5,7 +5,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v4.content.res.ResourcesCompat;
 
-class Globals {
+class Glob {
     static PaletteRing palette;
         private static int PALLETTE_LENGTH = 24;
     static int COLOR_SCALE_TEXT;

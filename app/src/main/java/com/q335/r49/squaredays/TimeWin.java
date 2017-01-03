@@ -21,8 +21,8 @@ class TimeWin { //TODO: Reevaluate static variables
     String statusText;
     void setStatusText(String s) { statusText = s; }
     @Nullable
-    private cInterval curTask;
-    private TreeSet<cInterval> shapeIndex;
+    private Interval curTask;
+    private TreeSet<Interval> shapeIndex;
     static TimeWin newWindowClass(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         return new TimeWin(sv, tsOrigin,widthDays,heightWeeks,xMin,yMin);
     }
@@ -32,28 +32,28 @@ class TimeWin { //TODO: Reevaluate static variables
         this.gridH = heightWeeks;
         g0x = xMin;
         g0y = yMin;
-        shapeIndex = new TreeSet<>(new Comparator<cInterval>() {
+        shapeIndex = new TreeSet<>(new Comparator<Interval>() {
             @Override
-            public int compare(cInterval o1, cInterval o2) { return o1.start > o2.start ? -1 : o1.start == o2.start ? 0 : 1; }
+            public int compare(Interval o1, Interval o2) { return o1.start > o2.start ? -1 : o1.start == o2.start ? 0 : 1; }
         });
         minorTickStyle = new Paint();
-            minorTickStyle.setColor(Globals.COLOR_SCALE_TEXT);
+            minorTickStyle.setColor(Glob.COLOR_SCALE_TEXT);
         majorTickStyle = new Paint();
-            majorTickStyle.setColor(Globals.COLOR_SCALE_TEXT);
+            majorTickStyle.setColor(Glob.COLOR_SCALE_TEXT);
             majorTickStyle.setTypeface(Typeface.DEFAULT_BOLD);
         nowLineStyle = new Paint();
-            nowLineStyle.setColor(Globals.COLOR_NOW_LINE);
+            nowLineStyle.setColor(Glob.COLOR_NOW_LINE);
         statusBarStyle = new Paint();
-            statusBarStyle.setColor(Globals.COLOR_STATUS_BAR);
+            statusBarStyle.setColor(Glob.COLOR_STATUS_BAR);
             statusBarStyle.setTextAlign(Paint.Align.LEFT);
         selectionStyle = new Paint();
             selectionStyle.setStyle(Paint.Style.STROKE);
-            selectionStyle.setColor(Globals.COLOR_SELECTION);
+            selectionStyle.setColor(Glob.COLOR_SELECTION);
         ongoingStyle = new Paint();
-            ongoingStyle.setColor(Globals.COLOR_NOW_LINE);
+            ongoingStyle.setColor(Glob.COLOR_NOW_LINE);
             ongoingStyle.setStyle(Paint.Style.FILL);
         gridStyle = new Paint();
-            gridStyle.setColor(Globals.COLOR_GRID_BACKGROUND);
+            gridStyle.setColor(Glob.COLOR_GRID_BACKGROUND);
             gridStyle.setStyle(Paint.Style.FILL);
         statusText = "";
     }
@@ -109,9 +109,9 @@ class TimeWin { //TODO: Reevaluate static variables
             RECT_SCALING_FACTOR_Y *= borderScale;
         }
     }
-    cInterval getSelectedShape(float sx, float sy) {
+    Interval getSelectedShape(float sx, float sy) {
         long ts = screenToTs(sx, sy);
-        cInterval closest = shapeIndex.ceiling(cInterval.newStartTime(ts));
+        Interval closest = shapeIndex.ceiling(Interval.newStartTime(ts));
         return closest == null? null : closest.end < ts ? null : closest;
     }
 
@@ -135,7 +135,7 @@ class TimeWin { //TODO: Reevaluate static variables
 
         drawBackgroundGrid();
 
-        for (cInterval s : shapeIndex)
+        for (Interval s : shapeIndex)
             drawInterval(s, s.paint);
 
         float gridSize;
@@ -228,7 +228,7 @@ class TimeWin { //TODO: Reevaluate static variables
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
     void drawNowLine(long ts) {
-        nowLineStyle.setColor(Globals.COLOR_NOW_LINE);
+        nowLineStyle.setColor(Glob.COLOR_NOW_LINE);
         long noon = ts - (ts - orig + 864000000000000000L) % 86400L + 43200;
         float[] a = tsToScreen(ts,0f);
         float[] b = tsToScreen(ts,1f);
@@ -368,7 +368,7 @@ class TimeWin { //TODO: Reevaluate static variables
             corner = midn + 1;
         }
     }
-    void drawInterval(cInterval iv, Paint paint) {
+    void drawInterval(Interval iv, Paint paint) {
         float scaleX = iv.end < expansionComplete ? scaleB : iv.end > now ? scaleA : (float) (iv.end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
         if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
@@ -393,7 +393,7 @@ class TimeWin { //TODO: Reevaluate static variables
                 (b[0]-c[0])*scaleX+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
-    private void drawOngoingInterval(cInterval iv, float scaleB) {
+    private void drawOngoingInterval(Interval iv, float scaleB) {
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
         float[] a, b, c;
@@ -418,16 +418,16 @@ class TimeWin { //TODO: Reevaluate static variables
         pp.lineTo((b[0]-c[0])*scaleB+c[0],y2);
         pp.lineTo((a[0]-c[0])*scaleB+c[0],y2);
         pp.close();
-        Shader shader = new LinearGradient(0, y1, 0, y2, iv.paint.getColor(), Globals.COLOR_GRID_BACKGROUND, Shader.TileMode.CLAMP);
+        Shader shader = new LinearGradient(0, y1, 0, y2, iv.paint.getColor(), Glob.COLOR_GRID_BACKGROUND, Shader.TileMode.CLAMP);
         ongoingStyle.setShader(shader);
         mCanvas.drawPath(pp, ongoingStyle);
     }
-    cInterval procTask(cInterval a) {
+    Interval procTask(Interval a) {
         //TODO: request invalidate()
         MainActivity.setLogChanged();
-        cInterval c;
+        Interval c;
         switch (a.command) {
-            case cInterval.CMD_ADD_COMMENT:
+            case Interval.cCOMMENT:
                 if (curTask != null) {
                     if (curTask.label != null)
                         curTask.label += a.label == null ? "" : a.label;
@@ -435,7 +435,7 @@ class TimeWin { //TODO: Reevaluate static variables
                         curTask.label = a.label;
                 }
                 return curTask;
-            case cInterval.CMD_END_TASK:
+            case Interval.cENDTASK:
                 if (curTask != null) {
                     curTask.end = a.end;
                     c = curTask;
@@ -443,7 +443,7 @@ class TimeWin { //TODO: Reevaluate static variables
                 } else
                     return null;
                 break;
-            case cInterval.ONGOING:
+            case Interval.cONGOING:
                 if (curTask == null) {
                     curTask = a;
                     return curTask;
@@ -458,7 +458,7 @@ class TimeWin { //TODO: Reevaluate static variables
                     }
                 }
                 break;
-            case cInterval.CMD_CLEAR_LOG:
+            case Interval.cCLEARLOG:
                 curTask = null;
                 shapeIndex.clear();
                 return null;
@@ -467,8 +467,8 @@ class TimeWin { //TODO: Reevaluate static variables
         }
         if (c.end <= c.start)
             return curTask;
-        List<cInterval> removalList = new ArrayList<>();
-        for (cInterval p : shapeIndex) {
+        List<Interval> removalList = new ArrayList<>();
+        for (Interval p : shapeIndex) {
             if (c.start <= p.start) {
                 if (c.end > p.start)
                     if (c.end >= p.end)
@@ -478,7 +478,7 @@ class TimeWin { //TODO: Reevaluate static variables
             } else if (c.start > p.end)
                 break;
             else if (c.end < p.end) {
-                cInterval newLog = new cInterval(p);
+                Interval newLog = new Interval(p);
                 newLog.end = c.start;
                 shapeIndex.add(newLog);
                 p.start = c.end;
@@ -488,7 +488,7 @@ class TimeWin { //TODO: Reevaluate static variables
                 break;
             }
         }
-        for (cInterval l : removalList)
+        for (Interval l : removalList)
             shapeIndex.remove(l);
         shapeIndex.add(c);
         return curTask;
@@ -496,7 +496,7 @@ class TimeWin { //TODO: Reevaluate static variables
     List<String> getWritableShapes() {
         List<String> LogList = new ArrayList<>();
         String entry;
-        for (cInterval r : shapeIndex) {
+        for (Interval r : shapeIndex) {
             entry = r.toLogLine();
             if (entry != null)
                 LogList.add(entry);
@@ -508,16 +508,16 @@ class TimeWin { //TODO: Reevaluate static variables
         }
         return LogList;
     }
-    cInterval selection;
-        void setSelected(cInterval selection) { this.selection = selection; }
-        cInterval getSelection() { return selection; }
+    Interval selection;
+        void setSelected(Interval selection) { this.selection = selection; }
+        Interval getSelection() { return selection; }
         void removeSelection() {
             if (!shapeIndex.remove(selection))
                 Log.d("SquareDays","Cannot remove selection: " + selection.toString());
             selection = null;
             setStatusText("");
         }
-        void updateEntry(cInterval selection, long start, long end) {
+        void updateEntry(Interval selection, long start, long end) {
             if (shapeIndex.remove(selection)) {
                 selection.start = start;
                 selection.end = end;

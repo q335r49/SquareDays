@@ -72,7 +72,7 @@ public class TouchView<T extends TimeWin> extends View {
     private final Handler handler = new Handler();
     private Runnable mLongPressed = new Runnable() { public void run() {
         has_run = true;
-        final cInterval selection = CW.getSelection();
+        final Interval selection = CW.getSelection();
         if (selection != null) {
             if (gClass.equals(CODE_CAL)) {
                 LayoutInflater inflater = LayoutInflater.from(appContext);
@@ -88,7 +88,7 @@ public class TouchView<T extends TimeWin> extends View {
                 endEntry.setText(tsToDate(selection.end));
                 final View curColorV = promptView.findViewById(R.id.CurColor);
                 try { curColorV.setBackgroundColor(selection.paint.getColor());
-                } catch (Exception e) { curColorV.setBackgroundColor(Globals.COLOR_ERROR); }
+                } catch (Exception e) { curColorV.setBackgroundColor(Glob.COLOR_ERROR); }
 
                 final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                 final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
@@ -132,7 +132,7 @@ public class TouchView<T extends TimeWin> extends View {
                 final int childCount = paletteView.getChildCount();
                 for (int i = 0; i < childCount ; i++) {
                     View v = paletteView.getChildAt(i);
-                    v.setBackgroundColor(Globals.palette.get(i));
+                    v.setBackgroundColor(Glob.palette.get(i));
                     final int bg = ((ColorDrawable) v.getBackground()).getColor();
                     v.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -182,7 +182,7 @@ public class TouchView<T extends TimeWin> extends View {
                 endEntry.setText(Long.toString(selection.end));
                 final View curColorV = promptView.findViewById(R.id.CurColor);
                 try { curColorV.setBackgroundColor(selection.paint.getColor());
-                } catch (Exception e) { curColorV.setBackgroundColor(Globals.COLOR_ERROR); }
+                } catch (Exception e) { curColorV.setBackgroundColor(Glob.COLOR_ERROR); }
 
                 final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                 final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
@@ -226,7 +226,7 @@ public class TouchView<T extends TimeWin> extends View {
                 final int childCount = paletteView.getChildCount();
                 for (int i = 0; i < childCount ; i++) {
                     View v = paletteView.getChildAt(i);
-                    v.setBackgroundColor(Globals.palette.get(i));
+                    v.setBackgroundColor(Glob.palette.get(i));
                     final int bg = ((ColorDrawable) v.getBackground()).getColor();
                     v.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -242,7 +242,6 @@ public class TouchView<T extends TimeWin> extends View {
                 alertDialogBuilder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         ((ExpenseWin) CW).updateEntry(dateToTs(startEntry.getText().toString()), Long.parseLong(endEntry.getText().toString()));
-                        //TODO: error handling
                         invalidate();
                     }
                 });
@@ -273,7 +272,7 @@ public class TouchView<T extends TimeWin> extends View {
                 handler.postDelayed(mLongPressed,1200);
                 firstTouchX = lastTouchX = x;
                 firstTouchY = lastTouchY = y;
-                cInterval selection = CW.getSelectedShape(x,y);
+                Interval selection = CW.getSelectedShape(x,y);
                 if (selection != null) {
                     long duration = 1000L* (selection.end - selection.start);
                     CW.setStatusText(selection.label + ":"

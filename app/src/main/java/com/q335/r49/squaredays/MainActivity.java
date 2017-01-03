@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             return Color.parseColor(s);
         } catch (Exception e) {
             Log.d("SquareDays","Bad color: " + s);
-            return Globals.COLOR_ERROR;
+            return Glob.COLOR_ERROR;
         }
     }
     private static final String LOG_FILE = "log.txt";
@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     private void readLogFile() {
         try {
             for (String l : Files.readLines(new File(getFilesDir(), LOG_FILE), Charsets.UTF_8))
-                pushOnly(cInterval.newFromLogLine(l));
+                pushOnly(Interval.newFromLogLine(l));
         } catch (Exception e) {
             Log.d("SquareDays","Log read exception: " + e.toString());
         }
@@ -75,10 +75,10 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             Toast.makeText(context, "Cannot write to internal storage", Toast.LENGTH_LONG).show();
         }
     }
-    private Queue<cInterval> logQ;
-    public void pushProc(cInterval log) {
+    private Queue<Interval> logQ;
+    public void pushProc(Interval log) {
         if (logQ.isEmpty()) {
-            if (log.mode == cInterval.MODE_EXP) {
+            if (log.type == Interval.tEXP) {
                 if (EW != null)
                     EW.procTask(log);
                 else
@@ -94,16 +94,16 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             popAll();
         }
     }
-    public void pushOnly(cInterval log) { if (log != null) logQ.add(log); }
+    public void pushOnly(Interval log) { if (log != null) logQ.add(log); }
     public void popAll() {
         if (CW == null || BF == null || EW == null)
             return;
         Log.d("SquareDays","Init!");
-        cInterval onGoing = null;
+        Interval onGoing = null;
         if (logQ.isEmpty())
-            onGoing = CW.procTask(cInterval.newCommentCmd(""));
-        else for (cInterval le = logQ.poll(); le != null; le = logQ.poll()) {
-            if (le.mode == cInterval.MODE_EXP)
+            onGoing = CW.procTask(Interval.newCommentCmd(""));
+        else for (Interval le = logQ.poll(); le != null; le = logQ.poll()) {
+            if (le.type == Interval.tEXP)
                 EW.procTask(le);
             else
                 onGoing = CW.procTask(le);
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         super.onCreate(savedInstanceState);
         context = getApplicationContext();
         prefs = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
-        Globals.init(context);
+        Glob.init(context);
         logQ = new LinkedList<>();
 
         setContentView(R.layout.activity_main);
@@ -248,8 +248,8 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                     else {
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
-                                            pushOnly(cInterval.newClearTimeMsg());
-                                            pushOnly(cInterval.newClearExpMess());
+                                            pushOnly(Interval.newClearTimeMsg());
+                                            pushOnly(Interval.newClearExpMess());
                                             readLogFile();
                                             popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
@@ -280,8 +280,8 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                     else {
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
-                                            pushOnly(cInterval.newClearTimeMsg());
-                                            pushOnly(cInterval.newClearExpMess());
+                                            pushOnly(Interval.newClearTimeMsg());
+                                            pushOnly(Interval.newClearExpMess());
                                             readLogFile();
                                             popAll();
                                             Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
@@ -313,13 +313,13 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                 File logFile = new File(getFilesDir(), LOG_FILE);
                                 if (logFile.exists()) {
                                     if (logFile.delete()) {
-                                        pushOnly(cInterval.newClearTimeMsg());
-                                        pushOnly(cInterval.newClearExpMess());
+                                        pushOnly(Interval.newClearTimeMsg());
+                                        pushOnly(Interval.newClearExpMess());
                                     } else
                                         Log.d("SquareDays", "Log clear failed!");
                                 } else {
-                                    pushOnly(cInterval.newClearTimeMsg());
-                                    pushOnly(cInterval.newClearExpMess());
+                                    pushOnly(Interval.newClearTimeMsg());
+                                    pushOnly(Interval.newClearExpMess());
                                 }
                                 popAll();
                             }
