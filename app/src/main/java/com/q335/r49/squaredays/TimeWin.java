@@ -517,12 +517,12 @@ class TimeWin { //TODO: Reevaluate static variables
             selection = null;
             setStatusText("");
         }
-    void updateEntry(cInterval selection, long start, long end) {
-        if (shapeIndex.remove(selection)) {
-            selection.start = start;
-            selection.end = end;
-            procTask(selection);
-        } else
-            Log.d("SquareDays","Cannot remove selection: " + selection.toString());
-    }
+        void updateEntry(cInterval selection, long start, long end) {
+            if (shapeIndex.remove(selection)) {
+                selection.start = start;
+                selection.end = end;
+                procTask(selection);
+            } else
+                Log.d("SquareDays","Cannot remove selection: " + selection.toString());
+        }
 }

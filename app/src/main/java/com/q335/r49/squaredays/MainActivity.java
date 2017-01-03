@@ -25,12 +25,16 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+
+//TODO: #### Modify Intervals to make groups -- everything happens there
+//TODO: Deal with overages -- compress -- yes!
 //TODO: antialiased shapes?
 //TODO: Implement border auto-increment
 //TODO: Convert dollars to cents
 //TODO: Mark boxes with "extra" comments
 //TODO: Roiunded corners in TimeWin
 //TODO: Background fading
+//TODO: Eventually: draw only those intevrals that are onscreen
 
 
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {
@@ -74,7 +78,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     private Queue<cInterval> logQ;
     public void pushProc(cInterval log) {
         if (logQ.isEmpty()) {
-            if (log.command == cInterval.EXPENSE || log.command == cInterval.CMD_CLEAR_EXP) {
+            if (log.mode == cInterval.MODE_EXP) {
                 if (EW != null)
                     EW.procTask(log);
                 else
@@ -99,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         if (logQ.isEmpty())
             onGoing = CW.procTask(cInterval.newCommentCmd(""));
         else for (cInterval le = logQ.poll(); le != null; le = logQ.poll()) {
-            if (le.command == cInterval.EXPENSE || le.command == cInterval.CMD_CLEAR_EXP)
+            if (le.mode == cInterval.MODE_EXP)
                 EW.procTask(le);
             else
                 onGoing = CW.procTask(le);

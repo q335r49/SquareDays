@@ -28,6 +28,7 @@ public class CalendarFrag<T extends TimeWin> extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View frame = inflater.inflate(R.layout.fragment_calendar,container,false);
         TouchView inputLayer = (TouchView) (frame.findViewById(R.id.drawing));
+        inputLayer.setClass(gClass);
         Calendar cal = new GregorianCalendar();
             cal.setTimeInMillis(System.currentTimeMillis());
             cal.set(Calendar.DAY_OF_WEEK,1);

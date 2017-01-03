@@ -18,23 +18,44 @@ class ExpenseWin extends TimeWin {
         ArrayList<cInterval> expenses;
         ArrayList<Float> alreadySpent;
         float amountSpent;
+
         DailyExpense(long midn) {
             expenses = new ArrayList<>();
             alreadySpent = new ArrayList<>();
             amountSpent = 0f;
             this.midn = midn;
         }
-        DailyExpense(cInterval le, long midn) { this(midn); add(le); }
+
+        DailyExpense(cInterval le, long midn) {
+            this(midn);
+            add(le);
+        }
+
         void add(cInterval le) {
             expenses.add(le);
             alreadySpent.add(amountSpent);
             amountSpent += le.end;
         }
+
         List<String> getWritableShapes() {
             List<String> entries = new ArrayList<>();
             for (cInterval le : expenses)
                 entries.add(le.toLogLine());
             return entries;
+        }
+
+        public cInterval removeIndex(int selectedIndex) {
+            int S = expenses.size();
+            cInterval removed;
+            if (selectedIndex < S) {
+                removed = expenses.remove(selectedIndex);
+                alreadySpent.remove(selectedIndex);
+                amountSpent -= removed.end;
+                for (int i = selectedIndex; i < S - 1; i++)
+                    alreadySpent.set(i, alreadySpent.get(i) - removed.end);
+                return removed;
+            }
+            return null;
         }
     }
     private float rSecondsExpense;
@@ -43,6 +64,7 @@ class ExpenseWin extends TimeWin {
         rSecondsExpense = 86400/100;
     }
     private HashMap<Long,DailyExpense> DE = new HashMap<>();
+    private HashMap<Long,ArrayList<cInterval>> GR = new HashMap<>();
     private void drawExpenseInterval(DailyExpense de, int index, Paint paint) {
         cInterval le;
         long start, end;
@@ -113,8 +135,9 @@ class ExpenseWin extends TimeWin {
 
     @Override
     cInterval procTask(cInterval a) {  //TODO: Deal with modification commands
-        if (a.command == cInterval.CMD_CLEAR_EXP) {
+        if (a.command == cInterval.CMD_CLEAR_LOG) {
             DE.clear();
+            GR.clear();
             return null;
         }
         MainActivity.setLogChanged();
@@ -124,6 +147,15 @@ class ExpenseWin extends TimeWin {
             DE.put(prevMidn(a.start), new DailyExpense(a,midn));
         else
             currentExpenses.add(a);
+        if (a.group != 0) {
+            ArrayList<cInterval> gr = GR.get(a.group);
+            if (gr == null) {
+                gr = new ArrayList<>();
+                gr.add(a);
+                GR.put(a.group, gr);
+            } else
+                gr.add(a);
+        }
         return null;
     }
     @Override
@@ -233,7 +265,7 @@ class ExpenseWin extends TimeWin {
             }
         }
         if (selection!=null)
-            drawExpenseInterval(selected, selectedIndex, selectionStyle);
+            drawExpenseInterval(selectedDay, selectedIndex, selectionStyle);
         drawNowLine(now);
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
@@ -243,7 +275,7 @@ class ExpenseWin extends TimeWin {
         return new ExpenseWin(sv, tsOrigin,widthDays,heightWeeks,xMin,yMin);
     }
 
-    private DailyExpense selected;
+    private DailyExpense selectedDay;
     private int selectedIndex;
     @Override
     cInterval getSelectedShape(float sx, float sy) {
@@ -254,12 +286,36 @@ class ExpenseWin extends TimeWin {
             float exp = (ts - midn) / rSecondsExpense;
             for (int i = 0; i < de.alreadySpent.size(); i++)
                 if (de.alreadySpent.get(i) + de.expenses.get(i).end > exp) {
-                    selected = de;
+                    selectedDay = de;
                     selectedIndex = i;
                     return de.expenses.get(i);
                 }
         }
-        selected = null;
+        selectedDay = null;
         return null;
+    }
+
+    @Override
+    void removeSelection() {
+        if (selection != null) {
+            selectedDay.removeIndex(selectedIndex);
+            selection = null;
+            setStatusText("");
+        }
+    }
+    void updateEntry(long start, long amount) { //TODO: days / group
+        cInterval editedInterval;
+        if (selection != null) {
+            editedInterval = selectedDay.removeIndex(selectedIndex);
+            selection = null;
+            setStatusText("");
+        } else
+            return;
+        if (editedInterval == null)
+            return;
+        editedInterval.start = start;
+        editedInterval.end = amount;
+        procTask(editedInterval);
+
     }
 }

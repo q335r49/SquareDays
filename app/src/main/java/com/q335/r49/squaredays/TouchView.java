@@ -22,6 +22,11 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class TouchView<T extends TimeWin> extends View {
+    static String CODE_CAL = "cal";
+    static String CODE_EXP = "exp";
+    private String gClass;
+        void setClass(String s) {gClass = s;}
+
     private T CW;
     private ScaleListener SL;
     private ScaleGestureDetector mScaleDetector;
@@ -69,94 +74,192 @@ public class TouchView<T extends TimeWin> extends View {
         has_run = true;
         final cInterval selection = CW.getSelection();
         if (selection != null) {
-            LayoutInflater inflater = LayoutInflater.from(appContext);
-            View promptView = inflater.inflate(R.layout.edit_interval, null);
-            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(appContext);
-            alertDialogBuilder.setView(promptView);
+            if (gClass.equals(CODE_CAL)) {
+                LayoutInflater inflater = LayoutInflater.from(appContext);
+                View promptView = inflater.inflate(R.layout.edit_interval, null);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(appContext);
+                alertDialogBuilder.setView(promptView);
 
-            final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
-            commentEntry.setText(selection.label);
-            final EditText startEntry = (EditText) promptView.findViewById(R.id.startEdit);
-            startEntry.setText(tsToDate(selection.start));
-            final EditText endEntry = (EditText) promptView.findViewById(R.id.endEdit);
-            endEntry.setText(tsToDate(selection.end));
-            final View curColorV = promptView.findViewById(R.id.CurColor);
-            try { curColorV.setBackgroundColor(selection.paint.getColor());
-            } catch (Exception e) { curColorV.setBackgroundColor(Globals.COLOR_ERROR); }
+                final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
+                commentEntry.setText(selection.label);
+                final EditText startEntry = (EditText) promptView.findViewById(R.id.startEdit);
+                startEntry.setText(tsToDate(selection.start));
+                final EditText endEntry = (EditText) promptView.findViewById(R.id.endEdit);
+                endEntry.setText(tsToDate(selection.end));
+                final View curColorV = promptView.findViewById(R.id.CurColor);
+                try { curColorV.setBackgroundColor(selection.paint.getColor());
+                } catch (Exception e) { curColorV.setBackgroundColor(Globals.COLOR_ERROR); }
 
-            final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-            final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
-            final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
-            final SeekBar seekBlue = (SeekBar) promptView.findViewById(R.id.seekBlue);
-            seekRed.setProgress(Color.red(curColor));
-            seekRed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    curColorV.setBackgroundColor(Color.rgb(progress,seekGreen.getProgress(),seekBlue.getProgress()));
-                }
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) { }
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) { }
-            });
-            seekGreen.setProgress(Color.green(curColor));
-            seekGreen.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),progress,seekBlue.getProgress()));
-                }
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) { }
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) { }
-            });
-            seekBlue.setProgress(Color.blue(curColor));
-            seekBlue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),seekGreen.getProgress(),progress));
-                }
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) { }
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) { }
-            });
-
-            final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
-            final int childCount = paletteView.getChildCount();
-            for (int i = 0; i < childCount ; i++) {
-                View v = paletteView.getChildAt(i);
-                v.setBackgroundColor(Globals.palette.get(i));
-                final int bg = ((ColorDrawable) v.getBackground()).getColor();
-                v.setOnClickListener(new View.OnClickListener() {
+                final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
+                final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
+                final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
+                final SeekBar seekBlue = (SeekBar) promptView.findViewById(R.id.seekBlue);
+                seekRed.setProgress(Color.red(curColor));
+                seekRed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                     @Override
-                    public void onClick(View v) {
-                        seekRed.setProgress(Color.red(bg));
-                        seekGreen.setProgress(Color.green(bg));
-                        seekBlue.setProgress(Color.blue(bg));
-                        curColorV.setBackgroundColor(bg);
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        curColorV.setBackgroundColor(Color.rgb(progress,seekGreen.getProgress(),seekBlue.getProgress()));
+                    }
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) { }
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) { }
+                });
+                seekGreen.setProgress(Color.green(curColor));
+                seekGreen.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),progress,seekBlue.getProgress()));
+                    }
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) { }
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) { }
+                });
+                seekBlue.setProgress(Color.blue(curColor));
+                seekBlue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),seekGreen.getProgress(),progress));
+                    }
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) { }
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) { }
+                });
+
+                final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
+                final int childCount = paletteView.getChildCount();
+                for (int i = 0; i < childCount ; i++) {
+                    View v = paletteView.getChildAt(i);
+                    v.setBackgroundColor(Globals.palette.get(i));
+                    final int bg = ((ColorDrawable) v.getBackground()).getColor();
+                    v.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            seekRed.setProgress(Color.red(bg));
+                            seekGreen.setProgress(Color.green(bg));
+                            seekBlue.setProgress(Color.blue(bg));
+                            curColorV.setBackgroundColor(bg);
+                        }
+                    });
+                }
+                alertDialogBuilder.setCancelable(true);
+                alertDialogBuilder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) { //TODO: This is just ignoring the comment updates, and outside of the proc pipeline
+                        CW.updateEntry(selection, dateToTs(startEntry.getText().toString()), dateToTs(endEntry.getText().toString()));
+                        invalidate();
                     }
                 });
+                alertDialogBuilder.setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        CW.removeSelection();
+                        invalidate();
+                    }
+                });
+                alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+                alertDialogBuilder.create().show();
+            } else {
+
+
+
+
+
+                LayoutInflater inflater = LayoutInflater.from(appContext);
+                View promptView = inflater.inflate(R.layout.edit_expense, null);
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(appContext);
+                alertDialogBuilder.setView(promptView);
+
+                final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
+                commentEntry.setText(selection.label);
+                final EditText startEntry = (EditText) promptView.findViewById(R.id.startEdit);
+                startEntry.setText(tsToDate(selection.start));
+                final EditText endEntry = (EditText) promptView.findViewById(R.id.endEdit);
+                endEntry.setText(Long.toString(selection.end));
+                final View curColorV = promptView.findViewById(R.id.CurColor);
+                try { curColorV.setBackgroundColor(selection.paint.getColor());
+                } catch (Exception e) { curColorV.setBackgroundColor(Globals.COLOR_ERROR); }
+
+                final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
+                final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
+                final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
+                final SeekBar seekBlue = (SeekBar) promptView.findViewById(R.id.seekBlue);
+                seekRed.setProgress(Color.red(curColor));
+                seekRed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        curColorV.setBackgroundColor(Color.rgb(progress,seekGreen.getProgress(),seekBlue.getProgress()));
+                    }
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) { }
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) { }
+                });
+                seekGreen.setProgress(Color.green(curColor));
+                seekGreen.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),progress,seekBlue.getProgress()));
+                    }
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) { }
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) { }
+                });
+                seekBlue.setProgress(Color.blue(curColor));
+                seekBlue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                    @Override
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                        curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),seekGreen.getProgress(),progress));
+                    }
+                    @Override
+                    public void onStartTrackingTouch(SeekBar seekBar) { }
+                    @Override
+                    public void onStopTrackingTouch(SeekBar seekBar) { }
+                });
+
+                final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
+                final int childCount = paletteView.getChildCount();
+                for (int i = 0; i < childCount ; i++) {
+                    View v = paletteView.getChildAt(i);
+                    v.setBackgroundColor(Globals.palette.get(i));
+                    final int bg = ((ColorDrawable) v.getBackground()).getColor();
+                    v.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            seekRed.setProgress(Color.red(bg));
+                            seekGreen.setProgress(Color.green(bg));
+                            seekBlue.setProgress(Color.blue(bg));
+                            curColorV.setBackgroundColor(bg);
+                        }
+                    });
+                }
+                alertDialogBuilder.setCancelable(true);
+                alertDialogBuilder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ((ExpenseWin) CW).updateEntry(dateToTs(startEntry.getText().toString()), Long.parseLong(endEntry.getText().toString()));
+                        //TODO: error handling
+                        invalidate();
+                    }
+                });
+                alertDialogBuilder.setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ((ExpenseWin) CW).removeSelection();
+                        invalidate();
+                    }
+                });
+                alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+                alertDialogBuilder.create().show();
             }
-            alertDialogBuilder.setCancelable(true);
-            alertDialogBuilder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    CW.updateEntry(selection, dateToTs(startEntry.getText().toString()), dateToTs(endEntry.getText().toString()));
-                    invalidate();
-                }
-            });
-            alertDialogBuilder.setNeutralButton("Remove", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    CW.removeSelection();
-                    invalidate();
-                }
-            });
-            alertDialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    dialog.cancel();
-                }
-            });
-            alertDialogBuilder.create().show();
+
         }
     }};
     @Override

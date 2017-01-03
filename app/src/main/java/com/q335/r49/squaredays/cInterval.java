@@ -7,17 +7,17 @@ import java.util.Date;
 
 class cInterval {
     static final int ONGOING = 1;
-    static final int EXPENSE = 2;
     static final int CMD_ADD_COMMENT = 10;
     static final int CMD_END_TASK = 11;
     static final int CMD_CLEAR_LOG = 100;
-    static final int CMD_CLEAR_EXP = 101;
     int command;
+    static final int MODE_CAL = 0;
+    static final int MODE_EXP = 1;
+    int mode;
     Paint paint;
     long start;
     long end;
     long group;
-    boolean groupChild;
 
     String label;
     String comment;
@@ -51,7 +51,7 @@ class cInterval {
         le.start = start;
         le.end = amount;
         le.label = comment;
-        le.command = EXPENSE;
+        le.mode = MODE_EXP;
         return le;
     }
     static cInterval newCompletedTask(int color, long start, long duration, String comment) {
@@ -82,7 +82,8 @@ class cInterval {
     }
     static cInterval newClearExpMess() {
         cInterval le = new cInterval();
-        le.command = CMD_CLEAR_EXP;
+        le.command = CMD_CLEAR_LOG;
+        le.mode = MODE_EXP;
         return le;
     }
 
@@ -119,7 +120,7 @@ class cInterval {
         if (args[pLabel].charAt(0) == '$') {
             if (args[pLabel].length() > 1) {
                 le.label = args[pLabel].substring(1);
-                le.command = EXPENSE;
+                le.mode = MODE_EXP;
             } else
                 return logNull("Empty expense label",s);
         } else if (!args[pLabel].isEmpty()) {
@@ -130,13 +131,13 @@ class cInterval {
         le.comment = args[pComment];
 
         if (args[pEnd].isEmpty()) {
-            if (le.command == EXPENSE)
+            if (le.command == MODE_EXP)
                 return logNull("Empty expense value",s);
             else
                 le.command = ONGOING;
         } else {
             le.end = Long.parseLong(args[pEnd]);
-            if (le.command == EXPENSE) {
+            if (le.command == MODE_EXP) {
                 if (le.end == 0)
                     return logNull("Zero-valued expense", s);
             } else if (le.start > le.end)
@@ -144,20 +145,18 @@ class cInterval {
         }
         return le;
     }
-    String toLogLine() {
+    String toLogLine() { //TODO: minimize keys
         if (paint == null || label == null || label.isEmpty())
             return logNull("null or empty paint or label");
-        if (groupChild)
-            return null;
         String[] args = new String[nArgs];
         args[pFormattedTime] = new Date(start*1000L).toString();
         args[pColor]        = String.format("#%06X", 0xFFFFFF & paint.getColor());
         args[pStamp]        = Long.toString(start);
         args[pEnd]          = command == ONGOING ? "" : Long.toString(end);
         args[pGroup]        = group == 0 ? "" : Long.toString(group);
-        args[pLabel]        = command == EXPENSE ? "$" + label : label;
+        args[pLabel]        = command == MODE_EXP ? "$" + label : label;
         args[pComment]      = comment == null ? "" : comment;
-        if (command == EXPENSE) {
+        if (command == MODE_EXP) {
             if (end == 0)
                 return logNull("Zero expense");
         } else {
