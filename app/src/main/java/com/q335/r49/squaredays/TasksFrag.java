@@ -460,7 +460,7 @@ public class TasksFrag extends Fragment {
                                     mListener.pushProc(Interval.newOngoingTask(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L - delay * 60, comF[iCOMMENT]));
                                     setActiveTask(v);
                                 } else
-                                    mListener.pushProc(Interval.newCompleteTask(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[iCOMMENT]));
+                                    mListener.pushProc(Interval.newCompleted(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[iCOMMENT]));
                             } else
                                 statusBar.setText(savedStatusText);
                             return false;
