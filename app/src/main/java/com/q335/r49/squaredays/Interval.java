@@ -112,7 +112,7 @@ class Interval {
             if (end == 0)
                 return logNull("Zero expense");
         } else {
-            if (end - start < 60)
+            if (end - start < 60 && command != cONGOING)
                 return logNull("Interval negative or too short");
         }
         return TextUtils.join(SEP,args);
