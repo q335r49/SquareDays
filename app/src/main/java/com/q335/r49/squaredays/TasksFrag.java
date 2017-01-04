@@ -178,7 +178,7 @@ public class TasksFrag extends Fragment {
                 boolean isExpense = comF.length > 2 && comF[2].equals("E");
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if (isExpense) {    //TODO: ** Allow for delay (e.g., yesterday)
+                    if (isExpense) {    //TODO: ** Allow for delay (e.g., yesterday) .. or groups?
                         switch (event.getActionMasked()) {
                             case MotionEvent.ACTION_DOWN:
                                 actionDownX = event.getX();
@@ -308,7 +308,7 @@ public class TasksFrag extends Fragment {
                                 delay = delay > 50 ? delay - 50 : 0;
                                 duration = duration > 50 ? duration - 50 : 0;
                                 if (delay != 0)
-                                    mListener.pushProc(Interval.newExpense(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L, delay,comF[iCOMMENT]));
+                                    mListener.pushProc(Interval.newExpense(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L, delay, 0, comF[iCOMMENT]));
                                 else
                                     statusBar.setText(savedStatusText);
                                 return false;

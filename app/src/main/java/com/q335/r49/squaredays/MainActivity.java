@@ -28,7 +28,6 @@ import java.util.Queue;
 
 //TODO: is color being changed ANYWHERE??
 //TODO: really should have APPEND, if possible (such as with a flag)
-//TODO: #### Modify Intervals to make groups -- everything happens there
 //TODO: Deal with overages -- compress -- yes!
 //TODO: antialiased shapes?
 //TODO: Implement border auto-increment

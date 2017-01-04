@@ -352,7 +352,7 @@ class ExpenseWin extends TimeWin {
             Groups.put(newGroup.code,newGroup);
             int day; long midn;
             for (day = 0, midn = prevMidn(start); day < days; day++, midn+=86400)
-                newGroup.add(Interval.newExpense(color,midn,amt,selectedExp.label()));
+                newGroup.add(Interval.newExpense(color,midn,amt,newGroup.code, selectedExp.label()));
         } else if (days == 1){
             if (selectedExp == null)
                 return;
