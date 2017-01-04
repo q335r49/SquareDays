@@ -11,24 +11,48 @@ import java.util.List;
 import java.util.Locale;
 
 class ExpenseWin extends TimeWin {
+    private static final int rSecDay = 86400;
+    private static final int maxExp = 100;
     private static final float expCornerRadius = 5;
-    private float rSecondsExpense;
+    private float rSecExp;
+
     private ExpenseWin(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         super(sv, tsOrigin, widthDays, heightWeeks, xMin, yMin);
-        rSecondsExpense = 86400/100;
+        rSecExp = 86400f/maxExp;
     }
     private HashMap<Long,ExpenseDay> Days = new HashMap<>();
     private HashMap<Long,ExpenseGroup> Groups = new HashMap<>();
+    private Expense selectedExp;
+    @Override
+    Interval getSelectedShape(float sx, float sy) {
+        long ts = screenToTs(sx, sy);
+        long midn = prevMidn(ts);
+        ExpenseDay de = Days.get(midn);
+        if (de != null) {
+            float scaleF = de.total > 86400f/rSecExp ? 86399f / de.total : rSecExp;
+            float exp = (ts - midn) / scaleF;
+            for (int i = 0; i < de.cumulative.size(); i++)
+                if (de.cumulative.get(i) + de.expenses.get(i).amount() > exp) {
+                    selectedExp = de.expenses.get(i);
+                    if (selectedExp.group != null)
+                        selectedExp = selectedExp.group.expenses.get(0);
+                    return selectedExp.iv;
+                }
+        }
+        selectedExp = null;
+        return null;
+    }
     private void drawExpense(Expense e, Paint paint) {
         Interval v;
         long start, end;
-        ExpenseDay de = e.day;
-        if (de == null) return;
-        int index = de.expenses.indexOf(e);
+        ExpenseDay ed = e.day;
+        if (ed == null) return;
+        int index = ed.expenses.indexOf(e);
         if (index < 0) return;
+        float scaleF = ed.total > 86400f/rSecExp ? 86399f/ed.total : rSecExp;
         v = e.iv;
-        start = de.midn + (long) (de.cumulative.get(index) * rSecondsExpense);
-        end = de.midn + (long) ((de.cumulative.get(index) + v.end) * rSecondsExpense);
+        start = ed.midn + (long) (ed.cumulative.get(index) * scaleF);
+        end = ed.midn + (long) ((ed.cumulative.get(index) + v.end) * scaleF);
 
         float scaleX = end < expansionComplete ? scaleB : end > now ? scaleA : (float) (end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
         long corner = start;
@@ -55,40 +79,33 @@ class ExpenseWin extends TimeWin {
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
         mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, paint);
     }
-    private void drawDailyExpense(ExpenseDay de) { //TODO: Account for overflow
-        int size = de.expenses.size();
+    private void drawExpenseDay(ExpenseDay ed) {
+        float scaleF = ed.total > 86400f/rSecExp ? 86399f/ed.total : rSecExp;
+        int size = ed.expenses.size();
         Interval v;
         long start, end;
+        float scaleX = 0.6f;
         for (int i = 0; i < size; i++) {
-            v = de.expenses.get(i).iv;
-            start = de.midn + (long) (de.cumulative.get(i) * rSecondsExpense);
-            end = de.midn + (long) ((de.cumulative.get(i) + v.end) * rSecondsExpense);
-
-            float scaleX = end < expansionComplete ? scaleB : end > now ? scaleA : (float) (end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
-            long corner = start;
-            long midn = start - (start - orig + 864000000000000000L) % 86400L + 86399L;
-            float[] a, b, c;
-            RectF rect;
-            for (; midn < end; midn += 86400L) {
-                a = tsToScreen(corner, 0);
-                b = tsToScreen(midn, 1f);
-                c = tsToScreen(midn-43199L, 0.5f);
-                rect = new RectF((a[0]-c[0])*scaleX+c[0],
-                        (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                        (b[0]-c[0])*scaleX+c[0],
-                        (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
-                mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, v.paint);
-                corner = midn+1;
-            }
-            a = tsToScreen(corner, 0);
-            b = tsToScreen(end, 1f);
-            c = tsToScreen(midn-43199L, 0.5f);
-            rect = new RectF((a[0]-c[0])*scaleX+c[0],
+            v = ed.expenses.get(i).iv;
+            start = ed.midn + (long) (ed.cumulative.get(i) * scaleF);
+            end = ed.midn + (long) ((ed.cumulative.get(i) + v.end) * scaleF);
+            float[] a = tsToScreen(start, 0);
+            float[] b = tsToScreen(end, 1f);
+            float[] c = tsToScreen(prevMidn(start) + 43200, 0.5f);
+            RectF rect = new RectF((a[0]-c[0])*scaleX+c[0],
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                     (b[0]-c[0])*scaleX+c[0],
                     (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
             mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, v.paint);
         }
+        float[] a = tsToScreen((long) (ed.midn), 0);
+        float[] b = tsToScreen((long) ((ed.midn + 86399*scaleF/rSecExp)), 1f);
+        float[] c = tsToScreen((long) ((ed.midn + 43200)), 0.5f);
+        RectF rect = new RectF((a[0]-c[0])*scaleX+c[0],
+                (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
+                (b[0]-c[0])*scaleX+c[0],
+                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
+        mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, selectionStyle);
     }
 
     @Override
@@ -113,7 +130,7 @@ class ExpenseWin extends TimeWin {
         drawBackgroundGrid();
 
         for (HashMap.Entry<Long,ExpenseDay> e : Days.entrySet())
-            drawDailyExpense(e.getValue());
+            drawExpenseDay(e.getValue());
 
         float gridSize;
         String timeFormat;
@@ -210,25 +227,6 @@ class ExpenseWin extends TimeWin {
     }
     public static ExpenseWin newWindowClass(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         return new ExpenseWin(sv, tsOrigin,widthDays,heightWeeks,xMin,yMin);
-    }
-    private Expense selectedExp;
-    @Override
-    Interval getSelectedShape(float sx, float sy) {
-        long ts = screenToTs(sx, sy);
-        long midn = prevMidn(ts);
-        ExpenseDay de = Days.get(midn);
-        if (de != null) {
-            float exp = (ts - midn) / rSecondsExpense;
-            for (int i = 0; i < de.cumulative.size(); i++)
-                if (de.cumulative.get(i) + de.expenses.get(i).amount() > exp) {
-                    selectedExp = de.expenses.get(i);
-                    if (selectedExp.group != null)
-                        selectedExp = selectedExp.group.expenses.get(0);
-                    return selectedExp.iv;
-                }
-        }
-        selectedExp = null;
-        return null;
     }
     @Override
     Interval getSelection() { return selectedExp.iv; }

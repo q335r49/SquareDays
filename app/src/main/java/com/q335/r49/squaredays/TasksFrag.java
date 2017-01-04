@@ -35,6 +35,7 @@ import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 //TODO: ** Differentiate expenses and tasks
+//TODO: #### Updating expenses tunring into task
 
 public class TasksFrag extends Fragment {
     SharedPreferences prefs;

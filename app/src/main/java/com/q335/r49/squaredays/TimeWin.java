@@ -423,7 +423,6 @@ class TimeWin { //TODO: Reevaluate static variables
         mCanvas.drawPath(pp, ongoingStyle);
     }
     Interval procTask(Interval a) {
-        //TODO: request invalidate()
         MainActivity.setLogChanged();
         Interval c;
         switch (a.command) {
