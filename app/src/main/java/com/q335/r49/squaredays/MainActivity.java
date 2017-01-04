@@ -26,14 +26,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: Visual overhaul
-//TODO:     Visually distinguish expense-tasks
-//TODO:     Change expense background grid color
 //TODO:     Squares
-
-
-
-
 //TODO: is color being changed ANYWHERE??
 //TODO: really should have APPEND, if possible (such as with a flag)
 //TODO: Implement border auto-increment

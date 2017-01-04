@@ -18,8 +18,34 @@ class ExpenseWin extends TimeWin {
     private ExpenseWin(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         super(sv, tsOrigin, widthDays, heightWeeks, xMin, yMin);
         rSecExp = 86400f/maxExp;
-
+        gridStyle.setColor(Glob.COLOR_EXP_GRID);
     }
+    @Override
+    void setDPIScaling(float f) {
+        super.setDPIScaling(f);
+        gridRadius = LINE_WIDTH;
+    }
+    @Override
+    void drawBackgroundGrid() {
+        long start = Math.max(screenToTs(0f, 0f), now);
+        long end = screenToTs(screenW, screenH);
+        if (end <= start)
+            return;
+        float[] a, b, c, e;
+        long corner = prevMidn(start);
+        long midn = corner + 86399L;
+        for (; corner < end; midn += 86400L) {
+            a = tsToScreen(corner, 0);
+            b = tsToScreen(midn, 1f);
+            c = tsToScreen(midn - 43199L, 0.5f);
+            mCanvas.drawRoundRect(new RectF((a[0] - c[0]) * scaleGrid + c[0],
+                    (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1],
+                    (b[0] - c[0]) * scaleGrid + c[0],
+                    (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1]), gridRadius, gridRadius, gridStyle);
+            corner = midn + 1;
+        }
+    }
+
     private HashMap<Long,ExpenseDay> Days = new HashMap<>();
     private HashMap<Long,ExpenseGroup> Groups = new HashMap<>();
     private Expense selectedExp;

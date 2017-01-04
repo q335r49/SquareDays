@@ -125,7 +125,7 @@ class TimeWin { //TODO: Reevaluate static variable usage
     Canvas mCanvas;
     static final float scaleA = 0.25f;
     static final float scaleB = 1f;
-    private static final float scaleGrid = 0.85f;
+    static final float scaleGrid = 0.85f;
     static final long expansionTime = 86400L * 5L;
     long now, expansionComplete;
     int screenW, screenH;
@@ -246,7 +246,7 @@ class TimeWin { //TODO: Reevaluate static variable usage
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
     }
     private static final long curveLength = 86400/24;
-    static float gridRadius = 10f;
+    float gridRadius = 10f;
     private static final long maxStretch = 86400/40;
     long prevMidn(long ts) {return ts - (ts - orig + 864000000000000000L) % 86400L;}
     void drawBackgroundGrid() {
