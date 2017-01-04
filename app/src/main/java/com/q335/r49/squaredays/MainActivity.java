@@ -26,10 +26,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO:     Squares
 //TODO:     Invert Expenses
 //TODO:     Gradient backgrounds
-//TODO: is color being changed ANYWHERE??
 //TODO: really should have APPEND, if possible (such as with a flag)
 //TODO: Implement border auto-increment
 //TODO: Rescale drag input for expenses
@@ -39,6 +37,7 @@ import java.util.Queue;
 //TODO: Eventually: draw only those intevrals that are onscreen
 //TODO: Allow for delay or groups?
 //TODO: Reevaluate static variable usage in TimeWin
+//TODO: Consider: rearrange expenses?
 
 
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {

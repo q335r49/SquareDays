@@ -251,22 +251,13 @@ class TimeWin {
     long prevMidn(long ts) {return ts - (ts - orig + 864000000000000000L) % 86400L;}
 
     private static final float scaleXmin= 0.20f;
-    private static final float scaleXmax= 0.85f;
+    private static final float scaleXmax= 0.65f;
     private static final long durMin    = 60*10;
     private static final long durMax    = 60*150;
     private static final float durScaleF= (scaleXmax - scaleXmin) / (durMax - durMin);
-    private static final float expScaleXmin= 0.40f;
-    private static final float expScaleXmax= 0.85f;
-    private static final long expMin    = 5;
-    private static final long expMax    = 30;
-    private static final float expScaleF= (expScaleXmax - expScaleXmin) / (expMax - expMin);
     float scaleX(Interval iv) {
         long dur = iv == null ? 0 : iv == curTask ? now - iv.start : iv.end - iv.start;
         return dur < durMin ? scaleXmin : dur > durMax ? scaleXmax : scaleXmin + durScaleF * (dur - durMin);
-    }
-    float scaleX(ExpenseWin.Expense e) {
-        long amt = e == null ? 0 : e.amount();
-        return amt < expMin ? expScaleXmin : amt > expMax ? expScaleXmax : expScaleXmin + expScaleF * (amt - expMin);
     }
     void drawBackgroundGrid() {
         float width = scaleX(curTask);

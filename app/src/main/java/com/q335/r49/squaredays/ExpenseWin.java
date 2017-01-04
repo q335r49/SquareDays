@@ -11,9 +11,8 @@ import java.util.List;
 import java.util.Locale;
 
 class ExpenseWin extends TimeWin {
-    private static final int rSecDay = 86400;
     private static final int maxExp = 100;
-    private static final float expCornerRadius = 5;
+    private float expCornerRadius = 5;
     private float rSecExp;
     private ExpenseWin(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         super(sv, tsOrigin, widthDays, heightWeeks, xMin, yMin);
@@ -24,6 +23,7 @@ class ExpenseWin extends TimeWin {
     void setDPIScaling(float f) {
         super.setDPIScaling(f);
         gridRadius = LINE_WIDTH;
+        expCornerRadius = LINE_WIDTH;
     }
     @Override
     void drawBackgroundGrid() {
@@ -50,7 +50,15 @@ class ExpenseWin extends TimeWin {
     private HashMap<Long,ExpenseGroup> Groups = new HashMap<>();
     private Expense selectedExp;
         Expense getSelectedExp() { return selectedExp; }
-
+    private static final float expScaleXmin= 0.40f;
+    private static final float expScaleXmax= 0.85f;
+    private static final long expMin    = 5;
+    private static final long expMax    = 30;
+    private static final float expScaleF= (expScaleXmax - expScaleXmin) / (expMax - expMin);
+    float scaleX(ExpenseWin.Expense e) {
+        long amt = e == null ? 0 : e.amount();
+        return amt < expMin ? expScaleXmin : amt > expMax ? expScaleXmax : expScaleXmin + expScaleF * (amt - expMin);
+    }
     Expense getSelectedExpense(float sx, float sy) {
         long ts = screenToTs(sx, sy);
         long midn = prevMidn(ts);
@@ -70,18 +78,17 @@ class ExpenseWin extends TimeWin {
         return null;
     }
     private void drawExpense(Expense e, Paint paint) {
-        Interval v;
+        float width = scaleX(e);
         long start, end;
         ExpenseDay ed = e.day;
         if (ed == null) return;
         int index = ed.expenses.indexOf(e);
         if (index < 0) return;
         float scaleF = ed.total > 86400f/rSecExp ? 86399f/ed.total : rSecExp;
-        v = e.iv;
+        Interval v = e.iv;
         start = ed.midn + (long) (ed.cumulative.get(index) * scaleF);
         end = ed.midn + (long) ((ed.cumulative.get(index) + v.end) * scaleF);
 
-        float scaleX = end < expansionComplete ? scaleB : end > now ? scaleA : (float) (end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
         long corner = start;
         long midn = start - (start - orig + 864000000000000000L) % 86400L + 86399L;
         float[] a, b, c;
@@ -90,9 +97,9 @@ class ExpenseWin extends TimeWin {
             a = tsToScreen(corner, 0);
             b = tsToScreen(midn, 1f);
             c = tsToScreen(midn-43199L, 0.5f);
-            rect = new RectF((a[0]-c[0])*scaleX+c[0],
+            rect = new RectF((a[0]-c[0])*width+c[0],
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                    (b[0]-c[0])*scaleX+c[0],
+                    (b[0]-c[0])*width+c[0],
                     (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
             mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, paint);
             corner = midn+1;
@@ -100,9 +107,9 @@ class ExpenseWin extends TimeWin {
         a = tsToScreen(corner, 0);
         b = tsToScreen(end, 1f);
         c = tsToScreen(midn-43199L, 0.5f);
-        rect = new RectF((a[0]-c[0])*scaleX+c[0],
+        rect = new RectF((a[0]-c[0])*width+c[0],
                 (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                (b[0]-c[0])*scaleX+c[0],
+                (b[0]-c[0])*width+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
         mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, paint);
     }
@@ -111,17 +118,17 @@ class ExpenseWin extends TimeWin {
         int size = ed.expenses.size();
         Interval v;
         long start, end;
-        float scaleX = 0.6f;
         for (int i = 0; i < size; i++) {
+            float width = scaleX(ed.expenses.get(i));
             v = ed.expenses.get(i).iv;
             start = ed.midn + (long) (ed.cumulative.get(i) * scaleF);
             end = ed.midn + (long) ((ed.cumulative.get(i) + v.end) * scaleF);
             float[] a = tsToScreen(start, 0);
             float[] b = tsToScreen(end, 1f);
             float[] c = tsToScreen(prevMidn(start) + 43200, 0.5f);
-            RectF rect = new RectF((a[0]-c[0])*scaleX+c[0],
+            RectF rect = new RectF((a[0]-c[0])*width+c[0],
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                    (b[0]-c[0])*scaleX+c[0],
+                    (b[0]-c[0])*width+c[0],
                     (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
             mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, v.paint);
         }
@@ -129,9 +136,9 @@ class ExpenseWin extends TimeWin {
             float[] a = tsToScreen(ed.midn, 0);
             float[] b = tsToScreen((long) ((ed.midn + 86400 * scaleF / rSecExp)), 1f);
             float[] c = tsToScreen(ed.midn + 43200, 0.5f);
-            mCanvas.drawLine((a[0] - c[0]) * scaleX + c[0],
+            mCanvas.drawLine((a[0] - c[0]) * 0.6f + c[0],
                     (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1],
-                    (b[0] - c[0]) * scaleX + c[0],
+                    (b[0] - c[0]) * 0.6f + c[0],
                     (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1], overflowLine);
         }
     }
