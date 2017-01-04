@@ -250,6 +250,8 @@ class ExpenseWin extends TimeWin {
         Expense(Interval v) {
             iv = v;
             attach();
+            if (v.group > nextGroupCode)
+                nextGroupCode = v.group;
         }
         void detach() {
             if (day != null) {

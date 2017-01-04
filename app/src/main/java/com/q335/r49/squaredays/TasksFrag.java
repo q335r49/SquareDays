@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
-//TODO: #### Differentiate expenses and tasks
+//TODO: #### Visually differentiate expenses and tasks
 
 public class TasksFrag extends Fragment {
     SharedPreferences prefs;
@@ -102,7 +102,7 @@ public class TasksFrag extends Fragment {
             Glob.palette.add(MainActivity.parseColor(sa[iCOLOR]));
         makeView();
     }
-    public void setActiveTask(Interval le) { //TODO: Handle special case of expense name  = task name
+    public void setActiveTask(Interval le) { //TODO: Handle special case of expense name = task name
         if (le == null)
             setActiveTask(endButtonMonogram);
         else {
@@ -189,7 +189,7 @@ public class TasksFrag extends Fragment {
                                 hasRun = hasDragged = false;
                                 statusBar.setText(comF[iCOMMENT]);
                                 mLongPressed = new Runnable() {
-                                    public void run() { //TODO: ** Visually distinguish expense
+                                    public void run() {
                                         hasRun = true;
                                         statusBar.setText(savedStatusText);
                                         ((GradientDrawable) finalView.getBackground()).setColor(bg_Norm);

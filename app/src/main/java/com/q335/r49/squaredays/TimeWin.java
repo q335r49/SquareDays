@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
 
-class TimeWin { //TODO: Reevaluate static variables
+class TimeWin { //TODO: Reevaluate static variable usage
     Paint minorTickStyle, majorTickStyle, nowLineStyle, statusBarStyle, selectionStyle, ongoingStyle, gridStyle, overflowLine;
     String statusText;
     void setStatusText(String s) { statusText = s; }
