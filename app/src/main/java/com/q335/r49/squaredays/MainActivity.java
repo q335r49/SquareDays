@@ -81,14 +81,16 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     public void pushProc(Interval log) {
         if (logQ.isEmpty()) {
             if (log.type == Interval.tEXP) {
-                if (EW != null)
+                if (EW != null) {
                     EW.procTask(log);
-                else
+                    EF.invalidate();
+                } else
                     logQ.add(log);
             } else {
-                if (CW != null)
+                if (CW != null) {
                     BF.setSavedAB(CW.procTask(log));
-                else
+                    CF.invalidate();
+                } else
                     logQ.add(log);
             }
         } else {
@@ -112,6 +114,9 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         }
         BF.setSavedAB(onGoing);
         BF.setActiveTask(onGoing);
+        EF.invalidate();
+        CF.invalidate();
+
     }
 
     FragmentManager FM;

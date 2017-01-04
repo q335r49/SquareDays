@@ -13,6 +13,7 @@ public class CalendarFrag<T extends TimeWin> extends Fragment {
     static String CODE_CAL = "cal";
     static String CODE_EXP = "exp";
     private String gClass;
+    TouchView inputLayer;
     public interface OnFragmentInteractionListener {
         <T extends TimeWin> void setWin(CalendarFrag<T> frag, T disp, String code);
         void popAll();
@@ -21,13 +22,13 @@ public class CalendarFrag<T extends TimeWin> extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        //TODO: invalidate?
         mListener.popAll();
     }
+    void invalidate() { inputLayer.invalidate(); }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View frame = inflater.inflate(R.layout.fragment_calendar,container,false);
-        TouchView inputLayer = (TouchView) (frame.findViewById(R.id.drawing));
+        inputLayer = (TouchView) (frame.findViewById(R.id.drawing));
         inputLayer.setClass(gClass);
         Calendar cal = new GregorianCalendar();
             cal.setTimeInMillis(System.currentTimeMillis());
