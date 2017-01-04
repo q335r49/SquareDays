@@ -113,10 +113,13 @@ class TimeWin { //TODO: Reevaluate static variables
             RECT_SCALING_FACTOR_Y *= borderScale;
         }
     }
-    Interval getSelectedShape(float sx, float sy) {
+    Interval getSelectedTime(float sx, float sy) {
         long ts = screenToTs(sx, sy);
         Interval closest = shapeIndex.ceiling(Interval.newStartTime(ts));
-        return closest == null? null : closest.end < ts ? null : closest;
+        if (closest == null || closest.end < ts)
+            return null;
+        this.selection = closest;
+        return closest;
     }
 
     Canvas mCanvas;
@@ -511,7 +514,6 @@ class TimeWin { //TODO: Reevaluate static variables
         return LogList;
     }
     private Interval selection;
-        void setSelected(Interval selection) { this.selection = selection; }
         Interval getSelection() { return selection; }
         void removeSelection() {
             if (!shapeIndex.remove(selection))

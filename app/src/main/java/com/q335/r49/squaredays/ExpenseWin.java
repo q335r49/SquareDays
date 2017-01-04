@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-//TODO: #### Fix status bar message
-//TODO: #### not writing to log?
 class ExpenseWin extends TimeWin {
     private static final int rSecDay = 86400;
     private static final int maxExp = 100;
@@ -25,8 +23,8 @@ class ExpenseWin extends TimeWin {
     private HashMap<Long,ExpenseDay> Days = new HashMap<>();
     private HashMap<Long,ExpenseGroup> Groups = new HashMap<>();
     private Expense selectedExp;
-    @Override
-    Interval getSelectedShape(float sx, float sy) {
+
+    Expense getSelectedExpense(float sx, float sy) {
         long ts = screenToTs(sx, sy);
         long midn = prevMidn(ts);
         ExpenseDay de = Days.get(midn);
@@ -38,7 +36,7 @@ class ExpenseWin extends TimeWin {
                     selectedExp = de.expenses.get(i);
                     if (selectedExp.group != null)
                         selectedExp = selectedExp.group.expenses.get(0);
-                    return selectedExp.iv;
+                    return selectedExp;
                 }
         }
         selectedExp = null;
@@ -277,7 +275,9 @@ class ExpenseWin extends TimeWin {
             iv.end = amt;
             attach();
         }
+        long dailyTotal() { return day == null ? 0 : (long) day.total; }
         long amount() { return iv.end; }
+        long start() { return iv.start; }
         String toLogLine() { return iv.toLogLine(); }
     }
     private class ExpenseDay {

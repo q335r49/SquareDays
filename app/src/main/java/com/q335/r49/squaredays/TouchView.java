@@ -309,17 +309,27 @@ public class TouchView<T extends TimeWin> extends View {
                 handler.postDelayed(mLongPressed,1200);
                 firstTouchX = lastTouchX = x;
                 firstTouchY = lastTouchY = y;
-                Interval selection = CW.getSelectedShape(x,y);
-                if (selection != null) {
-                    long duration = 1000L* (selection.end - selection.start);
-                    CW.setStatusText(selection.label + ":"
-                            + new SimpleDateFormat(" h:mm-", Locale.US).format(new Date(selection.start*1000L))
-                            + new SimpleDateFormat("h:mm", Locale.US).format(new Date(selection.end*1000L))
-                            + String.format(Locale.US, " (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
-                            TimeUnit.MILLISECONDS.toMinutes(duration)%60));
-                } else
-                    CW.setStatusText("");
-                CW.setSelected(selection);
+                if (gClass.equals(CODE_CAL)) {
+                    Interval selection = CW.getSelectedTime(x,y);
+                    if (selection == null)
+                        CW.setStatusText("");
+                    else {
+                        long duration = 1000L* (selection.end - selection.start);
+                        CW.setStatusText(selection.label + ":"
+                                + new SimpleDateFormat(" h:mm-", Locale.US).format(new Date(selection.start*1000L))
+                                + new SimpleDateFormat("h:mm", Locale.US).format(new Date(selection.end*1000L))
+                                + String.format(Locale.US, " (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
+                                TimeUnit.MILLISECONDS.toMinutes(duration)%60));
+                    }
+                } else {
+                    ExpenseWin.Expense selection = ((ExpenseWin) CW).getSelectedExpense(x,y);
+                    if (selection != null) {
+                        CW.setStatusText(selection.getLabel() + ":"
+                                + new SimpleDateFormat(" M.d: ", Locale.US).format(new Date(selection.start()*1000L))
+                                + selection.amount() + " / " + selection.dailyTotal());
+                    } else
+                        CW.setStatusText("");
+                }
                 invalidate();
                 return true;
             case (MotionEvent.ACTION_MOVE):
