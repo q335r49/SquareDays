@@ -26,18 +26,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+//TODO: Normalize drag amount to size of screen / refactor dp-scaling for taskWin
+//TODO: Implement border auto-increment
 //TODO:     Invert Expenses
 //TODO:     Gradient backgrounds
-//TODO: really should have APPEND, if possible (such as with a flag)
-//TODO: Implement border auto-increment
-//TODO: Rescale drag input for expenses
-//TODO: Visually distinguish boxes with "extra" comments
-//TODO: Rounded corners in TimeWin
-//TODO: Background fading
-//TODO: Eventually: draw only those intevrals that are onscreen
+//TODO:     Visually distinguish boxes with "extra" comments
+
 //TODO: Allow for delay or groups?
-//TODO: Reevaluate static variable usage in TimeWin
-//TODO: Consider: rearrange expenses?
+//TODO: REF Reevaluate static variable usage in TimeWin
+//TODO: OPT really should have APPEND, if possible (such as with a flag)
+//TODO: OPT draw only those intevrals that are onscreen
 
 
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {

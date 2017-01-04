@@ -35,7 +35,7 @@ import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
-//TODO: BG: Vertical delay still updating status bar
+//TODO: BUG Vertical delay still updating status bar
 public class TasksFrag extends Fragment {
     SharedPreferences prefs;
     public interface OnFragmentInteractionListener {
@@ -180,6 +180,7 @@ public class TasksFrag extends Fragment {
                 private final Handler handler = new Handler();
                 private Runnable mLongPressed;
                 private final float ratio_dp_px = 1000f /(float) dpToPx(1000) * expDragScaleF;
+                private final int cancelZone = (int) (50f * ratio_dp_px);
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     if (isExpense) {
@@ -196,7 +197,7 @@ public class TasksFrag extends Fragment {
                                     public void run() {
                                         hasRun = true;
                                         statusBar.setText(savedStatusText);
-                                        ((GradientDrawable) finalView.getBackground()).setColor(bg_Norm);
+                                        ((GradientDrawable) finalView.getBackground()).setColor(Glob.COLOR_PRIMARY_DARK);
                                         View promptView = inflater.inflate(R.layout.prompts, null);
                                         final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
                                         commentEntry.setText(comF[iCOMMENT]);
@@ -302,8 +303,8 @@ public class TasksFrag extends Fragment {
                                     return false;
                                 int delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
                                 int duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
-                                delay = delay > 50 ? delay - 50 : 0;
-                                duration = duration > 50 ? duration - 50 : 0;
+                                delay = delay > cancelZone ? delay - cancelZone : 0;
+                                duration = duration > cancelZone ? duration - cancelZone : 0;
                                 if (duration != 0 || delay != 0) {
                                     if (!hasDragged) {
                                         handler.removeCallbacks(mLongPressed);
@@ -321,8 +322,8 @@ public class TasksFrag extends Fragment {
                                 handler.removeCallbacks(mLongPressed);
                                 delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
                                 duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
-                                delay = delay > 50 ? delay - 50 : 0;
-                                duration = duration > 50 ? duration - 50 : 0;
+                                delay = delay > cancelZone ? delay - cancelZone : 0;
+                                duration = duration > cancelZone ? duration - cancelZone : 0;
                                 if (delay != 0)
                                     mListener.pushProc(Interval.newExpense(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L, delay, 0, comF[iCOMMENT]));
                                 else
@@ -455,8 +456,8 @@ public class TasksFrag extends Fragment {
                                     return false;
                                 int delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
                                 int duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
-                                delay = delay > 50 ? delay - 50 : 0;
-                                duration = duration > 50 ? duration - 50 : 0;
+                                delay = delay > cancelZone ? delay - cancelZone : 0;
+                                duration = duration > cancelZone ? duration - cancelZone : 0;
                                 if (duration != 0 || delay != 0) {
                                     if (!hasDragged) {
                                         handler.removeCallbacks(mLongPressed);
@@ -481,8 +482,8 @@ public class TasksFrag extends Fragment {
                                 handler.removeCallbacks(mLongPressed);
                                 delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
                                 duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
-                                delay = delay > 50 ? delay - 50 : 0;
-                                duration = duration > 50 ? duration - 50 : 0;
+                                delay = delay > cancelZone ? delay - cancelZone : 0;
+                                duration = duration > cancelZone ? duration - cancelZone : 0;
                                 if (delay != 0 || duration != 0 || !hasDragged) {
                                     if (duration == 0) {
                                         mListener.pushProc(Interval.newOngoingTask(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L - delay * 60, comF[iCOMMENT]));
@@ -520,6 +521,7 @@ public class TasksFrag extends Fragment {
             private final Handler handler = new Handler();
             private Runnable mLongPressed;
             private final float ratio_dp_px = 1000f /(float) dpToPx(1000);
+            private final int cancelZone = (int) (50f * ratio_dp_px);
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getActionMasked()) {
@@ -621,8 +623,8 @@ public class TasksFrag extends Fragment {
                             return false;
                         int delay = (int) Math.abs((event.getX() - actionDownX)*ratio_dp_px);
                         int duration = (int) Math.abs((event.getY() - actionDownY)*ratio_dp_px);
-                        delay = delay > 50 ? delay - 50 : 0;
-                        duration = duration > 50 ? duration - 50 : 0;
+                        delay = delay > cancelZone ? delay - cancelZone : 0;
+                        duration = duration > cancelZone ? duration - cancelZone : 0;
                         if (duration != 0 || delay  != 0) {
                             if (!hasDragged) {
                                 handler.removeCallbacks(mLongPressed);
@@ -646,8 +648,8 @@ public class TasksFrag extends Fragment {
                         handler.removeCallbacks(mLongPressed);
                         delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
                         duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
-                        delay = delay > 50 ? delay - 50 : 0;
-                        duration = duration > 50 ? duration - 50 : 0;
+                        delay = delay > cancelZone ? delay - cancelZone : 0;
+                        duration = duration > cancelZone ? duration - cancelZone : 0;
                         statusBar.setText(savedStatusText);
                         if (duration != 0) {
                             LayoutInflater inflater = LayoutInflater.from(getContext());
