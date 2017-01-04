@@ -139,6 +139,7 @@ public class TasksFrag extends Fragment {
         }
     }
 
+    private static final float expDragScaleF = 1f / 3f;
     private void makeView() {
         Collections.sort(commands, new Comparator<String[]>() {
             public int compare(String[] s1, String[] s2) {
@@ -178,7 +179,7 @@ public class TasksFrag extends Fragment {
                 private boolean hasRun, hasDragged;
                 private final Handler handler = new Handler();
                 private Runnable mLongPressed;
-                private final float ratio_dp_px = 1000f /(float) dpToPx(1000);
+                private final float ratio_dp_px = 1000f /(float) dpToPx(1000) * expDragScaleF;
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     if (isExpense) {
