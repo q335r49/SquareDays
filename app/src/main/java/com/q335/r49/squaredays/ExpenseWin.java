@@ -9,68 +9,26 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-//TODO: *** Handle "split budgeting"
 
 class ExpenseWin extends TimeWin {
     private static final float expCornerRadius = 5;
-    private static class DailyExpense {
-        long midn;
-        ArrayList<Interval> expenses;
-        ArrayList<Float> alreadySpent;
-        float amountSpent;
-
-        DailyExpense(long midn) {
-            expenses = new ArrayList<>();
-            alreadySpent = new ArrayList<>();
-            amountSpent = 0f;
-            this.midn = midn;
-        }
-
-        DailyExpense(Interval le, long midn) {
-            this(midn);
-            add(le);
-        }
-
-        void add(Interval le) {
-            expenses.add(le);
-            alreadySpent.add(amountSpent);
-            amountSpent += le.end;
-        }
-
-        List<String> getWritableShapes() {
-            List<String> entries = new ArrayList<>();
-            for (Interval le : expenses)
-                entries.add(le.toLogLine());
-            return entries;
-        }
-
-        public Interval removeIndex(int selectedIndex) {
-            int S = expenses.size();
-            Interval removed;
-            if (selectedIndex < S) {
-                removed = expenses.remove(selectedIndex);
-                alreadySpent.remove(selectedIndex);
-                amountSpent -= removed.end;
-                for (int i = selectedIndex; i < S - 1; i++)
-                    alreadySpent.set(i, alreadySpent.get(i) - removed.end);
-                return removed;
-            }
-            return null;
-        }
-    }
     private float rSecondsExpense;
-    public ExpenseWin(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
+    private ExpenseWin(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         super(sv, tsOrigin, widthDays, heightWeeks, xMin, yMin);
         rSecondsExpense = 86400/100;
     }
-    private HashMap<Long,DailyExpense> DE = new HashMap<>();
-    private HashMap<Long,ArrayList<Interval>> GR = new HashMap<>();
-    private void drawExpenseInterval(DailyExpense de, int index, Paint paint) {
-        Interval le;
+    private HashMap<Long,ExpenseDay> Days = new HashMap<>();
+    private HashMap<Long,ExpenseGroup> Groups = new HashMap<>();
+    private void drawExpense(Expense e, Paint paint) {
+        Interval v;
         long start, end;
-        le = de.expenses.get(index);
-        start = de.midn + (long) (de.alreadySpent.get(index) * rSecondsExpense);
-        end = de.midn + (long) ((de.alreadySpent.get(index) + le.end) * rSecondsExpense);
+        ExpenseDay de = e.day;
+        if (de == null) return;
+        int index = de.expenses.indexOf(e);
+        if (index < 0) return;
+        v = e.iv;
+        start = de.midn + (long) (de.cumulative.get(index) * rSecondsExpense);
+        end = de.midn + (long) ((de.cumulative.get(index) + v.end) * rSecondsExpense);
 
         float scaleX = end < expansionComplete ? scaleB : end > now ? scaleA : (float) (end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
         long corner = start;
@@ -97,14 +55,14 @@ class ExpenseWin extends TimeWin {
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
         mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, paint);
     }
-    private void drawDailyExpense(DailyExpense de) {
+    private void drawDailyExpense(ExpenseDay de) { //TODO: Account for overflow
         int size = de.expenses.size();
-        Interval le;
+        Interval v;
         long start, end;
         for (int i = 0; i < size; i++) {
-            le = de.expenses.get(i);
-            start = de.midn + (long) (de.alreadySpent.get(i) * rSecondsExpense);
-            end = de.midn + (long) ((de.alreadySpent.get(i) + le.end) * rSecondsExpense);
+            v = de.expenses.get(i).iv;
+            start = de.midn + (long) (de.cumulative.get(i) * rSecondsExpense);
+            end = de.midn + (long) ((de.cumulative.get(i) + v.end) * rSecondsExpense);
 
             float scaleX = end < expansionComplete ? scaleB : end > now ? scaleA : (float) (end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
             long corner = start;
@@ -119,7 +77,7 @@ class ExpenseWin extends TimeWin {
                         (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                         (b[0]-c[0])*scaleX+c[0],
                         (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
-                mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, le.paint);
+                mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, v.paint);
                 corner = midn+1;
             }
             a = tsToScreen(corner, 0);
@@ -129,41 +87,14 @@ class ExpenseWin extends TimeWin {
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
                     (b[0]-c[0])*scaleX+c[0],
                     (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
-            mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, le.paint);
+            mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, v.paint);
         }
     }
 
     @Override
-    Interval procTask(Interval a) {  //TODO: Deal with modification commands, including modify commment
-        if (a.command == Interval.cCLEARLOG) {
-            DE.clear();
-            GR.clear();
-            return null;
-        }
-        if (a.end <= 0)
-            return null;
-        MainActivity.setLogChanged();
-        long midn = prevMidn(a.start);
-        DailyExpense currentExpenses = DE.get(midn);
-        if (currentExpenses == null)
-            DE.put(prevMidn(a.start), new DailyExpense(a,midn));
-        else
-            currentExpenses.add(a);
-        if (a.group != 0) {
-            ArrayList<Interval> gr = GR.get(a.group);
-            if (gr == null) {
-                gr = new ArrayList<>();
-                gr.add(a);
-                GR.put(a.group, gr);
-            } else
-                gr.add(a);
-        }
-        return null;
-    }
-    @Override
     List<String> getWritableShapes() {
         List<String> LogList = new ArrayList<>();
-        for (HashMap.Entry<Long,DailyExpense> e : DE.entrySet())
+        for (HashMap.Entry<Long,ExpenseDay> e : Days.entrySet())
             LogList.addAll(e.getValue().getWritableShapes());
         return LogList;
     }
@@ -181,7 +112,7 @@ class ExpenseWin extends TimeWin {
         now = prevMidn(System.currentTimeMillis() / 1000L) + 86400;
         drawBackgroundGrid();
 
-        for (HashMap.Entry<Long,DailyExpense> e : DE.entrySet())
+        for (HashMap.Entry<Long,ExpenseDay> e : Days.entrySet())
             drawDailyExpense(e.getValue());
 
         float gridSize;
@@ -266,57 +197,177 @@ class ExpenseWin extends TimeWin {
                 }
             }
         }
-        if (selection!=null)
-            drawExpenseInterval(selectedDay, selectedIndex, selectionStyle);
+        if (selectedExp!=null) {
+            if (selectedExp.group == null)
+                drawExpense(selectedExp, selectionStyle);
+            else
+                for (Expense s : selectedExp.group.expenses)
+                    drawExpense(s, selectionStyle);
+        }
         drawNowLine(now);
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
-
     public static ExpenseWin newWindowClass(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         return new ExpenseWin(sv, tsOrigin,widthDays,heightWeeks,xMin,yMin);
     }
-
-    private DailyExpense selectedDay;
-    private int selectedIndex;
+    private Expense selectedExp;
     @Override
     Interval getSelectedShape(float sx, float sy) {
         long ts = screenToTs(sx, sy);
         long midn = prevMidn(ts);
-        DailyExpense de = DE.get(midn);
+        ExpenseDay de = Days.get(midn);
         if (de != null) {
             float exp = (ts - midn) / rSecondsExpense;
-            for (int i = 0; i < de.alreadySpent.size(); i++)
-                if (de.alreadySpent.get(i) + de.expenses.get(i).end > exp) {
-                    selectedDay = de;
-                    selectedIndex = i;
-                    return de.expenses.get(i);
+            for (int i = 0; i < de.cumulative.size(); i++)
+                if (de.cumulative.get(i) + de.expenses.get(i).amount() > exp) {
+                    selectedExp = de.expenses.get(i);
+                    if (selectedExp.group != null)
+                        selectedExp = selectedExp.group.expenses.get(0);
+                    return selectedExp.iv;
                 }
         }
-        selectedDay = null;
+        selectedExp = null;
+        return null;
+    }
+    @Override
+    Interval getSelection() { return selectedExp.iv; }
+
+    @Override
+    Interval procTask(Interval v) {  //TODO: Deal with modification commands, including modify commment
+        if (v.command == Interval.cCLEARLOG) {
+            Days.clear();
+            Groups.clear();
+        } else if (v.end > 0) {
+            MainActivity.setLogChanged();
+            new Expense(v);
+        }
         return null;
     }
 
-    @Override
-    void removeSelection() {
-        if (selection != null) {
-            selectedDay.removeIndex(selectedIndex);
-            selection = null;
-            setStatusText("");
+    class Expense {
+        Interval iv;
+        ExpenseDay day;
+        ExpenseGroup group;
+        Expense(Interval v) {
+            iv = v;
+            attach();
+        }
+        void detach() {
+            if (day != null) {
+                day.remove(this);
+                day = null;
+            }
+        }
+        void attach() {
+            long midn = prevMidn(iv.start);
+            if (day == null || midn != day.midn) {
+                detach();
+                day = Days.get(midn);
+                if (day == null) {
+                    day = new ExpenseDay(midn);
+                    Days.put(day.midn, day);
+                }
+                day.add(this);
+            }
+        }
+        int color() { return iv.paint.getColor(); }
+        String getLabel() { return iv.label; }
+        void reattach(long time, long amt) {
+            iv.start = time;
+            iv.end = amt;
+            attach();
+        }
+        long amount() { return iv.end; }
+        String toLogLine() { return iv.toLogLine(); }
+    }
+    private class ExpenseDay {
+        private long midn;
+        ArrayList<Expense> expenses;
+        private ArrayList<Float> cumulative;
+        private float total;
+        ExpenseDay(long uts) {
+            expenses = new ArrayList<>();
+            cumulative = new ArrayList<>();
+            total = 0f;
+            this.midn = prevMidn(uts);
+        }
+        private void add(Expense e) {
+            expenses.add(e);
+            cumulative.add(total);
+            total += e.amount();
+        }
+        private boolean remove(Expense e) {
+            int index = expenses.indexOf(e);
+            if (index < 0) return false;
+            expenses.remove(index);
+            cumulative.remove(index);
+            total -= e.amount();
+            int S = cumulative.size();
+            for (; index < S; index++)
+                cumulative.set(index, cumulative.get(index) - e.amount());
+            return true;
+        }
+        List<String> getWritableShapes() {
+            List<String> entries = new ArrayList<>(expenses.size());
+            for (Expense e : expenses)
+                entries.add(e.toLogLine());
+            return entries;
         }
     }
-    void updateEntry(long start, long amount) { //TODO: days / group
-        Interval editedInterval;
-        if (selection != null) {
-            editedInterval = selectedDay.removeIndex(selectedIndex);
-            selection = null;
-            setStatusText("");
-        } else
+    private static long nextGroupCode = 0;
+    private class ExpenseGroup {
+        long code;
+        ArrayList<Expense> expenses;
+        void detachAll() {
+            for (Expense e : expenses)
+                e.detach();
+        }
+        void add(Interval v) {
+            Expense e = new Expense(v);
+            expenses.add(e);
+            e.group = this;
+        }
+        ExpenseGroup() {
+            nextGroupCode++;
+            code = nextGroupCode;
+            expenses = new ArrayList<>();
+        }
+    }
+    void updateEntry(int color, long start, long amt, long days) { //TODO: call from TouchWin
+        if (selectedExp == null)
             return;
-        if (editedInterval == null)
+        if (selectedExp.group != null) {
+            selectedExp.group.detachAll();
+            Groups.remove(selectedExp.group.code);
+        }
+        selectedExp.detach();
+        setStatusText("");
+        if (days > 1) {
+            ExpenseGroup newGroup = new ExpenseGroup();
+            Groups.put(newGroup.code,newGroup);
+            int day; long midn;
+            for (day = 0, midn = prevMidn(start); day < days; day++, midn+=86400)
+                newGroup.add(Interval.newExpense(color,midn,amt,selectedExp.getLabel()));
+        } else if (days == 1){
+            if (selectedExp == null)
+                return;
+            selectedExp.detach();
+            selectedExp.reattach(start, amt);
+        }
+        selectedExp = null;
+    }
+    @Override
+    void removeSelection() {
+        if (selectedExp == null)
             return;
-        editedInterval.start = start;
-        editedInterval.end = amount;
-        procTask(editedInterval);
+        else if (selectedExp.group != null) {
+            selectedExp.group.detachAll();
+            selectedExp.group = null;
+        } else {
+            selectedExp.detach();
+            selectedExp = null;
+        }
+        setStatusText("");
     }
 }

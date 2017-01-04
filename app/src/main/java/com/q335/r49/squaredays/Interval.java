@@ -34,15 +34,16 @@ class Interval {
         this.label   = label;
         this.comment = comment;
     }
-    Interval(Interval i) {                                                                   this    (i.command,i.type,i.paint.getColor(),i.start,i.end,    i.group,i.label,i.comment);}
-    static Interval newStartTime(long start) { return new                                    Interval(cNULL,    tCAL,  Glob.COLOR_ERROR,  start,  0,        0,      null,   null     );}
-    static Interval newOngoingTask(int color, long start, String label) { return new         Interval(cONGOING, tCAL,  color,             start,  0,        0,      label,  null     );}
-    static Interval newExpense(int color, long start, long amount, String label) {return new Interval(cNULL,    tEXP,  color,             start,  amount,   0,      label,  null     );}
-    static Interval newCompleted(int color, long start, long dur, String label) { return new Interval(cNULL,    tCAL,  color,             start,  start+dur,0,      label,  null     );}
-    static Interval newEndCommand(long end) { return new                                     Interval(cENDTASK, tCAL,  Glob.COLOR_ERROR,  0,      end,      0,      null,   null     );}
-    static Interval newCommentCmd(String label) { return new                                 Interval(cCOMMENT, tCAL,  Glob.COLOR_ERROR,  0,      0,        0,      label,  null     );}
-    static Interval newClearTimeMsg() { return new                                           Interval(cCLEARLOG,tCAL,  Glob.COLOR_ERROR,  0,      0,        0,      null,   null     );}
-    static Interval newClearExpMess() { return new                                           Interval(cCLEARLOG,tEXP,  Glob.COLOR_ERROR,  0,      0,        0,      null,   null     );}
+    Interval(Interval i) {                                                                              this    (i.command,i.type,i.paint.getColor(),i.start,i.end,    i.group,i.label,i.comment);}
+    static Interval newStartTime(long start) { return new                                               Interval(cNULL,    tCAL,  Glob.COLOR_ERROR,  start,  0,        0,      null,   null     );}
+    static Interval newOngoingTask(int color, long start, String label) { return new                    Interval(cONGOING, tCAL,  color,             start,  0,        0,      label,  null     );}
+    static Interval newExpense(int color, long start, long amount, String label) {return new            Interval(cNULL,    tEXP,  color,             start,  amount,   0,      label,  null     );}
+    static Interval newGrpExp(int color, long start, long amount, long group, String label) {return new Interval(cNULL,    tEXP,  color,             start,  amount,   group,  label,  null     );}
+    static Interval newCompleted(int color, long start, long dur, String label) { return new            Interval(cNULL,    tCAL,  color,             start,  start+dur,0,      label,  null     );}
+    static Interval newEndCommand(long end) { return new                                                Interval(cENDTASK, tCAL,  Glob.COLOR_ERROR,  0,      end,      0,      null,   null     );}
+    static Interval newCommentCmd(String label) { return new                                            Interval(cCOMMENT, tCAL,  Glob.COLOR_ERROR,  0,      0,        0,      label,  null     );}
+    static Interval newClearTimeMsg() { return new                                                      Interval(cCLEARLOG,tCAL,  Glob.COLOR_ERROR,  0,      0,        0,      null,   null     );}
+    static Interval newClearExpMess() { return new                                                      Interval(cCLEARLOG,tEXP,  Glob.COLOR_ERROR,  0,      0,        0,      null,   null     );}
 
     private static final String SEP      = ">";
     private static final int    nArgs    = 7;

@@ -508,7 +508,7 @@ class TimeWin { //TODO: Reevaluate static variables
         }
         return LogList;
     }
-    Interval selection;
+    private Interval selection;
         void setSelected(Interval selection) { this.selection = selection; }
         Interval getSelection() { return selection; }
         void removeSelection() {

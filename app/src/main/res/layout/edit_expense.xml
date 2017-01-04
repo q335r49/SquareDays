@@ -54,7 +54,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="text" />
-        <EditText android:id="@+id/budgetEdit"
+        <EditText android:id="@+id/bdgEdit"
             android:layout_below="@id/startEdit"
             android:layout_width="50sp"
             android:layout_alignEnd="@id/startEdit"
@@ -63,10 +63,10 @@
         </EditText>
         <TextView android:id = "@+id/bdgTxt"
             android:text="Bdg"
-            android:layout_alignBottom="@id/budgetEdit"
+            android:layout_alignBottom="@id/bdgEdit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toLeftOf="@id/budgetEdit"
+            android:layout_toLeftOf="@id/bdgEdit"
             android:layout_marginRight ="10dp"
             android:layout_marginLeft = "3dp"
             android:layout_marginBottom ="5dp"
