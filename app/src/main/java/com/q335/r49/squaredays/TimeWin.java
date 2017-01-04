@@ -255,11 +255,21 @@ class TimeWin {
     private static final long durMin    = 60*10;
     private static final long durMax    = 60*150;
     private static final float durScaleF= (scaleXmax - scaleXmin) / (durMax - durMin);
+    private static final float expScaleXmin= 0.40f;
+    private static final float expScaleXmax= 0.85f;
+    private static final long expMin    = 5;
+    private static final long expMax    = 30;
+    private static final float expScaleF= (expScaleXmax - expScaleXmin) / (expMax - expMin);
     float scaleX(Interval iv) {
-        long duration = iv == null ? 0 : iv == curTask ? now - iv.start : iv.end - iv.start;
-        return duration < durMin ? scaleXmin : duration > durMax ? scaleXmax : scaleXmin + durScaleF * (duration - durMin);
+        long dur = iv == null ? 0 : iv == curTask ? now - iv.start : iv.end - iv.start;
+        return dur < durMin ? scaleXmin : dur > durMax ? scaleXmax : scaleXmin + durScaleF * (dur - durMin);
+    }
+    float scaleX(ExpenseWin.Expense e) {
+        long amt = e == null ? 0 : e.amount();
+        return amt < expMin ? expScaleXmin : amt > expMax ? expScaleXmax : expScaleXmin + expScaleF * (amt - expMin);
     }
     void drawBackgroundGrid() {
+        float width = scaleX(curTask);
         long start = Math.max(screenToTs(0f,0f),now);
         long end = screenToTs(screenW, screenH);
         if (end <= start)
@@ -309,8 +319,8 @@ class TimeWin {
             b = tsToScreen(bot, 1f);
             c = tsToScreen(midn - 43199L, 0.5f);
             e = tsToScreen(midn, 1f);
-            float xpL = (a[0] - c[0]) * scaleX(curTask) + c[0];
-            float xpR = (b[0] - c[0]) * scaleX(curTask) + c[0];
+            float xpL = (a[0] - c[0]) * width + c[0];
+            float xpR = (b[0] - c[0]) * width + c[0];
             float xbR = (b[0] - c[0]) * scaleGrid + c[0];
             float xbL = (a[0] - c[0]) * scaleGrid + c[0];
             float yp = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
@@ -354,8 +364,8 @@ class TimeWin {
             a = tsToScreen(peak, 0);
             b = tsToScreen(bot, 1f);
             c = tsToScreen(midn - 43199L, 0.5f);
-            float xpL = (a[0] - c[0]) * scaleX(curTask) + c[0];
-            float xpR = (b[0] - c[0]) * scaleX(curTask) + c[0];
+            float xpL = (a[0] - c[0]) * width + c[0];
+            float xpR = (b[0] - c[0]) * width + c[0];
             float xbR = (b[0] - c[0]) * scaleGrid + c[0];
             float xbL = (a[0] - c[0]) * scaleGrid + c[0];
             float yp = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
@@ -386,6 +396,7 @@ class TimeWin {
         }
     }
     void drawInterval(Interval iv, Paint paint) {
+        float width = scaleX(iv);
         if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
         long corner = iv.start;
@@ -395,21 +406,22 @@ class TimeWin {
             a = tsToScreen(corner, 0);
             b = tsToScreen(midn, 1f);
             c = tsToScreen(midn-43199L, 0.5f);
-            mCanvas.drawRect((a[0]-c[0])*scaleX(iv)+c[0],
+            mCanvas.drawRect((a[0]-c[0])*width+c[0],
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                    (b[0]-c[0])*scaleX(iv)+c[0],
+                    (b[0]-c[0])*width+c[0],
                     (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
             corner = midn+1;
         }
         a = tsToScreen(corner, 0);
         b = tsToScreen(iv.end, 1f);
         c = tsToScreen(midn-43199L, 0.5f);
-        mCanvas.drawRect((a[0]-c[0])*scaleX(iv)+c[0],
+        mCanvas.drawRect((a[0]-c[0])*width+c[0],
                 (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                (b[0]-c[0])*scaleX(iv)+c[0],
+                (b[0]-c[0])*width+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
     private void drawOngoingInterval(Interval iv) {
+        float width = scaleX(iv);
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
         float[] a, b, c;
@@ -417,9 +429,9 @@ class TimeWin {
             a = tsToScreen(corner, 0);
             b = tsToScreen(midn, 1f);
             c = tsToScreen(midn-43199L, 0.5f);
-            mCanvas.drawRect((a[0]-c[0])*scaleX(iv)+c[0],
+            mCanvas.drawRect((a[0]-c[0])*width+c[0],
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                    (b[0]-c[0])*scaleX(iv)+c[0],
+                    (b[0]-c[0])*width+c[0],
                     (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
             corner = midn+1;
         }
@@ -429,10 +441,10 @@ class TimeWin {
         Path pp = new Path();
         float y1 = (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1];
         float y2 = (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1];
-        pp.moveTo((a[0]-c[0])*scaleX(iv)+c[0],y1);
-        pp.lineTo((b[0]-c[0])*scaleX(iv)+c[0],y1);
-        pp.lineTo((b[0]-c[0])*scaleX(iv)+c[0],y2);
-        pp.lineTo((a[0]-c[0])*scaleX(iv)+c[0],y2);
+        pp.moveTo((a[0]-c[0])*width+c[0],y1);
+        pp.lineTo((b[0]-c[0])*width+c[0],y1);
+        pp.lineTo((b[0]-c[0])*width+c[0],y2);
+        pp.lineTo((a[0]-c[0])*width+c[0],y2);
         pp.close();
         Shader shader = new LinearGradient(0, y1, 0, y2, iv.paint.getColor(), Glob.COLOR_GRID_BACKGROUND, Shader.TileMode.CLAMP);
         ongoingStyle.setShader(shader);
