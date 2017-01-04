@@ -23,6 +23,7 @@ class ExpenseWin extends TimeWin {
     private HashMap<Long,ExpenseDay> Days = new HashMap<>();
     private HashMap<Long,ExpenseGroup> Groups = new HashMap<>();
     private Expense selectedExp;
+        Expense getSelectedExp() { return selectedExp; }
 
     Expense getSelectedExpense(float sx, float sy) {
         long ts = screenToTs(sx, sy);
