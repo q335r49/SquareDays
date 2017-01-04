@@ -34,8 +34,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
-//TODO: ** Differentiate expenses and tasks
-//TODO: #### Updating expenses tunring into task
+//TODO: #### Differentiate expenses and tasks
 
 public class TasksFrag extends Fragment {
     SharedPreferences prefs;
@@ -190,7 +189,7 @@ public class TasksFrag extends Fragment {
                                 hasRun = hasDragged = false;
                                 statusBar.setText(comF[iCOMMENT]);
                                 mLongPressed = new Runnable() {
-                                    public void run() { //TODO: ** Distinguish expense
+                                    public void run() { //TODO: ** Visually distinguish expense
                                         hasRun = true;
                                         statusBar.setText(savedStatusText);
                                         ((GradientDrawable) finalView.getBackground()).setColor(bg_Norm);
@@ -261,7 +260,7 @@ public class TasksFrag extends Fragment {
                                                 .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int id) {
                                                         int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-                                                        commands.set(ixF, new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), "0", ""});
+                                                        commands.set(ixF, new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), "E"});
                                                         Glob.palette.add(newColor);
                                                         makeView();
                                                     }
@@ -402,7 +401,7 @@ public class TasksFrag extends Fragment {
                                             .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                                                 public void onClick(DialogInterface dialog, int id) {
                                                     int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-                                                    commands.set(ixF, new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), "0", ""});
+                                                    commands.set(ixF, new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), "0"});
                                                     Glob.palette.add(newColor);
                                                     makeView();
                                                 }

@@ -333,7 +333,7 @@ class ExpenseWin extends TimeWin {
             expenses = new ArrayList<>();
         }
     }
-    void updateEntry(int color, long start, long amt, long days) { //TODO: call from TouchWin
+    void updateEntry(int color, long start, long amt, long days) {
         if (selectedExp == null)
             return;
         if (selectedExp.group != null) {
