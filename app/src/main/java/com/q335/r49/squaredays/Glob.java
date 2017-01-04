@@ -7,7 +7,7 @@ import android.support.v4.content.res.ResourcesCompat;
 
 class Glob {
     static PaletteRing palette;
-        private static int PALLETTE_LENGTH = 24;
+    private static int PALLETTE_LENGTH = 24;
     static int COLOR_SCALE_TEXT;
     static int COLOR_GRID_BACKGROUND;
     static int COLOR_NOW_LINE;

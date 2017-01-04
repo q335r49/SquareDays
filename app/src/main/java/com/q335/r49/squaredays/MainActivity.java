@@ -26,17 +26,25 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: Normalize drag amount to size of screen / refactor dp-scaling for taskWin
-//TODO: Implement border auto-increment
+//TODO: ** Normalize drag amount to size of screen / refactor dp-scaling for taskWin
+//TODO:     Implement border auto-increment
+//TODO:     Normalize Expenses
+//TODO: ** Graphical tweaks:
 //TODO:     Invert Expenses
 //TODO:     Gradient backgrounds
 //TODO:     Visually distinguish boxes with "extra" comments
-
-//TODO: Allow for delay or groups?
-//TODO: REF Reevaluate static variable usage in TimeWin
-//TODO: OPT really should have APPEND, if possible (such as with a flag)
-//TODO: OPT draw only those intevrals that are onscreen
-
+//TODO:     Momentum drag
+//TODO:     Vertical drag is comment for expenses
+//TODO: ** Refactor
+//TODO:     Reevaluate static variable usage in TimeWin
+//TODO: ** Settings:
+//TODO:     Different Visualization modes
+//TODO:     Maximum expenses
+//TODO: ** Optimizations:
+//TODO:     Append flag
+//TODO:     Process only onscreen
+//TODO: ** Networking
+//TODO      Backup to google drive
 
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {
     Context context;

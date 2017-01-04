@@ -9,6 +9,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -69,6 +70,9 @@ public class TasksFrag extends Fragment {
         View view = this.inflater.inflate(R.layout.fragment_commands,container, false);
         buttons = (FlexboxLayout) view.findViewById(R.id.GV);
         statusBar = (TextView) view.findViewById(R.id.status);
+            statusBar.setEllipsize(TextUtils.TruncateAt.START);
+            statusBar.setHorizontallyScrolling(false);
+            statusBar.setSingleLine();
         final Context context = getActivity().getApplicationContext();
         view.findViewById(R.id.settings).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,7 +143,8 @@ public class TasksFrag extends Fragment {
         }
     }
 
-    private static final float expDragScaleF = 1f / 3f;
+    private static final float rExpDp = 1f / 6f;
+    private static final float rMinsDp = 1f / 2f;
     private void makeView() {
         Collections.sort(commands, new Comparator<String[]>() {
             public int compare(String[] s1, String[] s2) {
@@ -154,7 +159,9 @@ public class TasksFrag extends Fragment {
             lp.flexGrow=FlexboxLayout.LayoutParams.ALIGN_SELF_STRETCH;
             lp.flexShrink=0.2f;
         int cornerRadius = dpToPx(10);
-
+        final float rDpPx = 1000f / (float) dpToPx(1000);
+        final float rMinsPx = rDpPx * rMinsDp;
+        final float rExpPx = rDpPx * rExpDp;
         buttons.removeAllViews();
         for (int i = 0; i<commands.size(); i++) {
             final String[] comF = commands.get(i);
@@ -179,8 +186,7 @@ public class TasksFrag extends Fragment {
                 private boolean hasRun, hasDragged;
                 private final Handler handler = new Handler();
                 private Runnable mLongPressed;
-                private final float ratio_dp_px = 1000f /(float) dpToPx(1000) * expDragScaleF;
-                private final int cancelZone = (int) (50f * ratio_dp_px);
+                private final int cancelZone = (int) (50f * rExpDp);
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     if (isExpense) {
@@ -213,14 +219,10 @@ public class TasksFrag extends Fragment {
                                             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                                                 curColorV.setBackgroundColor(Color.rgb(progress, seekGreen.getProgress(), seekBlue.getProgress()));
                                             }
-
                                             @Override
-                                            public void onStartTrackingTouch(SeekBar seekBar) {
-                                            }
-
+                                            public void onStartTrackingTouch(SeekBar seekBar) { }
                                             @Override
-                                            public void onStopTrackingTouch(SeekBar seekBar) {
-                                            }
+                                            public void onStopTrackingTouch(SeekBar seekBar) { }
                                         });
                                         seekGreen.setProgress(Color.green(curColor));
                                         seekGreen.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -228,14 +230,10 @@ public class TasksFrag extends Fragment {
                                             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                                                 curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(), progress, seekBlue.getProgress()));
                                             }
-
                                             @Override
-                                            public void onStartTrackingTouch(SeekBar seekBar) {
-                                            }
-
+                                            public void onStartTrackingTouch(SeekBar seekBar) { }
                                             @Override
-                                            public void onStopTrackingTouch(SeekBar seekBar) {
-                                            }
+                                            public void onStopTrackingTouch(SeekBar seekBar) { }
                                         });
                                         seekBlue.setProgress(Color.blue(curColor));
                                         seekBlue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -243,14 +241,10 @@ public class TasksFrag extends Fragment {
                                             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                                                 curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(), seekGreen.getProgress(), progress));
                                             }
-
                                             @Override
-                                            public void onStartTrackingTouch(SeekBar seekBar) {
-                                            }
-
+                                            public void onStartTrackingTouch(SeekBar seekBar) { }
                                             @Override
-                                            public void onStopTrackingTouch(SeekBar seekBar) {
-                                            }
+                                            public void onStopTrackingTouch(SeekBar seekBar) { }
                                         });
 
                                         final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
@@ -301,8 +295,8 @@ public class TasksFrag extends Fragment {
                             case MotionEvent.ACTION_MOVE:
                                 if (hasRun)
                                     return false;
-                                int delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
-                                int duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
+                                int delay = (int) Math.abs((event.getX() - actionDownX) * rExpDp);
+                                int duration = (int) Math.abs((event.getY() - actionDownY) * rExpDp);
                                 delay = delay > cancelZone ? delay - cancelZone : 0;
                                 duration = duration > cancelZone ? duration - cancelZone : 0;
                                 if (duration != 0 || delay != 0) {
@@ -320,8 +314,8 @@ public class TasksFrag extends Fragment {
                                     return false;
                                 ((GradientDrawable) v.getBackground()).setColor(Glob.COLOR_PRIMARY_DARK);
                                 handler.removeCallbacks(mLongPressed);
-                                delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
-                                duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
+                                delay = (int) Math.abs((event.getX() - actionDownX) * rExpDp);
+                                duration = (int) Math.abs((event.getY() - actionDownY) * rExpDp);
                                 delay = delay > cancelZone ? delay - cancelZone : 0;
                                 duration = duration > cancelZone ? duration - cancelZone : 0;
                                 if (delay != 0)
@@ -454,8 +448,8 @@ public class TasksFrag extends Fragment {
                             case MotionEvent.ACTION_MOVE:
                                 if (hasRun)
                                     return false;
-                                int delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
-                                int duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
+                                int delay = (int) Math.abs((event.getX() - actionDownX) * rMinsDp);
+                                int duration = (int) Math.abs((event.getY() - actionDownY) * rMinsDp);
                                 delay = delay > cancelZone ? delay - cancelZone : 0;
                                 duration = duration > cancelZone ? duration - cancelZone : 0;
                                 if (duration != 0 || delay != 0) {
@@ -463,7 +457,7 @@ public class TasksFrag extends Fragment {
                                         handler.removeCallbacks(mLongPressed);
                                         hasDragged = true;
                                     }
-                                    String abString = "..";
+                                    String abString = "";
                                     long now = System.currentTimeMillis() / 1000L;
                                     if (delay != 0)
                                         abString += " already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
@@ -480,8 +474,8 @@ public class TasksFrag extends Fragment {
                                     return false;
                                 ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
                                 handler.removeCallbacks(mLongPressed);
-                                delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
-                                duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
+                                delay = (int) Math.abs((event.getX() - actionDownX) * rMinsDp);
+                                duration = (int) Math.abs((event.getY() - actionDownY) * rMinsDp);
                                 delay = delay > cancelZone ? delay - cancelZone : 0;
                                 duration = duration > cancelZone ? duration - cancelZone : 0;
                                 if (delay != 0 || duration != 0 || !hasDragged) {
@@ -630,12 +624,12 @@ public class TasksFrag extends Fragment {
                                 handler.removeCallbacks(mLongPressed);
                                 hasDragged = true;
                             }
-                            String abString = "..";
+                            String abString = "";
                             long now = System.currentTimeMillis()/1000L;
                             if (duration != 0)
                                 abString += " + COMMENT..";
                             if (delay != 0)
-                                abString += " ended already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
+                                abString += " ended already " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
                                         + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay))) + ")";
                             statusBar.setText(abString.isEmpty()? "End Task" : abString);
                         } else if (hasDragged)
