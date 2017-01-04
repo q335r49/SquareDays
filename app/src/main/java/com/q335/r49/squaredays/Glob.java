@@ -15,6 +15,7 @@ class Glob {
     static int COLOR_SELECTION;
     static int COLOR_END_BOX;
     static int COLOR_ERROR;
+    static int COLOR_OVERFLOW;
     static Typeface CommandFont;
 
     static void init(Context context) {
@@ -31,6 +32,7 @@ class Glob {
         COLOR_SELECTION          = ResourcesCompat.getColor(res, R.color.selection, null);
         COLOR_END_BOX            = ResourcesCompat.getColor(res, R.color.end_box, null);
         COLOR_ERROR              = ResourcesCompat.getColor(res, R.color.error, null);
+        COLOR_OVERFLOW           = ResourcesCompat.getColor(res, R.color.overflow, null);
         CommandFont     = Typeface.createFromAsset(context.getAssets(),  "fonts/22203___.TTF");
     }
     static int darkenColor(int color, float factor) {

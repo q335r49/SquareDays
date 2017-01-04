@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     private static final String COMMANDS_FILE = "commands.json";
     private static final String EXT_STORAGE_DIR = "tracker";
     private static boolean logChanged;
-        static void setLogChanged() { logChanged = true;}
     private void readLogFile() {
         try {
             for (String l : Files.readLines(new File(getFilesDir(), LOG_FILE), Charsets.UTF_8))
@@ -79,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     }
     private Queue<Interval> logQ;
     public void pushProc(Interval log) {
+        logChanged = true;
         if (logQ.isEmpty()) {
             if (log.type == Interval.tEXP) {
                 if (EW != null) {
@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             popAll();
         }
     }
-    public void pushOnly(Interval log) { if (log != null) logQ.add(log); }
+    public void pushOnly(Interval log) { logChanged = true; if (log != null) logQ.add(log); }
     public void popAll() {
         if (CW == null || BF == null || EW == null)
             return;

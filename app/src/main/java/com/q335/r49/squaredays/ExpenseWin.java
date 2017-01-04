@@ -10,15 +10,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+//TODO: #### Fix status bar message
+//TODO: #### not writing to log?
 class ExpenseWin extends TimeWin {
     private static final int rSecDay = 86400;
     private static final int maxExp = 100;
     private static final float expCornerRadius = 5;
     private float rSecExp;
-
     private ExpenseWin(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         super(sv, tsOrigin, widthDays, heightWeeks, xMin, yMin);
         rSecExp = 86400f/maxExp;
+
     }
     private HashMap<Long,ExpenseDay> Days = new HashMap<>();
     private HashMap<Long,ExpenseGroup> Groups = new HashMap<>();
@@ -98,14 +100,15 @@ class ExpenseWin extends TimeWin {
                     (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
             mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, v.paint);
         }
-        float[] a = tsToScreen((long) (ed.midn), 0);
-        float[] b = tsToScreen((long) ((ed.midn + 86399*scaleF/rSecExp)), 1f);
-        float[] c = tsToScreen((long) ((ed.midn + 43200)), 0.5f);
-        RectF rect = new RectF((a[0]-c[0])*scaleX+c[0],
-                (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                (b[0]-c[0])*scaleX+c[0],
-                (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1]);
-        mCanvas.drawRoundRect(rect, expCornerRadius, expCornerRadius, selectionStyle);
+        if (ed.total > 86400f/rSecExp) {
+            float[] a = tsToScreen(ed.midn, 0);
+            float[] b = tsToScreen((long) ((ed.midn + 86400 * scaleF / rSecExp)), 1f);
+            float[] c = tsToScreen(ed.midn + 43200, 0.5f);
+            mCanvas.drawLine((a[0] - c[0]) * scaleX + c[0],
+                    (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1],
+                    (b[0] - c[0]) * scaleX + c[0],
+                    (b[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1], overflowLine);
+        }
     }
 
     @Override
@@ -236,10 +239,8 @@ class ExpenseWin extends TimeWin {
         if (v.command == Interval.cCLEARLOG) {
             Days.clear();
             Groups.clear();
-        } else if (v.end > 0) {
-            MainActivity.setLogChanged();
+        } else if (v.end > 0)
             new Expense(v);
-        }
         return null;
     }
 

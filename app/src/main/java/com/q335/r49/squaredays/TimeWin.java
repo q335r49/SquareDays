@@ -17,7 +17,7 @@ import java.util.Locale;
 import java.util.TreeSet;
 
 class TimeWin { //TODO: Reevaluate static variables
-    Paint minorTickStyle, majorTickStyle, nowLineStyle, statusBarStyle, selectionStyle, ongoingStyle, gridStyle;
+    Paint minorTickStyle, majorTickStyle, nowLineStyle, statusBarStyle, selectionStyle, ongoingStyle, gridStyle, overflowLine;
     String statusText;
     void setStatusText(String s) { statusText = s; }
     @Nullable
@@ -55,6 +55,9 @@ class TimeWin { //TODO: Reevaluate static variables
         gridStyle = new Paint();
             gridStyle.setColor(Glob.COLOR_GRID_BACKGROUND);
             gridStyle.setStyle(Paint.Style.FILL);
+        overflowLine = new Paint();
+            overflowLine.setStyle(Paint.Style.STROKE);
+            overflowLine.setColor(Glob.COLOR_OVERFLOW);
         statusText = "";
     }
     static float LINE_WIDTH = 10;
@@ -67,6 +70,7 @@ class TimeWin { //TODO: Reevaluate static variables
         statusBarStyle.setTextSize(LINE_WIDTH*2f);
         selectionStyle.setStrokeWidth(LINE_WIDTH/4f);
         nowLineStyle.setStrokeWidth(LINE_WIDTH/4f);
+        overflowLine.setStrokeWidth(LINE_WIDTH/2F);
         gridRadius = LINE_WIDTH*2;
     }
 
@@ -423,7 +427,6 @@ class TimeWin { //TODO: Reevaluate static variables
         mCanvas.drawPath(pp, ongoingStyle);
     }
     Interval procTask(Interval a) {
-        MainActivity.setLogChanged();
         Interval c;
         switch (a.command) {
             case Interval.cCOMMENT:

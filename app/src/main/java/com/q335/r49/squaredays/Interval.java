@@ -83,13 +83,13 @@ class Interval {
         le.comment = args[pComment];
 
         if (args[pEnd].isEmpty()) {
-            if (le.command == tEXP)
+            if (le.type == tEXP)
                 return logNull("Empty expense value",s);
             else
                 le.command = cONGOING;
         } else {
             le.end = Long.parseLong(args[pEnd]);
-            if (le.command == tEXP) {
+            if (le.type == tEXP) {
                 if (le.end == 0)
                     return logNull("Zero-valued expense", s);
             } else if (le.start > le.end)
@@ -106,9 +106,9 @@ class Interval {
         args[pUTS]        = Long.toString(start);
         args[pEnd]          = command == cONGOING ? "" : Long.toString(end);
         args[pGroup]        = group == 0 ? "" : Long.toString(group);
-        args[pLabel]        = command == tEXP ? "$" + label : label;
+        args[pLabel]        = type == tEXP ? "$" + label : label;
         args[pComment]      = comment == null ? "" : comment;
-        if (command == tEXP) {
+        if (type == tEXP) {
             if (end == 0)
                 return logNull("Zero expense");
         } else {
