@@ -51,6 +51,14 @@ public class MonogramView extends TextView {
         mPaint.setColor(color);
         mPaint.setColorFilter(new ColorMatrixColorFilter(NORM_FILTER));
     }
+    public void setStaticColor(int color) {
+        ActivePaint.setColor(color);
+        if (Color.red(color) > 200 && Color.green(color) > 200 & Color.blue(color) > 200)
+            ActivePaint.setColor(0xFF888888);
+        else
+            ActivePaint.setColorFilter(new ColorMatrixColorFilter(FILTER));
+        mPaint.setColor(color);
+    }
     @Override
     public void onDraw(Canvas canvas) {
         mPaint.setTextSize(minMaxSize);

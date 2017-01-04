@@ -153,8 +153,9 @@ public class TouchView<T extends TimeWin> extends View {
             }
             alertDialogBuilder.setCancelable(true);
             alertDialogBuilder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) { //TODO: This is just ignoring the comment updates, and outside of the proc pipeline
-                    CW.updateEntry(selection, dateToTs(startEntry.getText().toString()), dateToTs(endEntry.getText().toString()));
+                public void onClick(DialogInterface dialog, int id) {
+                    try { CW.updateEntry(selection, dateToTs(startEntry.getText().toString()), dateToTs(endEntry.getText().toString()));
+                    } catch (IllegalArgumentException E) { Log.d("Bad number format", E.toString()); }
                     invalidate();
                 }
             });
@@ -189,11 +190,8 @@ public class TouchView<T extends TimeWin> extends View {
             final EditText bdgEntry = (EditText) promptView.findViewById(R.id.bdgEdit);
             bdgEntry.setText(Long.toString(selection.days()));
             final View curColorV = promptView.findViewById(R.id.CurColor);
-            try {
-                curColorV.setBackgroundColor(selection.color());
-            } catch (Exception e) {
-                curColorV.setBackgroundColor(Glob.COLOR_ERROR);
-            }
+            try { curColorV.setBackgroundColor(selection.color());
+            } catch (Exception e) { curColorV.setBackgroundColor(Glob.COLOR_ERROR); }
 
             final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
             final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
@@ -252,8 +250,7 @@ public class TouchView<T extends TimeWin> extends View {
             alertDialogBuilder.setCancelable(true);
             alertDialogBuilder.setPositiveButton("Update", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int id) {
-                    try {   //TODO: Avoid blank boxes; Mirror with other message boxes to avoid exceptions
-                        ((ExpenseWin) CW).updateEntry(((ColorDrawable) curColorV.getBackground()).getColor(), dateToTs(startEntry.getText().toString()), Long.parseLong(endEntry.getText().toString()), Long.parseLong(bdgEntry.getText().toString()));
+                    try { ((ExpenseWin) CW).updateEntry(((ColorDrawable) curColorV.getBackground()).getColor(), dateToTs(startEntry.getText().toString()), Long.parseLong(endEntry.getText().toString()), Long.parseLong(bdgEntry.getText().toString()));
                     } catch (IllegalArgumentException E) { Log.d("Bad number format", E.toString()); }
                     invalidate();
                 }

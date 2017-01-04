@@ -26,16 +26,23 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+//TODO: Visual overhaul
+//TODO:     Visually distinguish expense-tasks
+//TODO:     Change expense background grid color
+//TODO:     Squares
+
+
+
+
 //TODO: is color being changed ANYWHERE??
 //TODO: really should have APPEND, if possible (such as with a flag)
-//TODO: Deal with overages -- compress -- yes!
-//TODO: antialiased shapes?
 //TODO: Implement border auto-increment
-//TODO: Convert dollars to cents
-//TODO: Mark boxes with "extra" comments
-//TODO: Roiunded corners in TimeWin
+//TODO: Rescale drag input for expenses
+//TODO: Visually distinguish boxes with "extra" comments
+//TODO: Rounded corners in TimeWin
 //TODO: Background fading
 //TODO: Eventually: draw only those intevrals that are onscreen
+//TODO: Allow for delay or groups?
 
 
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {

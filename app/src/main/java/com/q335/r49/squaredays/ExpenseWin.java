@@ -234,7 +234,7 @@ class ExpenseWin extends TimeWin {
     Interval getSelection() { return selectedExp.iv; }
 
     @Override
-    Interval procTask(Interval v) {  //TODO: Deal with modification commands, including modify commment
+    Interval procTask(Interval v) {
         if (v.command == Interval.cCLEARLOG) {
             Days.clear();
             Groups.clear();

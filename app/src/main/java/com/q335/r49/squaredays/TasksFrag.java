@@ -34,8 +34,8 @@ import java.util.List;
 import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
-//TODO: #### Visually differentiate expenses and tasks
 
+//TODO: BG: Vertical delay still updating status bar
 public class TasksFrag extends Fragment {
     SharedPreferences prefs;
     public interface OnFragmentInteractionListener {
@@ -87,12 +87,12 @@ public class TasksFrag extends Fragment {
     }
     public void loadCommands(String s) {
         if (s.isEmpty()) {
-            commands.add(new String[]{"1st task", "#1abc9c"});
-            commands.add(new String[]{"2nd task", "#2ecc71"});
-            commands.add(new String[]{"3rd task", "#3498db"});
-            commands.add(new String[]{"4th task", "#9b59b6"});
-            commands.add(new String[]{"5th task", "#34495e"});
-            commands.add(new String[]{"6th task", "#16a085"});
+            commands.add(new String[]{"1st task", "#1abc9c","T"});
+            commands.add(new String[]{"2nd task", "#2ecc71","T"});
+            commands.add(new String[]{"3rd task", "#3498db","T"});
+            commands.add(new String[]{"4th task", "#9b59b6","T"});
+            commands.add(new String[]{"5th task", "#34495e","T"});
+            commands.add(new String[]{"6th task", "#16a085","T"});
             commands.add(new String[]{"$Expense", "#16a085","E"});
         } else {
             Type listType = new TypeToken<List<String[]>>() { }.getType();
@@ -157,6 +157,7 @@ public class TasksFrag extends Fragment {
         buttons.removeAllViews();
         for (int i = 0; i<commands.size(); i++) {
             final String[] comF = commands.get(i);
+            final boolean isExpense = comF[2].equals("E");
             final int ixF = i;
             View child = inflater.inflate(R.layout.gv_list_item, null);
             buttons.addView(child,lp);
@@ -164,10 +165,13 @@ public class TasksFrag extends Fragment {
             final int bg_Press = Glob.darkenColor(bg_Norm,0.7f);
             MonogramView mv = (MonogramView) child.findViewById(R.id.text1);
                 mv.setText(comF[iCOMMENT]);
-                mv.setColor(bg_Norm);
+                if (isExpense)
+                    mv.setStaticColor(bg_Norm);
+                else
+                    mv.setColor(bg_Norm);
             GradientDrawable rrect = new GradientDrawable();
                 rrect.setCornerRadius(cornerRadius);
-                rrect.setColor(bg_Norm);
+                rrect.setColor(isExpense? Glob.COLOR_PRIMARY_DARK : bg_Norm);
             child.setBackground(rrect);
             child.setOnTouchListener(new View.OnTouchListener() {
                 private float actionDownX, actionDownY;
@@ -175,10 +179,9 @@ public class TasksFrag extends Fragment {
                 private final Handler handler = new Handler();
                 private Runnable mLongPressed;
                 private final float ratio_dp_px = 1000f /(float) dpToPx(1000);
-                boolean isExpense = comF.length > 2 && comF[2].equals("E");
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if (isExpense) {    //TODO: ** Allow for delay (e.g., yesterday) .. or groups?
+                    if (isExpense) {
                         switch (event.getActionMasked()) {
                             case MotionEvent.ACTION_DOWN:
                                 actionDownX = event.getX();
@@ -206,39 +209,51 @@ public class TasksFrag extends Fragment {
                                         seekRed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                                             @Override
                                             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                                curColorV.setBackgroundColor(Color.rgb(progress,seekGreen.getProgress(),seekBlue.getProgress()));
+                                                curColorV.setBackgroundColor(Color.rgb(progress, seekGreen.getProgress(), seekBlue.getProgress()));
                                             }
+
                                             @Override
-                                            public void onStartTrackingTouch(SeekBar seekBar) { }
+                                            public void onStartTrackingTouch(SeekBar seekBar) {
+                                            }
+
                                             @Override
-                                            public void onStopTrackingTouch(SeekBar seekBar) { }
+                                            public void onStopTrackingTouch(SeekBar seekBar) {
+                                            }
                                         });
                                         seekGreen.setProgress(Color.green(curColor));
                                         seekGreen.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                                             @Override
                                             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                                curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),progress,seekBlue.getProgress()));
+                                                curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(), progress, seekBlue.getProgress()));
                                             }
+
                                             @Override
-                                            public void onStartTrackingTouch(SeekBar seekBar) { }
+                                            public void onStartTrackingTouch(SeekBar seekBar) {
+                                            }
+
                                             @Override
-                                            public void onStopTrackingTouch(SeekBar seekBar) { }
+                                            public void onStopTrackingTouch(SeekBar seekBar) {
+                                            }
                                         });
                                         seekBlue.setProgress(Color.blue(curColor));
                                         seekBlue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                                             @Override
                                             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                                curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),seekGreen.getProgress(),progress));
+                                                curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(), seekGreen.getProgress(), progress));
                                             }
+
                                             @Override
-                                            public void onStartTrackingTouch(SeekBar seekBar) { }
+                                            public void onStartTrackingTouch(SeekBar seekBar) {
+                                            }
+
                                             @Override
-                                            public void onStopTrackingTouch(SeekBar seekBar) { }
+                                            public void onStopTrackingTouch(SeekBar seekBar) {
+                                            }
                                         });
 
                                         final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
                                         final int childCount = paletteView.getChildCount();
-                                        for (int i = 0; i < childCount ; i++) {
+                                        for (int i = 0; i < childCount; i++) {
                                             View pv = paletteView.getChildAt(i);
                                             pv.setBackgroundColor(Glob.palette.get(i));
                                             final int bg = ((ColorDrawable) pv.getBackground()).getColor();
@@ -279,13 +294,13 @@ public class TasksFrag extends Fragment {
                                                 .create().show();
                                     }
                                 };
-                                handler.postDelayed(mLongPressed,1200);
+                                handler.postDelayed(mLongPressed, 1200);
                                 return true;
                             case MotionEvent.ACTION_MOVE:
                                 if (hasRun)
                                     return false;
-                                int delay = (int) Math.abs((event.getX() - actionDownX)*ratio_dp_px);
-                                int duration = (int) Math.abs((event.getY() - actionDownY)*ratio_dp_px);
+                                int delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
+                                int duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
                                 delay = delay > 50 ? delay - 50 : 0;
                                 duration = duration > 50 ? duration - 50 : 0;
                                 if (duration != 0 || delay != 0) {
@@ -294,7 +309,167 @@ public class TasksFrag extends Fragment {
                                         hasDragged = true;
                                     }
                                     String abString = " $ " + (delay + duration);
-                                    statusBar.setText(abString.isEmpty()? comF[iCOMMENT] : abString);
+                                    statusBar.setText(abString.isEmpty() ? comF[iCOMMENT] : abString);
+                                } else if (hasDragged)
+                                    statusBar.setText("Cancel");
+                                return true;
+                            case MotionEvent.ACTION_UP:
+                                if (hasRun)
+                                    return false;
+                                ((GradientDrawable) v.getBackground()).setColor(Glob.COLOR_PRIMARY_DARK);
+                                handler.removeCallbacks(mLongPressed);
+                                delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
+                                duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
+                                delay = delay > 50 ? delay - 50 : 0;
+                                duration = duration > 50 ? duration - 50 : 0;
+                                if (delay != 0)
+                                    mListener.pushProc(Interval.newExpense(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L, delay, 0, comF[iCOMMENT]));
+                                else
+                                    statusBar.setText(savedStatusText);
+                                return false;
+                            case MotionEvent.ACTION_CANCEL:
+                                handler.removeCallbacks(mLongPressed);
+                                ((GradientDrawable) v.getBackground()).setColor(Glob.COLOR_PRIMARY_DARK);
+                                return false;
+                            default:
+                                return true;
+                        }
+                    } else {
+                        switch (event.getActionMasked()) {
+                            case MotionEvent.ACTION_DOWN:
+                                actionDownX = event.getX();
+                                actionDownY = event.getY();
+                                v.getParent().requestDisallowInterceptTouchEvent(true);
+                                ((GradientDrawable) v.getBackground()).setColor(bg_Press);
+                                final View finalView = v;
+                                hasRun = hasDragged = false;
+                                statusBar.setText(comF[iCOMMENT]);
+                                mLongPressed = new Runnable() {
+                                    public void run() {
+                                        hasRun = true;
+                                        statusBar.setText(savedStatusText);
+                                        ((GradientDrawable) finalView.getBackground()).setColor(bg_Norm);
+                                        View promptView = inflater.inflate(R.layout.prompts, null);
+                                        final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
+                                        commentEntry.setText(comF[iCOMMENT]);
+                                        final View curColorV = promptView.findViewById(R.id.CurColor);
+                                        curColorV.setBackgroundColor(MainActivity.parseColor(comF[iCOLOR]));
+                                        final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
+                                        final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
+                                        final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
+                                        final SeekBar seekBlue = (SeekBar) promptView.findViewById(R.id.seekBlue);
+                                        seekRed.setProgress(Color.red(curColor));
+                                        seekRed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                                            @Override
+                                            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                                                curColorV.setBackgroundColor(Color.rgb(progress, seekGreen.getProgress(), seekBlue.getProgress()));
+                                            }
+
+                                            @Override
+                                            public void onStartTrackingTouch(SeekBar seekBar) {
+                                            }
+
+                                            @Override
+                                            public void onStopTrackingTouch(SeekBar seekBar) {
+                                            }
+                                        });
+                                        seekGreen.setProgress(Color.green(curColor));
+                                        seekGreen.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                                            @Override
+                                            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                                                curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(), progress, seekBlue.getProgress()));
+                                            }
+
+                                            @Override
+                                            public void onStartTrackingTouch(SeekBar seekBar) {
+                                            }
+
+                                            @Override
+                                            public void onStopTrackingTouch(SeekBar seekBar) {
+                                            }
+                                        });
+                                        seekBlue.setProgress(Color.blue(curColor));
+                                        seekBlue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                                            @Override
+                                            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                                                curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(), seekGreen.getProgress(), progress));
+                                            }
+
+                                            @Override
+                                            public void onStartTrackingTouch(SeekBar seekBar) {
+                                            }
+
+                                            @Override
+                                            public void onStopTrackingTouch(SeekBar seekBar) {
+                                            }
+                                        });
+
+                                        final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
+                                        final int childCount = paletteView.getChildCount();
+                                        for (int i = 0; i < childCount; i++) {
+                                            View pv = paletteView.getChildAt(i);
+                                            pv.setBackgroundColor(Glob.palette.get(i));
+                                            final int bg = ((ColorDrawable) pv.getBackground()).getColor();
+                                            pv.setOnClickListener(new View.OnClickListener() {
+                                                @Override
+                                                public void onClick(View v) {
+                                                    seekRed.setProgress(Color.red(bg));
+                                                    seekGreen.setProgress(Color.green(bg));
+                                                    seekBlue.setProgress(Color.blue(bg));
+                                                    curColorV.setBackgroundColor(bg);
+                                                }
+                                            });
+                                        }
+
+                                        final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
+                                        alertDialogBuilder.setView(promptView);
+                                        alertDialogBuilder
+                                                .setCancelable(true)
+                                                .setPositiveButton("Update", new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int id) {
+                                                        int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
+                                                        commands.set(ixF, new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), "T"});
+                                                        Glob.palette.add(newColor);
+                                                        makeView();
+                                                    }
+                                                })
+                                                .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int id) {
+                                                        commands.remove(ixF);
+                                                        makeView();
+                                                    }
+                                                })
+                                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                                    public void onClick(DialogInterface dialog, int id) {
+                                                        dialog.cancel();
+                                                    }
+                                                })
+                                                .create().show();
+                                    }
+                                };
+                                handler.postDelayed(mLongPressed, 1200);
+                                return true;
+                            case MotionEvent.ACTION_MOVE:
+                                if (hasRun)
+                                    return false;
+                                int delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
+                                int duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
+                                delay = delay > 50 ? delay - 50 : 0;
+                                duration = duration > 50 ? duration - 50 : 0;
+                                if (duration != 0 || delay != 0) {
+                                    if (!hasDragged) {
+                                        handler.removeCallbacks(mLongPressed);
+                                        hasDragged = true;
+                                    }
+                                    String abString = "..";
+                                    long now = System.currentTimeMillis() / 1000L;
+                                    if (delay != 0)
+                                        abString += " already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
+                                                + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay))) + ")";
+                                    if (duration != 0)
+                                        abString += " for " + Integer.toString(duration / 60) + ":" + String.format(Locale.US, "%02d", duration % 60)
+                                                + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay + 60 * duration))) + ")";
+                                    statusBar.setText(abString.isEmpty() ? comF[iCOMMENT] : abString);
                                 } else if (hasDragged)
                                     statusBar.setText("Cancel");
                                 return true;
@@ -307,9 +482,13 @@ public class TasksFrag extends Fragment {
                                 duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
                                 delay = delay > 50 ? delay - 50 : 0;
                                 duration = duration > 50 ? duration - 50 : 0;
-                                if (delay != 0)
-                                    mListener.pushProc(Interval.newExpense(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L, delay, 0, comF[iCOMMENT]));
-                                else
+                                if (delay != 0 || duration != 0 || !hasDragged) {
+                                    if (duration == 0) {
+                                        mListener.pushProc(Interval.newOngoingTask(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L - delay * 60, comF[iCOMMENT]));
+                                        setActiveTask(v);
+                                    } else
+                                        mListener.pushProc(Interval.newCompleted(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L - delay * 60, duration * 60, comF[iCOMMENT]));
+                                } else
                                     statusBar.setText(savedStatusText);
                                 return false;
                             case MotionEvent.ACTION_CANCEL:
@@ -319,157 +498,6 @@ public class TasksFrag extends Fragment {
                             default:
                                 return true;
                         }
-                    }
-                    switch (event.getActionMasked()) {
-                        case MotionEvent.ACTION_DOWN:
-                            actionDownX = event.getX();
-                            actionDownY = event.getY();
-                            v.getParent().requestDisallowInterceptTouchEvent(true);
-                            ((GradientDrawable) v.getBackground()).setColor(bg_Press);
-                            final View finalView = v;
-                            hasRun = hasDragged = false;
-                            statusBar.setText(comF[iCOMMENT]);
-                            mLongPressed = new Runnable() {
-                                public void run() {
-                                    hasRun = true;
-                                    statusBar.setText(savedStatusText);
-                                    ((GradientDrawable) finalView.getBackground()).setColor(bg_Norm);
-                                    View promptView = inflater.inflate(R.layout.prompts, null);
-                                    final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
-                                        commentEntry.setText(comF[iCOMMENT]);
-                                    final View curColorV = promptView.findViewById(R.id.CurColor);
-                                        curColorV.setBackgroundColor(MainActivity.parseColor(comF[iCOLOR]));
-                                    final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-                                    final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
-                                    final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
-                                    final SeekBar seekBlue = (SeekBar) promptView.findViewById(R.id.seekBlue);
-                                    seekRed.setProgress(Color.red(curColor));
-                                    seekRed.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                                        @Override
-                                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                            curColorV.setBackgroundColor(Color.rgb(progress,seekGreen.getProgress(),seekBlue.getProgress()));
-                                        }
-                                        @Override
-                                        public void onStartTrackingTouch(SeekBar seekBar) { }
-                                        @Override
-                                        public void onStopTrackingTouch(SeekBar seekBar) { }
-                                    });
-                                    seekGreen.setProgress(Color.green(curColor));
-                                    seekGreen.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                                        @Override
-                                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                            curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),progress,seekBlue.getProgress()));
-                                        }
-                                        @Override
-                                        public void onStartTrackingTouch(SeekBar seekBar) { }
-                                        @Override
-                                        public void onStopTrackingTouch(SeekBar seekBar) { }
-                                    });
-                                    seekBlue.setProgress(Color.blue(curColor));
-                                    seekBlue.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                                        @Override
-                                        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                            curColorV.setBackgroundColor(Color.rgb(seekRed.getProgress(),seekGreen.getProgress(),progress));
-                                        }
-                                        @Override
-                                        public void onStartTrackingTouch(SeekBar seekBar) { }
-                                        @Override
-                                        public void onStopTrackingTouch(SeekBar seekBar) { }
-                                    });
-
-                                    final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
-                                    final int childCount = paletteView.getChildCount();
-                                    for (int i = 0; i < childCount ; i++) {
-                                        View pv = paletteView.getChildAt(i);
-                                        pv.setBackgroundColor(Glob.palette.get(i));
-                                        final int bg = ((ColorDrawable) pv.getBackground()).getColor();
-                                        pv.setOnClickListener(new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                seekRed.setProgress(Color.red(bg));
-                                                seekGreen.setProgress(Color.green(bg));
-                                                seekBlue.setProgress(Color.blue(bg));
-                                                curColorV.setBackgroundColor(bg);
-                                            }
-                                        });
-                                    }
-
-                                    final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
-                                    alertDialogBuilder.setView(promptView);
-                                    alertDialogBuilder
-                                            .setCancelable(true)
-                                            .setPositiveButton("Update", new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int id) {
-                                                    int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-                                                    commands.set(ixF, new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), "0"});
-                                                    Glob.palette.add(newColor);
-                                                    makeView();
-                                                }
-                                            })
-                                            .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int id) {
-                                                    commands.remove(ixF);
-                                                    makeView();
-                                                }
-                                            })
-                                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int id) {
-                                                    dialog.cancel();
-                                                }
-                                            })
-                                            .create().show();
-                                }
-                            };
-                            handler.postDelayed(mLongPressed,1200);
-                            return true;
-                        case MotionEvent.ACTION_MOVE:
-                            if (hasRun)
-                                return false;
-                            int delay = (int) Math.abs((event.getX() - actionDownX)*ratio_dp_px);
-                            int duration = (int) Math.abs((event.getY() - actionDownY)*ratio_dp_px);
-                            delay = delay > 50 ? delay - 50 : 0;
-                            duration = duration > 50 ? duration - 50 : 0;
-                            if (duration != 0 || delay != 0) {
-                                if (!hasDragged) {
-                                    handler.removeCallbacks(mLongPressed);
-                                    hasDragged = true;
-                                }
-                                String abString = "..";
-                                long now = System.currentTimeMillis()/1000L;
-                                if (delay != 0)
-                                    abString += " already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
-                                            + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay))) + ")";
-                                if (duration != 0)
-                                    abString += " for " + Integer.toString(duration / 60) + ":" + String.format(Locale.US, "%02d", duration % 60)
-                                            + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L*(now - 60 * delay + 60 * duration))) + ")";
-                                statusBar.setText(abString.isEmpty()? comF[iCOMMENT] : abString);
-                            } else if (hasDragged)
-                                statusBar.setText("Cancel");
-                            return true;
-                        case MotionEvent.ACTION_UP:
-                            if (hasRun)
-                                return false;
-                            ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
-                            handler.removeCallbacks(mLongPressed);
-                            delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
-                            duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
-                            delay = delay > 50 ? delay - 50 : 0;
-                            duration = duration > 50 ? duration - 50 : 0;
-                            if (delay != 0 || duration != 0 || !hasDragged) {
-                                if (duration == 0) {
-                                    mListener.pushProc(Interval.newOngoingTask(MainActivity.parseColor(comF[iCOLOR]), System.currentTimeMillis() / 1000L - delay * 60, comF[iCOMMENT]));
-                                    setActiveTask(v);
-                                } else
-                                    mListener.pushProc(Interval.newCompleted(MainActivity.parseColor(comF[iCOLOR]),System.currentTimeMillis()/1000L - delay * 60,duration * 60,comF[iCOMMENT]));
-                            } else
-                                statusBar.setText(savedStatusText);
-                            return false;
-                        case MotionEvent.ACTION_CANCEL:
-                            handler.removeCallbacks(mLongPressed);
-                            ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
-                            return false;
-                        default:
-                            return true;
                     }
                 }
             });
@@ -571,7 +599,7 @@ public class TasksFrag extends Fragment {
                                         .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-                                                commands.add(new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), checkbox.isEnabled()? "E" : ""});
+                                                commands.add(new String[]{commentEntry.getText().toString(), String.format("#%06X", (0xFFFFFF & newColor)), checkbox.isEnabled()? "E" : "T"});
                                                 Glob.palette.add(newColor);
                                                 makeView();
                                             }
