@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TreeSet;
 
-class TimeWin { //TODO: Reevaluate static variable usage
+class TimeWin {
     Paint minorTickStyle, majorTickStyle, nowLineStyle, statusBarStyle, selectionStyle, ongoingStyle, gridStyle, overflowLine;
     String statusText;
     void setStatusText(String s) { statusText = s; }
@@ -230,7 +230,7 @@ class TimeWin { //TODO: Reevaluate static variable usage
         if (selection!=null)
             drawInterval(selection,selectionStyle);
         if (curTask != null)
-            drawOngoingInterval(curTask,scaleA);
+            drawOngoingInterval(curTask);
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
@@ -249,6 +249,16 @@ class TimeWin { //TODO: Reevaluate static variable usage
     float gridRadius = 10f;
     private static final long maxStretch = 86400/40;
     long prevMidn(long ts) {return ts - (ts - orig + 864000000000000000L) % 86400L;}
+
+    private static final float scaleXmin= 0.20f;
+    private static final float scaleXmax= 0.85f;
+    private static final long durMin    = 60*10;
+    private static final long durMax    = 60*150;
+    private static final float durScaleF= (scaleXmax - scaleXmin) / (durMax - durMin);
+    float scaleX(Interval iv) {
+        long duration = iv == null ? 0 : iv == curTask ? now - iv.start : iv.end - iv.start;
+        return duration < durMin ? scaleXmin : duration > durMax ? scaleXmax : scaleXmin + durScaleF * (duration - durMin);
+    }
     void drawBackgroundGrid() {
         long start = Math.max(screenToTs(0f,0f),now);
         long end = screenToTs(screenW, screenH);
@@ -299,8 +309,8 @@ class TimeWin { //TODO: Reevaluate static variable usage
             b = tsToScreen(bot, 1f);
             c = tsToScreen(midn - 43199L, 0.5f);
             e = tsToScreen(midn, 1f);
-            float xpL = (a[0] - c[0]) * scaleA + c[0];
-            float xpR = (b[0] - c[0]) * scaleA + c[0];
+            float xpL = (a[0] - c[0]) * scaleX(curTask) + c[0];
+            float xpR = (b[0] - c[0]) * scaleX(curTask) + c[0];
             float xbR = (b[0] - c[0]) * scaleGrid + c[0];
             float xbL = (a[0] - c[0]) * scaleGrid + c[0];
             float yp = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
@@ -344,8 +354,8 @@ class TimeWin { //TODO: Reevaluate static variable usage
             a = tsToScreen(peak, 0);
             b = tsToScreen(bot, 1f);
             c = tsToScreen(midn - 43199L, 0.5f);
-            float xpL = (a[0] - c[0]) * scaleA + c[0];
-            float xpR = (b[0] - c[0]) * scaleA + c[0];
+            float xpL = (a[0] - c[0]) * scaleX(curTask) + c[0];
+            float xpR = (b[0] - c[0]) * scaleX(curTask) + c[0];
             float xbR = (b[0] - c[0]) * scaleGrid + c[0];
             float xbL = (a[0] - c[0]) * scaleGrid + c[0];
             float yp = (a[1] - c[1]) * RECT_SCALING_FACTOR_Y + c[1];
@@ -376,7 +386,6 @@ class TimeWin { //TODO: Reevaluate static variable usage
         }
     }
     void drawInterval(Interval iv, Paint paint) {
-        float scaleX = iv.end < expansionComplete ? scaleB : iv.end > now ? scaleA : (float) (iv.end - expansionComplete) * (scaleA - scaleB) / (float) (now - expansionComplete)  + scaleB;
         if (iv.start == -1 || iv.end == -1 || iv.end <= iv.start)
             return;
         long corner = iv.start;
@@ -386,21 +395,21 @@ class TimeWin { //TODO: Reevaluate static variable usage
             a = tsToScreen(corner, 0);
             b = tsToScreen(midn, 1f);
             c = tsToScreen(midn-43199L, 0.5f);
-            mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
+            mCanvas.drawRect((a[0]-c[0])*scaleX(iv)+c[0],
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                    (b[0]-c[0])*scaleX+c[0],
+                    (b[0]-c[0])*scaleX(iv)+c[0],
                     (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
             corner = midn+1;
         }
         a = tsToScreen(corner, 0);
         b = tsToScreen(iv.end, 1f);
         c = tsToScreen(midn-43199L, 0.5f);
-        mCanvas.drawRect((a[0]-c[0])*scaleX+c[0],
+        mCanvas.drawRect((a[0]-c[0])*scaleX(iv)+c[0],
                 (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                (b[0]-c[0])*scaleX+c[0],
+                (b[0]-c[0])*scaleX(iv)+c[0],
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],paint);
     }
-    private void drawOngoingInterval(Interval iv, float scaleB) {
+    private void drawOngoingInterval(Interval iv) {
         long corner = iv.start;
         long midn = iv.start - (iv.start - orig + 864000000000000000L) % 86400L + 86399L;
         float[] a, b, c;
@@ -408,9 +417,9 @@ class TimeWin { //TODO: Reevaluate static variable usage
             a = tsToScreen(corner, 0);
             b = tsToScreen(midn, 1f);
             c = tsToScreen(midn-43199L, 0.5f);
-            mCanvas.drawRect((a[0]-c[0])*scaleB+c[0],
+            mCanvas.drawRect((a[0]-c[0])*scaleX(iv)+c[0],
                     (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                    (b[0]-c[0])*scaleB+c[0],
+                    (b[0]-c[0])*scaleX(iv)+c[0],
                     (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],iv.paint);
             corner = midn+1;
         }
@@ -420,10 +429,10 @@ class TimeWin { //TODO: Reevaluate static variable usage
         Path pp = new Path();
         float y1 = (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1];
         float y2 = (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1];
-        pp.moveTo((a[0]-c[0])*scaleB+c[0],y1);
-        pp.lineTo((b[0]-c[0])*scaleB+c[0],y1);
-        pp.lineTo((b[0]-c[0])*scaleB+c[0],y2);
-        pp.lineTo((a[0]-c[0])*scaleB+c[0],y2);
+        pp.moveTo((a[0]-c[0])*scaleX(iv)+c[0],y1);
+        pp.lineTo((b[0]-c[0])*scaleX(iv)+c[0],y1);
+        pp.lineTo((b[0]-c[0])*scaleX(iv)+c[0],y2);
+        pp.lineTo((a[0]-c[0])*scaleX(iv)+c[0],y2);
         pp.close();
         Shader shader = new LinearGradient(0, y1, 0, y2, iv.paint.getColor(), Glob.COLOR_GRID_BACKGROUND, Shader.TileMode.CLAMP);
         ongoingStyle.setShader(shader);
