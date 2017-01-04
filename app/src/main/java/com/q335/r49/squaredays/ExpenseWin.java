@@ -270,7 +270,7 @@ class ExpenseWin extends TimeWin {
             }
         }
         int color() { return iv.paint.getColor(); }
-        String getLabel() { return iv.label; }
+        String label() { return iv.label; }
         void reattach(long time, long amt) {
             iv.start = time;
             iv.end = amt;
@@ -279,6 +279,7 @@ class ExpenseWin extends TimeWin {
         long dailyTotal() { return day == null ? 0 : (long) day.total; }
         long amount() { return iv.end; }
         long start() { return iv.start; }
+        long days() { return group == null ? 1 : group.days(); }
         String toLogLine() { return iv.toLogLine(); }
     }
     private class ExpenseDay {
@@ -333,6 +334,7 @@ class ExpenseWin extends TimeWin {
             code = nextGroupCode;
             expenses = new ArrayList<>();
         }
+        long days() { return expenses.size(); }
     }
     void updateEntry(int color, long start, long amt, long days) {
         if (selectedExp == null)
@@ -348,7 +350,7 @@ class ExpenseWin extends TimeWin {
             Groups.put(newGroup.code,newGroup);
             int day; long midn;
             for (day = 0, midn = prevMidn(start); day < days; day++, midn+=86400)
-                newGroup.add(Interval.newExpense(color,midn,amt,selectedExp.getLabel()));
+                newGroup.add(Interval.newExpense(color,midn,amt,selectedExp.label()));
         } else if (days == 1){
             if (selectedExp == null)
                 return;
