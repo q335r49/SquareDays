@@ -231,6 +231,7 @@ class TimeWin {
             drawInterval(selection,selectionStyle);
         if (curTask != null)
             drawOngoingInterval(curTask);
+        drawNowLine(now);
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }

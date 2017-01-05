@@ -256,7 +256,6 @@ class ExpenseWin extends TimeWin {
                 for (Expense s : selectedExp.group.expenses)
                     drawExpense(s, selectionStyle);
         }
-        drawNowLine(now);
         if (!statusText.isEmpty())
             canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
     }
