@@ -36,6 +36,7 @@ import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
+//TODO: Draw overlay circle
 //TODO: BUG Vertical delay still updating status bar
 public class TasksFrag extends Fragment {
     SharedPreferences prefs;
