@@ -35,6 +35,7 @@ import java.util.Queue;
 //TODO:     Visually distinguish boxes with "extra" comments
 //TODO:     Momentum drag
 //TODO:     Vertical drag is comment for expenses
+//TODO:     Menu color
 //TODO: ** Refactor
 //TODO:     Reevaluate static variable usage in TimeWin
 //TODO: ** Settings:
@@ -49,14 +50,6 @@ import java.util.Queue;
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {
     Context context;
     SharedPreferences prefs;
-    static int parseColor(String s) {
-        try {
-            return Color.parseColor(s);
-        } catch (Exception e) {
-            Log.d("SquareDays","Bad color: " + s);
-            return Glob.COLOR_ERROR;
-        }
-    }
     private static final String LOG_FILE = "log.txt";
     private static final String COMMANDS_FILE = "commands.json";
     private static final String EXT_STORAGE_DIR = "tracker";

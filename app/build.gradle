@@ -3,10 +3,10 @@ apply plugin: 'com.android.application'
 android {
     signingConfigs {
         config {
-            keyAlias 'trackerKeys'
-            keyPassword 'Traqwear'
-            storeFile file('C:/Users/q335r/AndroidProjects/Tracker/keystore/tracker.jks')
-            storePassword 'tracqwer'
+            keyAlias 'pubkey'
+            keyPassword 'U7yefala!'
+            storeFile file('C:/Users/q335r/AndroidProjects/Tracker/keystore/mainKeys')
+            storePassword 'Argr08uy'
         }
     }
     compileSdkVersion 24
@@ -23,6 +23,8 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable true
+            signingConfig signingConfigs.config
         }
         debug {
             debuggable true

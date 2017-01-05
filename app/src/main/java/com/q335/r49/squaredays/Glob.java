@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v4.content.res.ResourcesCompat;
+import android.util.Log;
 
 class Glob {
     static PaletteRing palette;
@@ -44,5 +45,13 @@ class Glob {
                 Math.min(Math.round(Color.red(color) * factor),255),
                 Math.min(Math.round(Color.green(color) * factor),255),
                 Math.min(Math.round(Color.blue(color) * factor),255));
+    }
+    static int parseColor(String s) {
+        try {
+            return Color.parseColor(s);
+        } catch (Exception e) {
+            Log.d("SquareDays","Bad color: " + s);
+            return Glob.COLOR_ERROR;
+        }
     }
 }
