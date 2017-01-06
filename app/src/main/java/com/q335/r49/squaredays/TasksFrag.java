@@ -3,6 +3,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
@@ -10,7 +11,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -26,7 +26,6 @@ import android.widget.TextView;
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import java.lang.reflect.Type;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,12 +70,15 @@ public class TasksFrag extends Fragment {
     private LayoutInflater inflater;
     private MonogramView activeView;
     private MonogramView endButtonMonogram;
+    public OverlayView overlay;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.inflater = inflater;
         View view = this.inflater.inflate(R.layout.fragment_commands,container, false);
         buttons = (FlexboxLayout) view.findViewById(R.id.GV);
+        overlay = (OverlayView) view.findViewById(R.id.ovl);
+
         statusBar = (TextView) view.findViewById(R.id.status);
             statusBar.setEllipsize(TextUtils.TruncateAt.START);
             statusBar.setHorizontallyScrolling(false);
@@ -149,8 +151,9 @@ public class TasksFrag extends Fragment {
         }
     }
 
-    private static final float rExpDp = 1f / 6f;
-    private static final float rMinsDp = 1f / 2f;
+    static final float rExpDp = 1f / 6f;
+    static final float rMinsDp = 1f / 2f;
+    static final int cancelZone = (int) (50f * rExpDp);
     private void makeView() {
         Collections.sort(tasks, new Comparator<Task>() {
             public int compare(Task t1, Task t2) {
@@ -159,13 +162,12 @@ public class TasksFrag extends Fragment {
         });
         FlexboxLayout.LayoutParams lp = new FlexboxLayout.LayoutParams((int) (Glob.rPxDp * 30), (int) (Glob.rPxDp * 30));
             lp.minHeight    = (int) (Glob.rPxDp * 50f );
-            lp.minWidth     = (int) (Glob.rPxDp * 80f );
+            lp.minWidth     = (int) (Glob.rPxDp * 100f );
             lp.maxHeight    = (int) (Glob.rPxDp * 200f);
             lp.maxWidth     = (int) (Glob.rPxDp * 200f);
             lp.flexGrow     = FlexboxLayout.LayoutParams.ALIGN_SELF_STRETCH;
             lp.flexShrink   = 0.2f;
         int cornerRadius    = (int) (Glob.rPxDp * 10f);
-
         buttons.removeAllViews();
         for (int i = 0; i< tasks.size(); i++) {
             final Task comF = tasks.get(i);
@@ -190,7 +192,6 @@ public class TasksFrag extends Fragment {
                 private boolean hasRun, hasDragged;
                 private final Handler handler = new Handler();
                 private Runnable mLongPressed;
-                private final int cancelZone = (int) (50f * rExpDp);
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     if (isExpense) {
@@ -295,12 +296,8 @@ public class TasksFrag extends Fragment {
                                     }
                                 };
                                 handler.postDelayed(mLongPressed, 1200);
-
-                                //final ViewGroupOverlay viewGroupOverlay = ((ViewGroup) findViewById(android.R.id.content)).getOverlay();
-                                //viewGroupOverlay.add(button);
-
-
-
+                                overlay.actionDown(v.getX()+actionDownX,v.getY()+actionDownY);
+                                overlay.invalidate();
                                 return true;
                             case MotionEvent.ACTION_MOVE:
                                 if (hasRun)
@@ -320,6 +317,8 @@ public class TasksFrag extends Fragment {
                                     statusBar.setText("Cancel");
                                 return true;
                             case MotionEvent.ACTION_UP:
+                                overlay.actionUp();
+                                overlay.invalidate();
                                 if (hasRun)
                                     return false;
                                 ((GradientDrawable) v.getBackground()).setColor(Glob.COLOR_PRIMARY_DARK);

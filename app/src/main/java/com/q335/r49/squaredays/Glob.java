@@ -2,6 +2,7 @@ package com.q335.r49.squaredays;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.support.v4.content.res.ResourcesCompat;
 import android.util.DisplayMetrics;
@@ -20,8 +21,10 @@ class Glob {
     static int COLOR_OVERFLOW;
     static int COLOR_PRIMARY_DARK;
     static int COLOR_EXP_GRID;
+    static int COLOR_CANCEL_ZONE;
     static Typeface CommandFont;
     static float rPxDp;
+    static Paint pCancelZone;
 
     static void init(Context context) {
         palette = new PaletteRing(PALLETTE_LENGTH);
@@ -40,8 +43,13 @@ class Glob {
         COLOR_OVERFLOW        = ResourcesCompat.getColor(res, R.color.overflow, null);
         COLOR_PRIMARY_DARK    = ResourcesCompat.getColor(res, R.color.colorPrimaryDark, null);
         COLOR_EXP_GRID        = ResourcesCompat.getColor(res, R.color.exp_grid_background, null);
+        COLOR_CANCEL_ZONE     = ResourcesCompat.getColor(res, R.color.cancel_zone, null);
         CommandFont           = Typeface.createFromAsset(context.getAssets(),  "fonts/22203___.TTF");
         rPxDp                 = 0.75f * context.getResources().getDisplayMetrics().density;
+
+        pCancelZone = new Paint();
+        pCancelZone.setColor(COLOR_CANCEL_ZONE);
+
     }
     static int darkenColor(int color, float factor) {
         return Color.argb(Color.alpha(color),

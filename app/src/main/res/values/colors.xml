@@ -16,4 +16,5 @@
     <color name="statusBarTextColor">#ffffff</color>
     <color name="settingsButtonTextColor">#ffffff</color>
     <color name="overflow">#aaffffff</color>
+    <color name="cancel_zone">#885d3535</color>
 </resources>
