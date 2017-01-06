@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.PopupMenu;
 import android.widget.Toast;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import java.io.File;
@@ -25,8 +26,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+//TODO: Export commands not working
+
 //TODO: ** Implement border auto-increment
-//TODO:     Prettify time notation
 //TODO:     Normalize Expenses
 //TODO: ** Graphical tweaks:
 //TODO:     Invert Expenses
@@ -175,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
-                                    Files.write(prefs.getString("commands", ""),cmdFile,Charsets.UTF_8);
+                                    Files.write(prefs.getString(TasksFrag.prefsTasksKey, ""),cmdFile,Charsets.UTF_8);
                                     Toast.makeText(context, "Commands exported to " + extStorPath + fTASKS, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Log.d("SquareDays",e.toString());
@@ -202,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                 try {
                                     writeLogFile();
                                     Files.copy(new File(getFilesDir(), fLOGS),logFile);
-                                    Files.write(prefs.getString("commands", ""),cmdFile,Charsets.UTF_8);
+                                    Files.write(prefs.getString(TasksFrag.prefsTasksKey, ""),cmdFile,Charsets.UTF_8);
                                     Toast.makeText(context, "Commands exported to " + extStorPath + fTASKS + System.getProperty("line.separator")
                                             + "Log entries exported to " + extStorPath + fLOGS, Toast.LENGTH_LONG).show();
                                 } catch (Exception e) {

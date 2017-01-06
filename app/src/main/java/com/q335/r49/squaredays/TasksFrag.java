@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroupOverlay;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.PopupMenu;
@@ -36,12 +37,12 @@ import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
-//Prettify statusbar display
+//TODO: Prettify statusbar display (eliminate altogeteher)
 //TODO: Draw overlay circle / bar
 //TODO: BUG Vertical delay still updating status bar
 //TODO: Tasks toString and fromString; don't use GSON
 public class TasksFrag extends Fragment {
-    private static final String prefsTasksKey = "tasks_1.0";
+    static final String prefsTasksKey = "tasks_1.0";
     SharedPreferences prefs;
     public interface OnFragmentInteractionListener {
         void pushProc(Interval log);
@@ -70,10 +71,6 @@ public class TasksFrag extends Fragment {
     private LayoutInflater inflater;
     private MonogramView activeView;
     private MonogramView endButtonMonogram;
-    private int dpToPx(int dp) {
-        DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
-        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -160,17 +157,15 @@ public class TasksFrag extends Fragment {
                 return t1.label.compareToIgnoreCase(t2.label);
             }
         });
-        FlexboxLayout.LayoutParams lp = new FlexboxLayout.LayoutParams(dpToPx(30),dpToPx(30));
-            lp.minHeight = dpToPx(50);
-            lp.minWidth = dpToPx(80);
-            lp.maxHeight = dpToPx(200);
-            lp.maxWidth = dpToPx(200);
-            lp.flexGrow=FlexboxLayout.LayoutParams.ALIGN_SELF_STRETCH;
-            lp.flexShrink=0.2f;
-        int cornerRadius = dpToPx(10);
-        final float rDpPx = 1000f / (float) dpToPx(1000);
-        final float rMinsPx = rDpPx * rMinsDp;
-        final float rExpPx = rDpPx * rExpDp;
+        FlexboxLayout.LayoutParams lp = new FlexboxLayout.LayoutParams((int) (Glob.rPxDp * 30), (int) (Glob.rPxDp * 30));
+            lp.minHeight    = (int) (Glob.rPxDp * 50f );
+            lp.minWidth     = (int) (Glob.rPxDp * 80f );
+            lp.maxHeight    = (int) (Glob.rPxDp * 200f);
+            lp.maxWidth     = (int) (Glob.rPxDp * 200f);
+            lp.flexGrow     = FlexboxLayout.LayoutParams.ALIGN_SELF_STRETCH;
+            lp.flexShrink   = 0.2f;
+        int cornerRadius    = (int) (Glob.rPxDp * 10f);
+
         buttons.removeAllViews();
         for (int i = 0; i< tasks.size(); i++) {
             final Task comF = tasks.get(i);
@@ -300,6 +295,12 @@ public class TasksFrag extends Fragment {
                                     }
                                 };
                                 handler.postDelayed(mLongPressed, 1200);
+
+                                //final ViewGroupOverlay viewGroupOverlay = ((ViewGroup) findViewById(android.R.id.content)).getOverlay();
+                                //viewGroupOverlay.add(button);
+
+
+
                                 return true;
                             case MotionEvent.ACTION_MOVE:
                                 if (hasRun)
@@ -523,8 +524,7 @@ public class TasksFrag extends Fragment {
             private boolean hasRun, hasDragged;
             private final Handler handler = new Handler();
             private Runnable mLongPressed;
-            private final float ratio_dp_px = 1000f /(float) dpToPx(1000);
-            private final int cancelZone = (int) (50f * ratio_dp_px);
+            private final int cancelZone = (int) (Glob.rPxDp * 50f);
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 switch (event.getActionMasked()) {
@@ -605,7 +605,7 @@ public class TasksFrag extends Fragment {
                                         .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-                                                tasks.add(new Task(commentEntry.getText().toString(), newColor, checkbox.isEnabled()? Interval.tEXP : Interval.tCAL));
+                                                tasks.add(new Task(commentEntry.getText().toString(), newColor, checkbox.isChecked()? Interval.tEXP : Interval.tCAL));
                                                 Glob.palette.add(newColor);
                                                 makeView();
                                             }
@@ -624,8 +624,8 @@ public class TasksFrag extends Fragment {
                     case MotionEvent.ACTION_MOVE:
                         if (hasRun)
                             return false;
-                        int delay = (int) Math.abs((event.getX() - actionDownX)*ratio_dp_px);
-                        int duration = (int) Math.abs((event.getY() - actionDownY)*ratio_dp_px);
+                        int delay = (int) Math.abs((event.getX() - actionDownX)*Glob.rPxDp);
+                        int duration = (int) Math.abs((event.getY() - actionDownY)*Glob.rPxDp);
                         delay = delay > cancelZone ? delay - cancelZone : 0;
                         duration = duration > cancelZone ? duration - cancelZone : 0;
                         if (duration != 0 || delay  != 0) {
@@ -649,8 +649,8 @@ public class TasksFrag extends Fragment {
                             return false;
                         ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
                         handler.removeCallbacks(mLongPressed);
-                        delay = (int) Math.abs((event.getX() - actionDownX) * ratio_dp_px);
-                        duration = (int) Math.abs((event.getY() - actionDownY) * ratio_dp_px);
+                        delay = (int) Math.abs((event.getX() - actionDownX) * Glob.rPxDp);
+                        duration = (int) Math.abs((event.getY() - actionDownY) * Glob.rPxDp);
                         delay = delay > cancelZone ? delay - cancelZone : 0;
                         duration = duration > cancelZone ? duration - cancelZone : 0;
                         statusBar.setText(savedStatusText);
