@@ -23,10 +23,10 @@ class TimeWin {
     @Nullable
     private Interval curTask;
     private TreeSet<Interval> shapeIndex;
-    static TimeWin newWindowClass(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
-        return new TimeWin(sv, tsOrigin,widthDays,heightWeeks,xMin,yMin);
+    static TimeWin newWindowClass(long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
+        return new TimeWin(tsOrigin,widthDays,heightWeeks,xMin,yMin);
     }
-    TimeWin(TouchView sv, long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
+    TimeWin(long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         this.orig = tsOrigin;
         this.gridW = widthDays;
         this.gridH = heightWeeks;
@@ -38,17 +38,24 @@ class TimeWin {
         });
         minorTickStyle = new Paint();
             minorTickStyle.setColor(Glob.COLOR_SCALE_TEXT);
+            minorTickStyle.setTextSize(Glob.rPxDp * 20f);
+            minorTickStyle.setStrokeWidth(Glob.rPxDp * 2f);
         majorTickStyle = new Paint();
             majorTickStyle.setColor(Glob.COLOR_SCALE_TEXT);
             majorTickStyle.setTypeface(Typeface.DEFAULT_BOLD);
+            majorTickStyle.setTextSize(Glob.rPxDp * 25f);
+            majorTickStyle.setStrokeWidth(Glob.rPxDp * 2f);
         nowLineStyle = new Paint();
             nowLineStyle.setColor(Glob.COLOR_NOW_LINE);
+            nowLineStyle.setStrokeWidth(Glob.rPxDp * 2.5f);
         statusBarStyle = new Paint();
             statusBarStyle.setColor(Glob.COLOR_STATUS_BAR);
             statusBarStyle.setTextAlign(Paint.Align.LEFT);
+            statusBarStyle.setTextSize(Glob.rPxDp * 20f);
         selectionStyle = new Paint();
             selectionStyle.setStyle(Paint.Style.STROKE);
             selectionStyle.setColor(Glob.COLOR_SELECTION);
+            selectionStyle.setStrokeWidth(Glob.rPxDp * 2.5f);
         ongoingStyle = new Paint();
             ongoingStyle.setColor(Glob.COLOR_NOW_LINE);
             ongoingStyle.setStyle(Paint.Style.FILL);
@@ -58,28 +65,17 @@ class TimeWin {
         overflowLine = new Paint();
             overflowLine.setStyle(Paint.Style.STROKE);
             overflowLine.setColor(Glob.COLOR_OVERFLOW);
+            overflowLine.setStrokeWidth(Glob.rPxDp * 4f);
         statusText = "";
-    }
-    static float LINE_WIDTH = 10;
-    void setDPIScaling(float f) {
-        LINE_WIDTH = f;
-        minorTickStyle.setTextSize(LINE_WIDTH*2f);
-            minorTickStyle.setStrokeWidth(LINE_WIDTH/5f);
-        majorTickStyle.setTextSize(LINE_WIDTH*2.5f);
-            majorTickStyle.setStrokeWidth(LINE_WIDTH/5f);
-        statusBarStyle.setTextSize(LINE_WIDTH*2f);
-        selectionStyle.setStrokeWidth(LINE_WIDTH/4f);
-        nowLineStyle.setStrokeWidth(LINE_WIDTH/4f);
-        overflowLine.setStrokeWidth(LINE_WIDTH/2F);
-        gridRadius = LINE_WIDTH*2;
+        gridRadius = Glob.rPxDp * 2;
     }
 
     long orig;
     float g0x, g0y;
     float gridW, gridH;
     float rGridScreenW, rGridScreenH;
-    private static float RECT_SCALING_FACTOR_X = 0.86f;
-    static float RECT_SCALING_FACTOR_Y = 0.94f;
+    private float RECT_SCALING_FACTOR_X = 0.86f;
+    float RECT_SCALING_FACTOR_Y = 0.94f;
     float[] tsToScreen(long ts, float offset) {
         long days = ts >= orig ? (ts - orig)/86400L : (ts - orig + 1) / 86400L - 1L;
         float dow = (float) ((days + 4611686018427387900L)%7);
@@ -116,18 +112,11 @@ class TimeWin {
     Interval getSelectedTime(float sx, float sy) {
         long ts = screenToTs(sx, sy);
         Interval closest = shapeIndex.ceiling(Interval.newStartTime(ts));
-        if (closest == null || closest.end < ts)
-            return null;
-        this.selection = closest;
-        return closest;
+        return selection = closest == null ? null : closest.end < ts ? null : closest;
     }
-
     Canvas mCanvas;
-    static final float scaleA = 0.25f;
-    static final float scaleB = 1f;
     static final float scaleGrid = 0.85f;
-    static final long expansionTime = 86400L * 5L;
-    long now, expansionComplete;
+    long now;
     int screenW, screenH;
     void draw(Canvas canvas) {
         mCanvas = canvas;
@@ -136,9 +125,8 @@ class TimeWin {
         screenW = canvas.getWidth();
         rGridScreenW = gridW/screenW;
         rGridScreenH = gridH/screenH;
-        RECT_SCALING_FACTOR_Y = 1f - LINE_WIDTH * rGridScreenH;
+        RECT_SCALING_FACTOR_Y = 1f - Glob.rPxDp * 10 * rGridScreenH;
         now = System.currentTimeMillis() / 1000L;
-        expansionComplete = now - expansionTime;
 
         drawBackgroundGrid();
 
@@ -155,8 +143,8 @@ class TimeWin {
             for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, majorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat, Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.6f, majorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, majorTickStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat, Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 26f, majorTickStyle);
                 }
             }
         } else if (gridH > 1f) {
@@ -167,14 +155,14 @@ class TimeWin {
                 if (startGrid - Math.floor(startGrid) < 0.01f) {
                     scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                     if (scaledMark > 0f) {
-                        canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, majorTickStyle);
-                        canvas.drawText((new SimpleDateFormat("M.d",Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.6f, majorTickStyle);
+                        canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, majorTickStyle);
+                        canvas.drawText((new SimpleDateFormat("M.d",Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 26f, majorTickStyle);
                     }
                 } else {
                     scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                     if (scaledMark > 0f) {
-                        canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
-                        canvas.drawText((new SimpleDateFormat(" h:mm",Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
+                        canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
+                        canvas.drawText((new SimpleDateFormat(" h:mm",Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                     }
                 }
             }
@@ -186,8 +174,8 @@ class TimeWin {
             for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                 }
             }
         } else if (gridH > 1f/24f) {
@@ -198,8 +186,8 @@ class TimeWin {
             for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                 }
             }
         } else if (gridH > 1f/144f) {
@@ -210,8 +198,8 @@ class TimeWin {
             for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                 }
             }
         } else {
@@ -222,8 +210,8 @@ class TimeWin {
             for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, LINE_WIDTH * 6f, scaledMark, minorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + LINE_WIDTH * 2.1f, minorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
+                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                 }
             }
         }
@@ -233,7 +221,7 @@ class TimeWin {
             drawOngoingInterval(curTask);
         drawNowLine(now);
         if (!statusText.isEmpty())
-            canvas.drawText(statusText,LINE_WIDTH,screenH-LINE_WIDTH,statusBarStyle);
+            canvas.drawText(statusText,Glob.rPxDp*10,screenH-Glob.rPxDp*10,statusBarStyle);
     }
     void drawNowLine(long ts) {
         nowLineStyle.setColor(Glob.COLOR_NOW_LINE);
@@ -243,7 +231,7 @@ class TimeWin {
         float[] c = tsToScreen(noon,0.5f);
         mCanvas.drawLine(0,
                 (a[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],
-                LINE_WIDTH*5f,
+                Glob.rPxDp*50f,
                 (b[1]-c[1])*RECT_SCALING_FACTOR_Y+c[1],nowLineStyle);
     }
     private static final long curveLength = 86400/24;
@@ -530,7 +518,7 @@ class TimeWin {
         Interval getSelection() { return selection; }
         void removeSelection() {
             if (!shapeIndex.remove(selection))
-                Log.d("SquareDays","Cannot remove selection: " + selection.toString());
+                Log.d("SquareDays","Cannot remove selection: " + (selection == null ? "null" : selection.toString()));
             selection = null;
             setStatusText("");
         }

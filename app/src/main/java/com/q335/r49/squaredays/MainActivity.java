@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -26,8 +25,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: ** Normalize drag amount to size of screen / refactor dp-scaling for taskWin
-//TODO:     Implement border auto-increment
+//TODO: ** Implement border auto-increment
+//TODO:     Prettify time notation
 //TODO:     Normalize Expenses
 //TODO: ** Graphical tweaks:
 //TODO:     Invert Expenses
@@ -36,10 +35,8 @@ import java.util.Queue;
 //TODO:     Momentum drag
 //TODO:     Vertical drag is comment for expenses
 //TODO:     Menu color
-//TODO: ** Refactor
-//TODO:     Reevaluate static variable usage in TimeWin
 //TODO: ** Settings:
-//TODO:     Different Visualization modes
+//TODO:     Different Visualization modes / no shrinking
 //TODO:     Maximum expenses
 //TODO: ** Optimizations:
 //TODO:     Append flag
@@ -50,13 +47,14 @@ import java.util.Queue;
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {
     Context context;
     SharedPreferences prefs;
-    private static final String LOG_FILE = "log.txt";
-    private static final String COMMANDS_FILE = "commands.json";
-    private static final String EXT_STORAGE_DIR = "tracker";
+    private static final String fLOGS = "log.txt";
+    private static final String fTASKS = "commands.json";
+    private static final String fEXTSTOR = "tracker";
+    static final String prefsName = "TrackerPrefs";
     private static boolean logChanged;
     private void readLogFile() {
         try {
-            for (String l : Files.readLines(new File(getFilesDir(), LOG_FILE), Charsets.UTF_8))
+            for (String l : Files.readLines(new File(getFilesDir(), fLOGS), Charsets.UTF_8))
                 pushOnly(Interval.newFromLogLine(l));
         } catch (Exception e) {
             Log.d("SquareDays","Log read exception: " + e.toString());
@@ -66,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         if (!logChanged)
             return;
         try {
-            File file = new File(getFilesDir(), LOG_FILE);
+            File file = new File(getFilesDir(), fLOGS);
             List<String> fullLog = CW.getWritableShapes();
             fullLog.addAll(EW.getWritableShapes());
             Files.asCharSink(file, Charsets.UTF_8).writeLines(fullLog);
@@ -116,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         BF.setActiveTask(onGoing);
         EF.invalidate();
         CF.invalidate();
-
     }
 
     FragmentManager FM;
@@ -146,10 +143,9 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = getApplicationContext();
-        prefs = getApplicationContext().getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
+        prefs = getApplicationContext().getSharedPreferences(prefsName, MODE_PRIVATE);
         Glob.init(context);
         logQ = new LinkedList<>();
-
         setContentView(R.layout.activity_main);
         ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
             FM = getSupportFragmentManager();
@@ -160,12 +156,11 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
         mViewPager.setOffscreenPageLimit(2);
         readLogFile();
     }
-
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + EXT_STORAGE_DIR + File.separator;
-        final File cmdFile = new File(extStorPath, COMMANDS_FILE);
-        final File logFile = new File(extStorPath, LOG_FILE);
+        final String extStorPath = Environment.getExternalStorageDirectory() + File.separator + fEXTSTOR + File.separator;
+        final File cmdFile = new File(extStorPath, fTASKS);
+        final File logFile = new File(extStorPath, fLOGS);
         switch (item.getItemId()) {
             case R.id.menuItemExport: {
                 if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
@@ -181,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
                                     Files.write(prefs.getString("commands", ""),cmdFile,Charsets.UTF_8);
-                                    Toast.makeText(context, "Commands exported to " + extStorPath + COMMANDS_FILE, Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(context, "Commands exported to " + extStorPath + fTASKS, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Log.d("SquareDays",e.toString());
                                     Toast.makeText(context, "Export failed. Does this app have storage permission? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
@@ -193,8 +188,8 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
                                     writeLogFile();
-                                    Files.copy(new File(getFilesDir(), LOG_FILE),logFile);
-                                    Toast.makeText(context, "Log entries exported to " + extStorPath + LOG_FILE, Toast.LENGTH_SHORT).show();
+                                    Files.copy(new File(getFilesDir(), fLOGS),logFile);
+                                    Toast.makeText(context, "Log entries exported to " + extStorPath + fLOGS, Toast.LENGTH_SHORT).show();
                                 } catch (Exception e) {
                                     Log.d("SquareDays",e.toString());
                                     Toast.makeText(context, "Export failed. Does this app have storage permission? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
@@ -206,10 +201,10 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                             public void onClick(DialogInterface dialog, int which) {
                                 try {
                                     writeLogFile();
-                                    Files.copy(new File(getFilesDir(), LOG_FILE),logFile);
+                                    Files.copy(new File(getFilesDir(), fLOGS),logFile);
                                     Files.write(prefs.getString("commands", ""),cmdFile,Charsets.UTF_8);
-                                    Toast.makeText(context, "Commands exported to " + extStorPath + COMMANDS_FILE + System.getProperty("line.separator")
-                                            + "Log entries exported to " + extStorPath + LOG_FILE, Toast.LENGTH_LONG).show();
+                                    Toast.makeText(context, "Commands exported to " + extStorPath + fTASKS + System.getProperty("line.separator")
+                                            + "Log entries exported to " + extStorPath + fLOGS, Toast.LENGTH_LONG).show();
                                 } catch (Exception e) {
                                     Log.d("SquareDays",e.toString());
                                     Toast.makeText(context, "Export failed. Does this app have storage permission? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
@@ -239,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                             Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
                                         else {
                                             BF.loadCommands(jsonText);
-                                            Toast.makeText(context, COMMANDS_FILE + " import successful", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(context, fTASKS + " import successful", Toast.LENGTH_SHORT).show();
                                         }
                                     } catch (Exception e) {
                                         Log.d("SquareDays",e.toString());
@@ -259,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                             pushOnly(Interval.newClearExpMess());
                                             readLogFile();
                                             popAll();
-                                            Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(context, fLOGS + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.d("SquareDays",e.toString());
                                             Toast.makeText(context, "Import failed. Does this app have storage access? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
@@ -276,14 +271,14 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                             Toast.makeText(context, "Import failed: empty file", Toast.LENGTH_SHORT).show();
                                         } else {
                                             BF.loadCommands(jsonText);
-                                            Toast.makeText(context, COMMANDS_FILE + " import successful", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(context, fTASKS + " import successful", Toast.LENGTH_SHORT).show();
                                         }
                                     } catch (Exception e) {
                                         Log.d("SquareDays",e.toString());
                                         Toast.makeText(context, "Import failed. Does this app have storage access? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
                                     }
                                     if (!logFile.exists())
-                                        Toast.makeText(context, LOG_FILE + " failed: no file", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(context, fLOGS + " failed: no file", Toast.LENGTH_SHORT).show();
                                     else {
                                         try {
                                             Files.copy(logFile, new File(getFilesDir(), "log.txt"));
@@ -291,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                                             pushOnly(Interval.newClearExpMess());
                                             readLogFile();
                                             popAll();
-                                            Toast.makeText(context, LOG_FILE + " import successful", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(context, fLOGS + " import successful", Toast.LENGTH_SHORT).show();
                                         } catch (Exception e) {
                                             Log.d("SquareDays",e.toString());
                                             Toast.makeText(context, "Import failed. Does this app have storage access? (Settings > Apps > tracker > Permissions)", Toast.LENGTH_LONG).show();
@@ -317,7 +312,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                File logFile = new File(getFilesDir(), LOG_FILE);
+                                File logFile = new File(getFilesDir(), fLOGS);
                                 if (logFile.exists()) {
                                     if (logFile.delete()) {
                                         pushOnly(Interval.newClearTimeMsg());

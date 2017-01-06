@@ -62,7 +62,7 @@ class Interval {
 
         Interval le = new Interval();
             le.paint = new Paint();
-            le.paint.setColor(MainActivity.parseColor(args[pColor]));
+            le.paint.setColor(Glob.parseColor(args[pColor]));
 
         le.start = Long.parseLong(args[pUTS]);
 

@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.support.v4.content.res.ResourcesCompat;
+import android.util.DisplayMetrics;
 import android.util.Log;
 
 class Glob {
@@ -20,6 +21,7 @@ class Glob {
     static int COLOR_PRIMARY_DARK;
     static int COLOR_EXP_GRID;
     static Typeface CommandFont;
+    static float rPxDp;
 
     static void init(Context context) {
         palette = new PaletteRing(PALLETTE_LENGTH);
@@ -28,17 +30,18 @@ class Glob {
                 "#8e44ad", "#2c3e50", "#f1c40f", "#e67e22", "#e74c3c", "#ecf0f1", "#95a5a6", "#f39c12",
                 "#d35400", "#c0392b", "#bdc3c7", "#7f8c8d", "#3b5999", "#21759b", "#dd4b39", "#bd081c"});
         Resources res = context.getResources();
-        COLOR_SCALE_TEXT         = ResourcesCompat.getColor(res, R.color.scale_text, null);
-        COLOR_GRID_BACKGROUND    = ResourcesCompat.getColor(res, R.color.grid_background, null);
-        COLOR_NOW_LINE           = ResourcesCompat.getColor(res, R.color.now_line, null);
-        COLOR_STATUS_BAR         = ResourcesCompat.getColor(res, R.color.status_bar, null);
-        COLOR_SELECTION          = ResourcesCompat.getColor(res, R.color.selection, null);
-        COLOR_END_BOX            = ResourcesCompat.getColor(res, R.color.end_box, null);
-        COLOR_ERROR              = ResourcesCompat.getColor(res, R.color.error, null);
-        COLOR_OVERFLOW           = ResourcesCompat.getColor(res, R.color.overflow, null);
-        COLOR_PRIMARY_DARK       = ResourcesCompat.getColor(res, R.color.colorPrimaryDark, null);
-        COLOR_EXP_GRID           = ResourcesCompat.getColor(res, R.color.exp_grid_background, null);
-        CommandFont     = Typeface.createFromAsset(context.getAssets(),  "fonts/22203___.TTF");
+        COLOR_SCALE_TEXT      = ResourcesCompat.getColor(res, R.color.scale_text, null);
+        COLOR_GRID_BACKGROUND = ResourcesCompat.getColor(res, R.color.grid_background, null);
+        COLOR_NOW_LINE        = ResourcesCompat.getColor(res, R.color.now_line, null);
+        COLOR_STATUS_BAR      = ResourcesCompat.getColor(res, R.color.status_bar, null);
+        COLOR_SELECTION       = ResourcesCompat.getColor(res, R.color.selection, null);
+        COLOR_END_BOX         = ResourcesCompat.getColor(res, R.color.end_box, null);
+        COLOR_ERROR           = ResourcesCompat.getColor(res, R.color.error, null);
+        COLOR_OVERFLOW        = ResourcesCompat.getColor(res, R.color.overflow, null);
+        COLOR_PRIMARY_DARK    = ResourcesCompat.getColor(res, R.color.colorPrimaryDark, null);
+        COLOR_EXP_GRID        = ResourcesCompat.getColor(res, R.color.exp_grid_background, null);
+        CommandFont           = Typeface.createFromAsset(context.getAssets(),  "fonts/22203___.TTF");
+        rPxDp                 = 0.75f * context.getResources().getDisplayMetrics().density;
     }
     static int darkenColor(int color, float factor) {
         return Color.argb(Color.alpha(color),
@@ -47,8 +50,7 @@ class Glob {
                 Math.min(Math.round(Color.blue(color) * factor),255));
     }
     static int parseColor(String s) {
-        try {
-            return Color.parseColor(s);
+        try { return Color.parseColor(s);
         } catch (Exception e) {
             Log.d("SquareDays","Bad color: " + s);
             return Glob.COLOR_ERROR;

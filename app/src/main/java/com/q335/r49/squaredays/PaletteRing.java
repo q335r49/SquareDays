@@ -28,7 +28,7 @@ class PaletteRing {
     }
     public void add(String[] colors) {
         for (String c:colors)
-            add(MainActivity.parseColor(c));
+            add(Glob.parseColor(c));
     }
     int get(int i) { return ring[(pos - 1 - i + 10*length) % length]; }
 }

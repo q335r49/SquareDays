@@ -36,9 +36,12 @@ import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
-//TODO: Draw overlay circle
+//Prettify statusbar display
+//TODO: Draw overlay circle / bar
 //TODO: BUG Vertical delay still updating status bar
+//TODO: Tasks toString and fromString; don't use GSON
 public class TasksFrag extends Fragment {
+    private static final String prefsTasksKey = "tasks_1.0";
     SharedPreferences prefs;
     public interface OnFragmentInteractionListener {
         void pushProc(Interval log);
@@ -49,7 +52,6 @@ public class TasksFrag extends Fragment {
         String label;
         int color;
         int type;
-
         Task(String label, int color, int type) {
             this.label = label;
             this.color = color;
@@ -64,7 +66,7 @@ public class TasksFrag extends Fragment {
             savedStatusText = le != null ? le.label + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
             statusBar.setText(savedStatusText);
         }
-    private List<Task> commands = new ArrayList<>();
+    private List<Task> tasks = new ArrayList<>();
     private LayoutInflater inflater;
     private MonogramView activeView;
     private MonogramView endButtonMonogram;
@@ -72,7 +74,6 @@ public class TasksFrag extends Fragment {
         DisplayMetrics displayMetrics = getContext().getResources().getDisplayMetrics();
         return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,26 +94,24 @@ public class TasksFrag extends Fragment {
                 popup.show();
             }
         });
-        prefs = context.getSharedPreferences("TrackerPrefs", MODE_PRIVATE);
-        String jsonText = prefs.getString("commands", "");
+        prefs = context.getSharedPreferences(MainActivity.prefsName, MODE_PRIVATE);
+        String jsonText = prefs.getString(prefsTasksKey, "");
         loadCommands(jsonText);
         mListener.setBF(this);
         return view;
     }
     public void loadCommands(String s) {
         if (s.isEmpty()) {
-            commands.add(new Task("1st task", Glob.parseColor("#2ecc71"),Interval.tCAL));
-            commands.add(new Task("2nd task", Glob.parseColor("#3498db"),Interval.tCAL));
-            commands.add(new Task("3rd task", Glob.parseColor("#9b59b6"),Interval.tCAL));
-            commands.add(new Task("4th task", Glob.parseColor("#34495e"),Interval.tCAL));
-            commands.add(new Task("5th task", Glob.parseColor("#16a085"),Interval.tCAL));
-            commands.add(new Task("6th task", Glob.parseColor("#16a085"),Interval.tCAL));
-            commands.add(new Task("Expense", Glob.parseColor("#1abc9c"),Interval.tEXP));
-        } else {
-            Type listType = new TypeToken<List<String[]>>() { }.getType();
-            commands = new Gson().fromJson(s, listType);
-        }
-        for (Task t : commands)
+            tasks.add(new Task("1st task", Glob.parseColor("#2ecc71"),Interval.tCAL));
+            tasks.add(new Task("2nd task", Glob.parseColor("#3498db"),Interval.tCAL));
+            tasks.add(new Task("3rd task", Glob.parseColor("#9b59b6"),Interval.tCAL));
+            tasks.add(new Task("4th task", Glob.parseColor("#34495e"),Interval.tCAL));
+            tasks.add(new Task("5th task", Glob.parseColor("#16a085"),Interval.tCAL));
+            tasks.add(new Task("6th task", Glob.parseColor("#16a085"),Interval.tCAL));
+            tasks.add(new Task("Expense",  Glob.parseColor("#1abc9c"),Interval.tEXP));
+        } else //TODO: try here
+            tasks = new Gson().fromJson(s, new TypeToken<List<Task>>() { }.getType());
+        for (Task t : tasks)
             Glob.palette.add(t.color);
         makeView();
     }
@@ -120,8 +119,8 @@ public class TasksFrag extends Fragment {
         if (le == null)
             setActiveTask(endButtonMonogram);
         else {
-            for (int i = 0; i < commands.size(); i++) {
-                if (commands.get(i).label.equals(le.label)) {
+            for (int i = 0; i < tasks.size(); i++) {
+                if (tasks.get(i).label.equals(le.label)) {
                     View activeV = buttons.getChildAt(i);
                     setActiveTask(activeV);
                     break;
@@ -156,7 +155,7 @@ public class TasksFrag extends Fragment {
     private static final float rExpDp = 1f / 6f;
     private static final float rMinsDp = 1f / 2f;
     private void makeView() {
-        Collections.sort(commands, new Comparator<Task>() {
+        Collections.sort(tasks, new Comparator<Task>() {
             public int compare(Task t1, Task t2) {
                 return t1.label.compareToIgnoreCase(t2.label);
             }
@@ -173,8 +172,8 @@ public class TasksFrag extends Fragment {
         final float rMinsPx = rDpPx * rMinsDp;
         final float rExpPx = rDpPx * rExpDp;
         buttons.removeAllViews();
-        for (int i = 0; i<commands.size(); i++) {
-            final Task comF = commands.get(i);
+        for (int i = 0; i< tasks.size(); i++) {
+            final Task comF = tasks.get(i);
             final boolean isExpense = comF.type == Interval.tEXP;
             final int ixF = i;
             View child = inflater.inflate(R.layout.gv_list_item, null);
@@ -281,14 +280,14 @@ public class TasksFrag extends Fragment {
                                                 .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int id) {
                                                         int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-                                                        commands.set(ixF, new Task(commentEntry.getText().toString(), newColor, Interval.tEXP));
+                                                        tasks.set(ixF, new Task(commentEntry.getText().toString(), newColor, Interval.tEXP));
                                                         Glob.palette.add(newColor);
                                                         makeView();
                                                     }
                                                 })
                                                 .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int id) {
-                                                        commands.remove(ixF);
+                                                        tasks.remove(ixF);
                                                         makeView();
                                                     }
                                                 })
@@ -434,14 +433,14 @@ public class TasksFrag extends Fragment {
                                                 .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int id) {
                                                         int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-                                                        commands.set(ixF, new Task(commentEntry.getText().toString(), newColor, Interval.tCAL));
+                                                        tasks.set(ixF, new Task(commentEntry.getText().toString(), newColor, Interval.tCAL));
                                                         Glob.palette.add(newColor);
                                                         makeView();
                                                     }
                                                 })
                                                 .setNeutralButton("Remove", new DialogInterface.OnClickListener() {
                                                     public void onClick(DialogInterface dialog, int id) {
-                                                        commands.remove(ixF);
+                                                        tasks.remove(ixF);
                                                         makeView();
                                                     }
                                                 })
@@ -606,7 +605,7 @@ public class TasksFrag extends Fragment {
                                         .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
                                                 int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-                                                commands.add(new Task(commentEntry.getText().toString(), newColor, checkbox.isEnabled()? Interval.tEXP : Interval.tCAL));
+                                                tasks.add(new Task(commentEntry.getText().toString(), newColor, checkbox.isEnabled()? Interval.tEXP : Interval.tCAL));
                                                 Glob.palette.add(newColor);
                                                 makeView();
                                             }
@@ -699,7 +698,7 @@ public class TasksFrag extends Fragment {
         View addButton = inflater.inflate(R.layout.gv_list_item, null);
         buttons.addView(addButton,lp);
 
-        prefs.edit().putString("commands", new Gson().toJson(commands)).apply();
+        prefs.edit().putString(prefsTasksKey, new Gson().toJson(tasks)).apply();
     }
     public TasksFrag() { }
     @Override

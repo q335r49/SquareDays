@@ -2,7 +2,6 @@ package com.q335.r49.squaredays;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,13 +38,11 @@ public class CalendarFrag<T extends TimeWin> extends Fragment {
             cal.set(Calendar.MILLISECOND, 0);
 
         if (gClass.equals(CODE_CAL)) {
-            TimeWin drawLayer = TimeWin.newWindowClass(inputLayer, cal.getTimeInMillis() / 1000L, 8f, 1.5f, -0.8f, -0.1f);
-            drawLayer.setDPIScaling(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
+            TimeWin drawLayer = TimeWin.newWindowClass(cal.getTimeInMillis() / 1000L, 8f, 1.5f, -0.8f, -0.1f);
             mListener.setWin(this, (T) drawLayer, gClass);
             inputLayer.setDisplay(drawLayer);
         } else {
-            ExpenseWin drawLayer = ExpenseWin.newWindowClass(inputLayer, cal.getTimeInMillis() / 1000L, 8f, 1.5f, -0.8f, -0.1f);
-            drawLayer.setDPIScaling(Math.round(6 * (getContext().getResources().getDisplayMetrics().xdpi / DisplayMetrics.DENSITY_DEFAULT)));
+            ExpenseWin drawLayer = ExpenseWin.newWindowClass(cal.getTimeInMillis() / 1000L, 8f, 1.5f, -0.8f, -0.1f);
             mListener.setWin(this, (T) drawLayer, gClass);
             inputLayer.setDisplay(drawLayer);
         }
