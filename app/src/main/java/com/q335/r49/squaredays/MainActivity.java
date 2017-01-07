@@ -26,8 +26,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: Export commands not working
-
 //TODO: ** Implement border auto-increment
 //TODO:     Normalize Expenses
 //TODO: ** Graphical tweaks:
@@ -59,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragm
             for (String l : Files.readLines(new File(getFilesDir(), fLOGS), Charsets.UTF_8))
                 pushOnly(Interval.newFromLogLine(l));
         } catch (Exception e) {
-            Log.d("SquareDays","Log read exception: " + e.toString());
+            Log.d("readLogFile","Log read exception: " + e.toString());
         }
     }
     private void writeLogFile() {

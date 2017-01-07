@@ -7,6 +7,5 @@ tools:context="com.q335.r49.squaredays.CalendarFrag">
         android:id="@+id/drawing"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="@color/background" >
-    </com.q335.r49.squaredays.TouchView>
+        android:background="@color/background" />
 </FrameLayout>

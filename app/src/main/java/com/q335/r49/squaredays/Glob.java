@@ -48,7 +48,7 @@ class Glob {
         rPxDp                 = 0.75f * context.getResources().getDisplayMetrics().density;
 
         pCancelZone = new Paint();
-        pCancelZone.setColor(COLOR_CANCEL_ZONE);
+        pCancelZone.setColor(COLOR_PRIMARY_DARK);
 
     }
     static int darkenColor(int color, float factor) {

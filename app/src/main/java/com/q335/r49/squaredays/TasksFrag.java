@@ -194,11 +194,13 @@ public class TasksFrag extends Fragment {
                 private Runnable mLongPressed;
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
+                    float eventX = event.getX();
+                    float eventY = event.getY();
                     if (isExpense) {
                         switch (event.getActionMasked()) {
                             case MotionEvent.ACTION_DOWN:
-                                actionDownX = event.getX();
-                                actionDownY = event.getY();
+                                actionDownX = eventX;
+                                actionDownY = eventY;
                                 v.getParent().requestDisallowInterceptTouchEvent(true);
                                 ((GradientDrawable) v.getBackground()).setColor(bg_Press);
                                 final View finalView = v;
@@ -296,14 +298,14 @@ public class TasksFrag extends Fragment {
                                     }
                                 };
                                 handler.postDelayed(mLongPressed, 1200);
-                                overlay.actionDown(v.getX()+actionDownX,v.getY()+actionDownY);
-                                overlay.invalidate();
+                                overlay.actionDown(v,actionDownX,actionDownY);
                                 return true;
                             case MotionEvent.ACTION_MOVE:
+                                overlay.actionMove(eventX,eventY);
                                 if (hasRun)
                                     return false;
-                                int delay = (int) Math.abs((event.getX() - actionDownX) * rExpDp);
-                                int duration = (int) Math.abs((event.getY() - actionDownY) * rExpDp);
+                                int delay = (int) Math.abs((eventX - actionDownX) * rExpDp);
+                                int duration = (int) Math.abs((eventY - actionDownY) * rExpDp);
                                 delay = delay > cancelZone ? delay - cancelZone : 0;
                                 duration = duration > cancelZone ? duration - cancelZone : 0;
                                 if (duration != 0 || delay != 0) {
@@ -317,14 +319,13 @@ public class TasksFrag extends Fragment {
                                     statusBar.setText("Cancel");
                                 return true;
                             case MotionEvent.ACTION_UP:
-                                overlay.actionUp();
-                                overlay.invalidate();
+                                overlay.actionUp(actionDownX,actionDownY);
                                 if (hasRun)
                                     return false;
                                 ((GradientDrawable) v.getBackground()).setColor(Glob.COLOR_PRIMARY_DARK);
                                 handler.removeCallbacks(mLongPressed);
-                                delay = (int) Math.abs((event.getX() - actionDownX) * rExpDp);
-                                duration = (int) Math.abs((event.getY() - actionDownY) * rExpDp);
+                                delay = (int) Math.abs((eventX - actionDownX) * rExpDp);
+                                duration = (int) Math.abs((eventY - actionDownY) * rExpDp);
                                 delay = delay > cancelZone ? delay - cancelZone : 0;
                                 duration = duration > cancelZone ? duration - cancelZone : 0;
                                 if (delay != 0)
@@ -342,8 +343,8 @@ public class TasksFrag extends Fragment {
                     } else {
                         switch (event.getActionMasked()) {
                             case MotionEvent.ACTION_DOWN:
-                                actionDownX = event.getX();
-                                actionDownY = event.getY();
+                                actionDownX = eventX;
+                                actionDownY = eventY;
                                 v.getParent().requestDisallowInterceptTouchEvent(true);
                                 ((GradientDrawable) v.getBackground()).setColor(bg_Press);
                                 final View finalView = v;
@@ -457,8 +458,8 @@ public class TasksFrag extends Fragment {
                             case MotionEvent.ACTION_MOVE:
                                 if (hasRun)
                                     return false;
-                                int delay = (int) Math.abs((event.getX() - actionDownX) * rMinsDp);
-                                int duration = (int) Math.abs((event.getY() - actionDownY) * rMinsDp);
+                                int delay = (int) Math.abs((eventX - actionDownX) * rMinsDp);
+                                int duration = (int) Math.abs((eventY - actionDownY) * rMinsDp);
                                 delay = delay > cancelZone ? delay - cancelZone : 0;
                                 duration = duration > cancelZone ? duration - cancelZone : 0;
                                 if (duration != 0 || delay != 0) {
@@ -483,8 +484,8 @@ public class TasksFrag extends Fragment {
                                     return false;
                                 ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
                                 handler.removeCallbacks(mLongPressed);
-                                delay = (int) Math.abs((event.getX() - actionDownX) * rMinsDp);
-                                duration = (int) Math.abs((event.getY() - actionDownY) * rMinsDp);
+                                delay = (int) Math.abs((eventX - actionDownX) * rMinsDp);
+                                duration = (int) Math.abs((eventY - actionDownY) * rMinsDp);
                                 delay = delay > cancelZone ? delay - cancelZone : 0;
                                 duration = duration > cancelZone ? duration - cancelZone : 0;
                                 if (delay != 0 || duration != 0 || !hasDragged) {
