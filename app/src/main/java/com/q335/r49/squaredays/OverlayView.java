@@ -12,7 +12,7 @@ class OverlayView extends View {
     private int lastEvent;
     private float originX, originY, bmOrigX, bmOrigY;
     private float actionDownX, actionDownY, moveX, moveY;
-    private float cancelZoneRadius = TasksFrag.cancelZone / TasksFrag.rExpDp;
+    private float cancelZoneRadius = 100;
     View selectedView;
     Bitmap viewBmp;
     float viewBmpCenterX, viewBmpCenterY;
