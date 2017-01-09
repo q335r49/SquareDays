@@ -11,7 +11,6 @@ import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -33,9 +32,9 @@ import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
-//TODO: Prettify statusbar display (eliminate altogeteher)
-//TODO: Draw overlay circle / bar
-//TODO: BUG Vertical delay still updating status bar
+//TODO: Rotation should not show "negative space" -- set View background color
+//TODO: Prettify statusbar display (eliminate altogether)
+//TODO: Maybe somehow work the rotation into the active display??
 //TODO: Tasks toString and fromString; don't use GSON
 public class TasksFrag extends Fragment {
     static final String prefsTasksKey = "tasks_1.0";
@@ -142,7 +141,6 @@ public class TasksFrag extends Fragment {
             activeView = null;
         }
     }
-
     private void makeView() {
         Collections.sort(tasks, new Comparator<Task>() {
             public int compare(Task t1, Task t2) {
@@ -159,7 +157,6 @@ public class TasksFrag extends Fragment {
         buttons.removeAllViews();
         for (int i = 0; i< tasks.size(); i++) {
             final Task task = tasks.get(i);
-            final boolean isExpense = task.type == Interval.tEXP;
             final int ixF = i;
             final View child = inflater.inflate(R.layout.gv_list_item, null);
             buttons.addView(child,lp);
@@ -211,7 +208,6 @@ public class TasksFrag extends Fragment {
                         @Override
                         public void onStopTrackingTouch(SeekBar seekBar) { }
                     });
-
                     final FlexboxLayout paletteView = (FlexboxLayout) promptView.findViewById(R.id.paletteBox);
                     final int childCount = paletteView.getChildCount();
                     for (int i = 0; i < childCount; i++) {
@@ -254,42 +250,37 @@ public class TasksFrag extends Fragment {
                             .create().show();
                 }
             };
-            mv.init(task.color, task.label, new MonogramView.onProc() {
+            mv.init(task.type,task.color, task.label, new MonogramView.onTouch() {
                 @Override
-                public void onPress() {
+                public void actionDown() {
                     statusBar.setText(task.label);
                     handler.postDelayed(mLongPressed, 1200);
                 }
                 @Override
-                public void onDragMessage(float escaped) {
-                    if (escaped > 0) {
+                public void actionMove(float d) {
+                    if (d > 0) {
                         handler.removeCallbacks(mLongPressed);
                         statusBar.setText(mv.getStatusString());
                     } else if (mv.hasExited())
                         statusBar.setText("Cancel");
                 }
-
                 @Override
-                public void onRelease(float dr) {
+                public void actionUp(float d) {
                     handler.removeCallbacks(mLongPressed);
-                    if (dr > 0)
-                        if (isExpense)
-                            mListener.pushProc(Interval.newExpense(task.color, System.currentTimeMillis() / 1000L, (long) dr, 0, task.label));
+                    if (d > 0)
+                        if (task.type == Interval.tEXP)
+                            mListener.pushProc(Interval.newExpense(task.color, System.currentTimeMillis() / 1000L, (long) d, 0, task.label));
                         else {
-                            mListener.pushProc(Interval.newOngoingTask(task.color, System.currentTimeMillis() / 1000L - (long) dr * 60L, task.label));
+                            mListener.pushProc(Interval.newOngoingTask(task.color, System.currentTimeMillis() / 1000L - (long) d * 60L, task.label));
                             setActiveTask(child);
                         }
                     else
                         statusBar.setText(savedStatusText);
                 }
-
                 @Override
-                public void onCancel() {
-                    handler.removeCallbacks(mLongPressed);
-                }
+                public void actionCancel() { handler.removeCallbacks(mLongPressed); }
             });
         }
-
         final View endButton = inflater.inflate(R.layout.gv_list_item, null);
         buttons.addView(endButton,lp);
         endM = (MonogramView) endButton.findViewById(R.id.monogram);
@@ -378,38 +369,30 @@ public class TasksFrag extends Fragment {
             }
         };
         final Handler handler = new Handler();
-        endM.init(Glob.COLOR_END_BOX, "!", new MonogramView.onProc() {
+        endM.init(Interval.tCAL,Glob.COLOR_END_BOX, "!", new MonogramView.onTouch() {
             @Override
-            public void onPress() {
-                handler.postDelayed(mLongPressed, 1200);
-            }
-
+            public void actionDown() { handler.postDelayed(mLongPressed, 1200); }
             @Override
-            public void onDragMessage(float escaped) {
+            public void actionMove(float escaped) {
                 if (escaped > 0) {
                     handler.removeCallbacks(mLongPressed);
                     statusBar.setText(endM.getStatusString());
                 } else if (endM.hasExited())
                     statusBar.setText("Cancel");
             }
-
             @Override
-            public void onRelease(float amount) {
+            public void actionUp(float amount) {
                 if (amount > 0) {
                     mListener.pushProc(Interval.newEndCommand(System.currentTimeMillis() / 1000L - (long) amount * 60));
                     clearActiveTask();
                 } else
                     statusBar.setText(savedStatusText);
             }
-
             @Override
-            public void onCancel() {
-                handler.removeCallbacks(mLongPressed);
-            }
+            public void actionCancel() { handler.removeCallbacks(mLongPressed); }
         });
         View addButton = inflater.inflate(R.layout.gv_list_item, null);
         buttons.addView(addButton,lp);
-
         prefs.edit().putString(prefsTasksKey, new Gson().toJson(tasks)).apply();
     }
     public TasksFrag() { }
