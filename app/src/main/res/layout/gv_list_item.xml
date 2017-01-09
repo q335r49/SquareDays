@@ -5,7 +5,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="0dp">
-    <com.q335.r49.squaredays.MonogramView android:id="@+id/text1"
+    <com.q335.r49.squaredays.MonogramView android:id="@+id/monogram"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding = "0dp"

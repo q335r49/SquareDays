@@ -133,7 +133,7 @@ public class TasksFrag extends Fragment {
             endButtonMonogram.unpress();
             endButtonMonogram.invalidate();
         }
-        activeView =((MonogramView) v.findViewById(R.id.text1));
+        activeView =((MonogramView) v.findViewById(R.id.monogram));
         activeView.press();
         activeView.invalidate();
     }
@@ -152,7 +152,6 @@ public class TasksFrag extends Fragment {
     static final float rExpDp = 1f / 6f;
     static final float rMinsDp = 1f / 2f;
     static final int cancelZone = (int) (50f * rExpDp);
-    static final float rRotDrag = 0.6f;
     private void makeView() {
         Collections.sort(tasks, new Comparator<Task>() {
             public int compare(Task t1, Task t2) {
@@ -168,24 +167,17 @@ public class TasksFrag extends Fragment {
             lp.flexShrink   = 0.2f;
         buttons.removeAllViews();
         for (int i = 0; i< tasks.size(); i++) {
-            final Task comF = tasks.get(i);
-            final boolean isExpense = comF.type == Interval.tEXP;
+            final Task task = tasks.get(i);
+            final boolean isExpense = task.type == Interval.tEXP;
             final int ixF = i;
             View child = inflater.inflate(R.layout.gv_list_item, null);
             buttons.addView(child,lp);
-            final int bg_Norm = comF.color;
-            final int bg_Press = Glob.darkenColor(bg_Norm,0.7f);
-            final MonogramView mv = (MonogramView) child.findViewById(R.id.text1);
-            mv.init(comF.type,bg_Norm,comF.label);
+            final MonogramView mv = (MonogramView) child.findViewById(R.id.monogram);
+            mv.init(task.type,task.color,task.label);
             mv.setOnTouchListener(new View.OnTouchListener() {
-                private float actionDownX, actionDownY;
-                private boolean hasExited, hasExe;
-                private boolean hasRun, hasDragged;
                 private final Handler handler = new Handler();
                 private Runnable mLongPressed;
-                float cx, cy;
-                float dx, dy, dr;
-                float border;
+                float dr;
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
                     float eventX = event.getX();
@@ -193,21 +185,18 @@ public class TasksFrag extends Fragment {
                     if (isExpense) {
                         switch (event.getActionMasked()) {
                             case MotionEvent.ACTION_DOWN:
-                                actionDownX = eventX;
-                                actionDownY = eventY;
-                                v.getParent().requestDisallowInterceptTouchEvent(true);
                                 mv.press();
-                                hasExited = hasExe = false;
-                                statusBar.setText(comF.label);
+                                v.getParent().requestDisallowInterceptTouchEvent(true);
+                                statusBar.setText(task.label);
                                 mLongPressed = new Runnable() {
                                     public void run() {
-                                        hasExe = true;
+                                        mv.unpress();
                                         statusBar.setText(savedStatusText);
                                         View promptView = inflater.inflate(R.layout.prompts, null);
                                         final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
-                                        commentEntry.setText(comF.label);
+                                        commentEntry.setText(task.label);
                                         final View curColorV = promptView.findViewById(R.id.CurColor);
-                                        curColorV.setBackgroundColor(comF.color);
+                                        curColorV.setBackgroundColor(task.color);
                                         final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                                         final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
                                         final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
@@ -291,48 +280,32 @@ public class TasksFrag extends Fragment {
                                 };
                                 handler.postDelayed(mLongPressed, 1200);
                                 //overlay.actionDown(v,actionDownX,actionDownY);
-                                cx = v.getWidth()/2f;
-                                cy = v.getHeight()/2f;
-                                border =(float) Math.sqrt(cx * cx + cy * cy);
                                 return true;
                             case MotionEvent.ACTION_MOVE:
                                 //overlay.actionMove(eventX,eventY);
-                                if (hasExe)
+                                if (!mv.pressed())
                                     return false;
-                                dx = eventX - cx;
-                                dy = eventY - cy;
-                                dr = (float) Math.sqrt(dx * dx + dy * dy);
-                                if (dr > border) {
-                                    v.setRotation((dr - border) * rRotDrag);
-                                    if (!hasExited) {
-                                        handler.removeCallbacks(mLongPressed);
-                                        hasExited = true;
-                                    }
+                                dr = mv.setDrag(eventX,eventY);
+                                if (dr > 0) {
+                                    handler.removeCallbacks(mLongPressed);
                                     String abString = " $" + dr;
-                                    statusBar.setText(abString.isEmpty() ? comF.label : abString);
-                                } else if (hasExited) {
+                                    statusBar.setText(abString.isEmpty() ? task.label : abString);
+                                } else if (mv.hasExited())
                                     statusBar.setText("Cancel");
-                                    v.setRotation(0);
-                                }
                                 return true;
                             case MotionEvent.ACTION_UP:
-                                mv.unpress();
-                                v.setRotation(0);
-                                //overlay.actionUp(actionDownX,actionDownY);
-                                if (hasExe)
+                                if (!mv.pressed())
                                     return false;
+                                //overlay.actionUp(actionDownX,actionDownY);
                                 handler.removeCallbacks(mLongPressed);
-                                dx = eventX - cx;
-                                dy = eventY - cy;
-                                dr = (float) Math.sqrt(dx * dx + dy * dy);
-                                if (dr > border)
-                                    mListener.pushProc(Interval.newExpense(comF.color, System.currentTimeMillis() / 1000L, (long) (dr - border), 0, comF.label));
+                                dr = mv.setRelease(eventX,eventY);
+                                if (dr > 0)
+                                    mListener.pushProc(Interval.newExpense(task.color, System.currentTimeMillis() / 1000L, (long) dr, 0, task.label));
                                 else
                                     statusBar.setText(savedStatusText);
                                 return false;
                             case MotionEvent.ACTION_CANCEL:
                                 mv.unpress();
-                                v.setRotation(0);
                                 handler.removeCallbacks(mLongPressed);
                                 return false;
                             default:
@@ -341,23 +314,18 @@ public class TasksFrag extends Fragment {
                     } else {
                         switch (event.getActionMasked()) {
                             case MotionEvent.ACTION_DOWN:
-                                actionDownX = eventX;
-                                actionDownY = eventY;
+                                mv.press();
                                 v.getParent().requestDisallowInterceptTouchEvent(true);
-                                ((GradientDrawable) v.getBackground()).setColor(bg_Press);
-                                final View finalView = v;
-                                hasRun = hasDragged = false;
-                                statusBar.setText(comF.label);
+                                statusBar.setText(task.label);
                                 mLongPressed = new Runnable() {
                                     public void run() {
-                                        hasRun = true;
                                         statusBar.setText(savedStatusText);
-                                        ((GradientDrawable) finalView.getBackground()).setColor(bg_Norm);
+                                        mv.unpress();
                                         View promptView = inflater.inflate(R.layout.prompts, null);
                                         final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
-                                        commentEntry.setText(comF.label);
+                                        commentEntry.setText(task.label);
                                         final View curColorV = promptView.findViewById(R.id.CurColor);
-                                        curColorV.setBackgroundColor(comF.color);
+                                        curColorV.setBackgroundColor(task.color);
                                         final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
                                         final SeekBar seekRed = (SeekBar) promptView.findViewById(R.id.seekRed);
                                         final SeekBar seekGreen = (SeekBar) promptView.findViewById(R.id.seekGreen);
@@ -454,50 +422,34 @@ public class TasksFrag extends Fragment {
                                 handler.postDelayed(mLongPressed, 1200);
                                 return true;
                             case MotionEvent.ACTION_MOVE:
-                                if (hasRun)
+                                if (!mv.pressed())
                                     return false;
-                                int delay = (int) Math.abs((eventX - actionDownX) * rMinsDp);
-                                int duration = (int) Math.abs((eventY - actionDownY) * rMinsDp);
-                                delay = delay > cancelZone ? delay - cancelZone : 0;
-                                duration = duration > cancelZone ? duration - cancelZone : 0;
-                                if (duration != 0 || delay != 0) {
-                                    if (!hasDragged) {
-                                        handler.removeCallbacks(mLongPressed);
-                                        hasDragged = true;
-                                    }
+                                dr = mv.setDrag(eventX,eventY) * rMinsDp;
+                                if (dr > 0) {
+                                    handler.removeCallbacks(mLongPressed);
                                     String abString = "";
                                     long now = System.currentTimeMillis() / 1000L;
-                                    if (delay != 0)
-                                        abString += " already  " + Integer.toString(delay / 60) + ":" + String.format(Locale.US, "%02d", delay % 60)
-                                                + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay))) + ")";
-                                    if (duration != 0)
-                                        abString += " for " + Integer.toString(duration / 60) + ":" + String.format(Locale.US, "%02d", duration % 60)
-                                                + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * delay + 60 * duration))) + ")";
-                                    statusBar.setText(abString.isEmpty() ? comF.label : abString);
-                                } else if (hasDragged)
+                                    abString += " already  " + Integer.toString((int) (dr / 60)) + ":" + String.format(Locale.US, "%02d", (int) dr % 60)
+                                            + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (now - 60 * (long) dr))) + ")";
+                                    statusBar.setText(abString.isEmpty() ? task.label : abString);
+                                } else if (mv.hasExited())
                                     statusBar.setText("Cancel");
                                 return true;
                             case MotionEvent.ACTION_UP:
-                                if (hasRun)
+                                if (!mv.pressed())
                                     return false;
-                                ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
+                                //overlay.actionUp(actionDownX,actionDownY);
                                 handler.removeCallbacks(mLongPressed);
-                                delay = (int) Math.abs((eventX - actionDownX) * rMinsDp);
-                                duration = (int) Math.abs((eventY - actionDownY) * rMinsDp);
-                                delay = delay > cancelZone ? delay - cancelZone : 0;
-                                duration = duration > cancelZone ? duration - cancelZone : 0;
-                                if (delay != 0 || duration != 0 || !hasDragged) {
-                                    if (duration == 0) {
-                                        mListener.pushProc(Interval.newOngoingTask(comF.color, System.currentTimeMillis() / 1000L - delay * 60, comF.label));
-                                        setActiveTask(v);
-                                    } else
-                                        mListener.pushProc(Interval.newCompleted(comF.color, System.currentTimeMillis() / 1000L - delay * 60, duration * 60, comF.label));
+                                dr = mv.setRelease(eventX,eventY) * rMinsDp;
+                                if (dr != 0) {
+                                    mListener.pushProc(Interval.newOngoingTask(task.color, System.currentTimeMillis() / 1000L - (long) dr * 60, task.label));
+                                    setActiveTask(v);
                                 } else
                                     statusBar.setText(savedStatusText);
                                 return false;
                             case MotionEvent.ACTION_CANCEL:
                                 handler.removeCallbacks(mLongPressed);
-                                ((GradientDrawable) v.getBackground()).setColor(bg_Norm);
+                                mv.unpress();
                                 return false;
                             default:
                                 return true;
@@ -510,7 +462,7 @@ public class TasksFrag extends Fragment {
         final int bg_Press = Glob.darkenColor(bg_Norm,0.7f);
         final View endButton = inflater.inflate(R.layout.gv_list_item, null);
         buttons.addView(endButton,lp);
-        endButtonMonogram = (MonogramView) endButton.findViewById(R.id.text1);
+        endButtonMonogram = (MonogramView) endButton.findViewById(R.id.monogram);
             endButtonMonogram.init(Interval.tCAL,bg_Norm,"!");
         endButton.setOnTouchListener(new View.OnTouchListener() {
             private float actionDownX, actionDownY;
