@@ -2,14 +2,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:layout_flexShrink="0"
-    app:layout_minWidth = "75dp"
-    app:layout_minHeight="75dp"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:minWidth="75dp"
-    android:minHeight="75dp"
-    android:layout_margin="0dp"
-    android:padding="5dp">
+    android:layout_margin="0dp">
     <com.q335.r49.squaredays.MonogramView android:id="@+id/text1"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

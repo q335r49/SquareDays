@@ -16,7 +16,7 @@
         jumboMode="true"
         optimize="true"
         revision="24.0.3"
-        sha1="e11399b14e7a8c77133193f06c4d4c020200fc9e">
+        sha1="10ca08449cbe3585e35a378f93f3825704eb28ed">
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\instant-run_08abdd5ff122d3029e69f37e51543ddc0ab24230\classes.dex" />
     </item>
     <item
@@ -142,7 +142,7 @@
         jumboMode="true"
         optimize="true"
         revision="24.0.3"
-        sha1="136a8d5c6b64744a7e68317fb1c8d4e9881daf34">
+        sha1="a10f638f7da24cd2939832b20ab80028f0f70a83">
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\instant-run-bootstrap_3e680c2456ff9ca2ee2e8931a8ea30ecd74d24da\classes.dex" />
     </item>
     <item

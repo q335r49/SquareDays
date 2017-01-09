@@ -5,12 +5,13 @@ import android.graphics.Color;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.drawable.GradientDrawable;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
 public class MonogramView extends TextView {
     static float minMaxSize = 1000f;
-    private static final float[] FILTER = {
+    private static final float[] INV_FILTER = {
             -1, 0, 0, 0,255, // red
             0, -1, 0, 0,255, // green
             0,  0,-1, 0,255, // blue
@@ -27,7 +28,7 @@ public class MonogramView extends TextView {
     float originX, originY;
     Paint mPaint, ActivePaint;
     Rect bounds;
-    public boolean active;
+    private boolean active;
     public MonogramView(Context context, AttributeSet attrs) {
         super(context, attrs);
         mPaint = new Paint();
@@ -36,29 +37,35 @@ public class MonogramView extends TextView {
             mPaint.setTextSize(100f);
             mPaint.setTypeface(Glob.CommandFont);
             mPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-        ActivePaint = new Paint();
-            ActivePaint.setStyle(Paint.Style.FILL);
-            ActivePaint.setTypeface(Glob.CommandFont);
-            ActivePaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+        ActivePaint = new Paint(mPaint);
         bounds = new Rect();
     }
-    public void setColor(int color) {
-        ActivePaint.setColor(color);
-        if (Color.red(color) > 200 && Color.green(color) > 200 & Color.blue(color) > 200)
-            ActivePaint.setColor(0xFF888888);
-        else
-            ActivePaint.setColorFilter(new ColorMatrixColorFilter(FILTER));
+    public void init(int type, int color, String label) {
         mPaint.setColor(color);
-        mPaint.setColorFilter(new ColorMatrixColorFilter(NORM_FILTER));
+        super.setText(label);
+        if (type == Interval.tEXP) {
+            ActivePaint.setColor(Glob.invert(color));
+            if (Color.red(color) > 200 && Color.green(color) > 200 & Color.blue(color) > 200)
+                ActivePaint.setColor(0xFF888888);
+            else
+                ActivePaint.setColor(Glob.invert(color));
+        } else {
+            ActivePaint.setColor(color);
+            if (Color.red(color) > 200 && Color.green(color) > 200 & Color.blue(color) > 200)
+                ActivePaint.setColor(0xFF888888);
+            else {
+                ActivePaint.setColorFilter(new ColorMatrixColorFilter(INV_FILTER));
+            }
+            mPaint.setColorFilter(new ColorMatrixColorFilter(NORM_FILTER));
+            GradientDrawable rrect = new GradientDrawable();
+            rrect.setCornerRadius(Glob.rPxDp * 10f);
+            rrect.setColor(color);
+            setBackground(rrect);
+        }
     }
-    public void setStaticColor(int color) {
-        ActivePaint.setColor(color);
-        if (Color.red(color) > 200 && Color.green(color) > 200 & Color.blue(color) > 200)
-            ActivePaint.setColor(0xFF888888);
-        else
-            ActivePaint.setColorFilter(new ColorMatrixColorFilter(FILTER));
-        mPaint.setColor(color);
-    }
+    public void press() { active = true; invalidate(); }
+    public void unpress() { active = false; invalidate(); }
+    public boolean pressed() {return active;}
     @Override
     public void onDraw(Canvas canvas) {
         mPaint.setTextSize(minMaxSize);
@@ -70,7 +77,6 @@ public class MonogramView extends TextView {
             canvas.drawText(Monogram, originX, originY, mPaint);
         else {
             ActivePaint.setTextSize(minMaxSize);
-            ActivePaint.setStrokeWidth(minMaxSize/10f);
             canvas.drawText(Monogram, originX, originY, ActivePaint);
         }
     }

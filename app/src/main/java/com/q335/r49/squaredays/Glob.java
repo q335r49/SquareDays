@@ -25,6 +25,7 @@ class Glob {
     static Typeface CommandFont;
     static float rPxDp;
     static Paint pCancelZone;
+    static int COLOR_TRANSPARENT;
 
     static void init(Context context) {
         palette = new PaletteRing(PALLETTE_LENGTH);
@@ -33,6 +34,7 @@ class Glob {
                 "#8e44ad", "#2c3e50", "#f1c40f", "#e67e22", "#e74c3c", "#ecf0f1", "#95a5a6", "#f39c12",
                 "#d35400", "#c0392b", "#bdc3c7", "#7f8c8d", "#3b5999", "#21759b", "#dd4b39", "#bd081c"});
         Resources res = context.getResources();
+        COLOR_TRANSPARENT     = 0;
         COLOR_SCALE_TEXT      = ResourcesCompat.getColor(res, R.color.scale_text, null);
         COLOR_GRID_BACKGROUND = ResourcesCompat.getColor(res, R.color.grid_background, null);
         COLOR_NOW_LINE        = ResourcesCompat.getColor(res, R.color.now_line, null);
@@ -63,5 +65,8 @@ class Glob {
             Log.d("SquareDays","Bad color: " + s);
             return Glob.COLOR_ERROR;
         }
+    }
+    static int invert(int color) {
+        return Color.argb(255,Math.max(0,255 - Color.red(color)),Math.max(0,255 - Color.green(color)),Math.max(0,255 - Color.blue(color)));
     }
 }

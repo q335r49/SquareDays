@@ -11,7 +11,7 @@
         android:layout_above="@+id/fl"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/background"
+        android:background="@color/transparent"
         android:id="@+id/GV"
         app:flexDirection="row"
         app:flexWrap="wrap"
