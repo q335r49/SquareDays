@@ -14,7 +14,7 @@ public class HelpFrag extends DialogFragment {
     public static HelpFrag newInstance() { return new HelpFrag(); }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View mView = inflater.inflate(R.layout.fragment_help_scroller, container, false);
+        View mView = inflater.inflate(R.layout.help, container, false);
         ((WebView) mView.findViewById(R.id.webView)).loadUrl("file:///android_asset/help.html");
         return mView;
     }

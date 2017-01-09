@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+//TODO: Rotation should not show "negative space" -- set View background color
 public class MonogramView extends TextView implements View.OnTouchListener {
     private onTouch commands;
         public interface onTouch {

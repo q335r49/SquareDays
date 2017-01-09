@@ -26,7 +26,7 @@ public class CalendarFrag<T extends TimeWin> extends Fragment {
     void invalidate() { inputLayer.invalidate(); }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View frame = inflater.inflate(R.layout.fragment_calendar,container,false);
+        View frame = inflater.inflate(R.layout.calendar,container,false);
         inputLayer = (TouchView) (frame.findViewById(R.id.drawing));
         inputLayer.setClass(gClass);
         Calendar cal = new GregorianCalendar();

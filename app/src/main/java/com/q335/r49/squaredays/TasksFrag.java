@@ -32,7 +32,7 @@ import java.util.Locale;
 
 import static android.content.Context.MODE_PRIVATE;
 
-//TODO: Rotation should not show "negative space" -- set View background color
+
 //TODO: Prettify statusbar display (eliminate altogether)
 //TODO: Maybe somehow work the rotation into the active display??
 //TODO: Tasks toString and fromString; don't use GSON
@@ -71,7 +71,7 @@ public class TasksFrag extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.inflater = inflater;
-        View view = this.inflater.inflate(R.layout.fragment_commands,container, false);
+        View view = this.inflater.inflate(R.layout.tasks,container, false);
         buttons = (FlexboxLayout) view.findViewById(R.id.GV);
         overlay = (OverlayView) view.findViewById(R.id.ovl);
 
@@ -158,7 +158,7 @@ public class TasksFrag extends Fragment {
         for (int i = 0; i< tasks.size(); i++) {
             final Task task = tasks.get(i);
             final int ixF = i;
-            final View child = inflater.inflate(R.layout.gv_list_item, null);
+            final View child = inflater.inflate(R.layout.monogram, null);
             buttons.addView(child,lp);
             final MonogramView mv = (MonogramView) child.findViewById(R.id.monogram);
             final Handler handler = new Handler();
@@ -166,7 +166,7 @@ public class TasksFrag extends Fragment {
                 public void run() {
                     mv.unpress();
                     statusBar.setText(savedStatusText);
-                    View promptView = inflater.inflate(R.layout.prompts, null);
+                    View promptView = inflater.inflate(R.layout.edit_task, null);
                     final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
                     commentEntry.setText(task.label);
                     final View curColorV = promptView.findViewById(R.id.CurColor);
@@ -281,14 +281,14 @@ public class TasksFrag extends Fragment {
                 public void actionCancel() { handler.removeCallbacks(mLongPressed); }
             });
         }
-        final View endButton = inflater.inflate(R.layout.gv_list_item, null);
+        final View endButton = inflater.inflate(R.layout.monogram, null);
         buttons.addView(endButton,lp);
         endM = (MonogramView) endButton.findViewById(R.id.monogram);
         final Runnable mLongPressed = new Runnable() {
             public void run() {
                 endM.unpress();
                 statusBar.setText(savedStatusText);
-                final View promptView = inflater.inflate(R.layout.prompt_new_task, null);
+                final View promptView = inflater.inflate(R.layout.edit_new_task, null);
                 final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
                 final View curColorV = promptView.findViewById(R.id.CurColor);
                 final int curColor = ((ColorDrawable) curColorV.getBackground()).getColor();
@@ -391,7 +391,7 @@ public class TasksFrag extends Fragment {
             @Override
             public void actionCancel() { handler.removeCallbacks(mLongPressed); }
         });
-        View addButton = inflater.inflate(R.layout.gv_list_item, null);
+        View addButton = inflater.inflate(R.layout.monogram, null);
         buttons.addView(addButton,lp);
         prefs.edit().putString(prefsTasksKey, new Gson().toJson(tasks)).apply();
     }

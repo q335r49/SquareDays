@@ -79,7 +79,7 @@ public class TouchView<T extends TimeWin> extends View {
             if (selection == null)
                 return;
             LayoutInflater inflater = LayoutInflater.from(appContext);
-            View promptView = inflater.inflate(R.layout.edit_interval, null);
+            View promptView = inflater.inflate(R.layout.edit_time, null);
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(appContext);
             alertDialogBuilder.setView(promptView);
 
