@@ -18,29 +18,29 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.PopupMenu;
 import android.widget.Toast;
-
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-
 //TODO: ** Graphical tweaks:
 //TODO:     Gradient backgrounds
 //TODO:     Visually distinguish boxes with "extra" comments
 //TODO:     Momentum drag
 //TODO:     Menu color
+//TODO:     Update help
 //TODO: ** Settings:
 //TODO:     Different Visualization modes / no shrinking
 //TODO:     Maximum expenses
+//TODO:     Fonts, colors
 //TODO: ** Optimizations:
 //TODO:     Append flag
 //TODO:     Process only onscreen
 //TODO: ** Networking
 //TODO      Backup to google drive
+//TODO: ** Extras
 //TODO:     Font License
-
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {
     Context context;
     SharedPreferences prefs;

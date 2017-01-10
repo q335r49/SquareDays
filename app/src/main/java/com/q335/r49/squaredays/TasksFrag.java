@@ -29,10 +29,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import static android.content.Context.MODE_PRIVATE;
-//TODO: Prettify statusbar display (eliminate altogether) + font
-//TODO: Normalize drag
-//TODO: Tasks toString and fromString; don't use GSON
-//TODO: refresh active task on activate
+
 public class TasksFrag extends Fragment {
     static final String prefsTasksKey = "tasks_1.0";
     private static float rExpDrag, rTimeDrag;
@@ -57,15 +54,26 @@ public class TasksFrag extends Fragment {
     private TextView statusBar;
         private String savedStatusText = "";
         void setSavedAB(Interval le) {
-            savedStatusText = le != null ? le.label + " @" + (new SimpleDateFormat(" h:mm", Locale.US).format(new Date(le.start * 1000L))) : "";
+            savedStatusText = le != null ? le.label + " - " + (new SimpleDateFormat("h:mm a", Locale.US).format(new Date(le.start * 1000L))) : "";
             statusBar.setText(savedStatusText);
         }
+        private void setStatusBarDragTime(long time) {
+        statusBar.setText(new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (System.currentTimeMillis() / 1000L - time)))
+                + " ("
+                + Integer.toString((int) time / 3600) + ":" + String.format(Locale.US, "%02d", (time / 60) % 60)
+                + " ago)");
+    }
     private List<Task> tasks = new ArrayList<>();
     private LayoutInflater inflater;
     private MonogramView activeView;
     private MonogramView endM;
     public OverlayView overlay;
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshActiveTask();
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -241,7 +249,7 @@ public class TasksFrag extends Fragment {
                             .setPositiveButton("Update", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-                                    tasks.set(ixF, new Task(commentEntry.getText().toString(), newColor, Interval.tEXP));
+                                    tasks.set(ixF, new Task(commentEntry.getText().toString(), newColor, task.type));
                                     Glob.palette.add(newColor);
                                     makeView();
                                 }
@@ -302,7 +310,7 @@ public class TasksFrag extends Fragment {
                         long time = (long) (d * rTimeDrag);
                         if (time > 0) {
                             handler.removeCallbacks(mLongPressed);
-                            setStatusBar(time);
+                            setStatusBarDragTime(time);
                         } else if (mv.hasExited())
                             statusBar.setText(task.label);
                     }
@@ -425,7 +433,7 @@ public class TasksFrag extends Fragment {
                 long time = (long) (d * rTimeDrag);
                 if (time > 0) {
                     handler.removeCallbacks(mLongPressed);
-                    setStatusBar(time);
+                    setStatusBarDragTime(time);
                 } else if (endM.hasExited())
                     statusBar.setText("Cancel");
             }
@@ -444,12 +452,6 @@ public class TasksFrag extends Fragment {
         buttons.addView(statView,lp);
 
         prefs.edit().putString(prefsTasksKey, new Gson().toJson(tasks)).apply();
-    }
-    private void setStatusBar(long time) {
-        statusBar.setText(new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (System.currentTimeMillis() / 1000L - time)))
-                + " ("
-                + Integer.toString((int) time / 3600) + ":" + String.format(Locale.US, "%02d", (time / 60) % 60)
-                + " ago)");
     }
     public TasksFrag() { }
     @Override
