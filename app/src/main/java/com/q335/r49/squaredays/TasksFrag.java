@@ -424,9 +424,9 @@ public class TasksFrag extends Fragment {
         };
         final Handler handler = new Handler();
         endM.setRRotDrag(rRotSec*rTimeDrag);
-        endM.init(Glob.invert(Glob.COLOR_END_BOX,0.2f), "0", new MonogramView.onTouch() {
+        endM.init(Glob.invert(Glob.COLOR_END_BOX,0.2f), "!", new MonogramView.onTouch() {
             @Override
-            public void actionDown() { handler.postDelayed(mLongPressed, longPressDelay); } //TODO: Make long-press delay static int;
+            public void actionDown() { handler.postDelayed(mLongPressed, longPressDelay); }
             @Override
             public void actionMove(float d) {
                 long time = (long) (d * rTimeDrag);

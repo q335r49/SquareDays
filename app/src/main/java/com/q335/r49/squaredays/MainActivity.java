@@ -24,12 +24,10 @@ import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-//TODO: ** Graphical tweaks:
-//TODO:     Gradient backgrounds
+//TODO:     Update help
 //TODO:     Visually distinguish boxes with "extra" comments
 //TODO:     Momentum drag
 //TODO:     Menu color
-//TODO:     Update help
 //TODO: ** Settings:
 //TODO:     Different Visualization modes / no shrinking
 //TODO:     Maximum expenses
@@ -41,6 +39,9 @@ import java.util.Queue;
 //TODO      Backup to google drive
 //TODO: ** Extras
 //TODO:     Font License
+
+//TODO:     Gradient backgrounds
+
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {
     Context context;
     SharedPreferences prefs;
