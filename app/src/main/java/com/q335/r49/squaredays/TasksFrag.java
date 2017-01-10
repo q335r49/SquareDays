@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Locale;
 import static android.content.Context.MODE_PRIVATE;
 //TODO: Prettify statusbar display (eliminate altogether)
-//TODO: Maybe somehow work the rotation into the active display??
 //TODO: Tasks toString and fromString; don't use GSON
 public class TasksFrag extends Fragment {
     static final String prefsTasksKey = "tasks_1.0";
@@ -114,13 +113,13 @@ public class TasksFrag extends Fragment {
     }
     public static final float rRotSec = 360f/86400f;
     private long activeSince;
-    public void setActiveTask(MonogramView v, long time) {
+    public void setActiveTask(MonogramView v, long since) {
         if (activeView != null)
             activeView.deactivate();
-        else if (endM != null && endM.pressed())
+        else if (endM != null && endM.isActive())
             endM.deactivate();
         activeView = v;
-        activeSince = time;
+        activeSince = since;
         activeView.activate(activeSince < 0 ? 0f : (System.currentTimeMillis()/1000L - activeSince) * rRotSec);
     }
     public void clearActiveTask() {
@@ -300,12 +299,12 @@ public class TasksFrag extends Fragment {
                     @Override
                     public void actionUp(float d) {
                         handler.removeCallbacks(mLongPressed);
-                        if (d > 0) {
+                        if (d > 0 || !mv.hasExited()) {
                             long time = System.currentTimeMillis() / 1000L - (long) d * 60L;
                             mListener.pushProc(Interval.newOngoingTask(task.color, time, task.label));
                             setActiveTask(mv, time);
-                        } else
-                            statusBar.setText(savedStatusText);
+                        }
+                        statusBar.setText(savedStatusText);
                     }
                     @Override
                     public void actionCancel() { handler.removeCallbacks(mLongPressed); }

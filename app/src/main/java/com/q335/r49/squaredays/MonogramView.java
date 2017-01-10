@@ -74,18 +74,20 @@ public class MonogramView extends TextView implements View.OnTouchListener {
                     return false;
             case MotionEvent.ACTION_UP:
                 if (state == PRESSED) {
+                    state = INACTIVE;
                     dragDist = (float) Math.max(0, Math.sqrt((X - rx0) * (X - rx0) + (Y - ry0) * (Y - ry0)) - rEdge);
                     setRotation(0);
-                    invalidate();
                     listener.actionUp(dragDist);
+                    invalidate();
                 }
-                state = INACTIVE;
                 return false;
             case MotionEvent.ACTION_CANCEL:
-                state = INACTIVE;
-                setRotation(0);
-                invalidate();
-                listener.actionCancel();
+                if (state == PRESSED) {
+                    state = INACTIVE;
+                    setRotation(0);
+                    listener.actionCancel();
+                    invalidate();
+                }
                 return false;
             default:
                 return true;
@@ -98,9 +100,10 @@ public class MonogramView extends TextView implements View.OnTouchListener {
     }
     public void deactivate() {
         state = INACTIVE;
+        setRotation(0);
         invalidate();
     }
-    public boolean pressed() { return state == PRESSED; }
+    public boolean isActive() { return state != INACTIVE; }
     public boolean hasExited() { return hasExited; }
     private Rect bounds;
     @Override
