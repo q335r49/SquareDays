@@ -11,7 +11,8 @@ import android.widget.TextView;
 
 //TODO: Active tasks should show "rotation"
 public class MonogramView extends TextView implements View.OnTouchListener {
-    private static float rRotDrag = 0.6f;
+    private float rRotDrag = 0.6f;
+        public void setNoRotate() { rRotDrag = 0f; }
     public interface onTouch {
         void actionDown();
         void actionMove(float dist);
@@ -30,6 +31,7 @@ public class MonogramView extends TextView implements View.OnTouchListener {
     private boolean hasExited;
     private String monogram;
 
+    float border = 10f * Glob.rPxDp;
     public MonogramView(Context context, AttributeSet attrs) {
         super(context, attrs);
         pNorm = new Paint();
@@ -40,6 +42,7 @@ public class MonogramView extends TextView implements View.OnTouchListener {
         pActive = new Paint(pNorm);
         bounds = new Rect();
     }
+
     public void init(int color, String label, onTouch listener) {
         pNorm.setColor(color);
         super.setText(label);
@@ -49,6 +52,8 @@ public class MonogramView extends TextView implements View.OnTouchListener {
         else pActive.setColor(Glob.invert(color));
         setOnTouchListener(this);
     }
+    float prevD;
+    float curD;
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         float X = event.getX();
@@ -58,17 +63,29 @@ public class MonogramView extends TextView implements View.OnTouchListener {
             case MotionEvent.ACTION_DOWN:
                 state = PRESSED;
                 hasExited = false;
-                v.getParent().requestDisallowInterceptTouchEvent(true);
+                if (rRotDrag != 0)
+                    v.getParent().requestDisallowInterceptTouchEvent(true);
                 invalidate();
                 listener.actionDown();
+                prevD = 0f;
+                curD = 0f;
                 return true;
             case MotionEvent.ACTION_MOVE:
                 if (state == PRESSED) {
-                    dragDist = (float) Math.max(0, Math.sqrt((X - rx0) * (X - rx0) + (Y - ry0) * (Y - ry0)) - rEdge);
-                    if (dragDist > 0)
+                    float rawD = (float) Math.max(0, Math.sqrt((X - rx0) * (X - rx0) + (Y - ry0) * (Y - ry0)) - rEdge);
+                    if (rawD > 0)
                         hasExited = true;
-                    setRotation(dragDist * rRotDrag);
-                    listener.actionMove(dragDist);
+                    float rawX = event.getRawX();
+                    float rawY = event.getRawY();
+                    if (rawX < border || rawY < border || rawX > Glob.SCREEN_WIDTH - border || rawY > Glob.SCREEN_HEIGHT - border)
+                        curD += Glob.SCREEN_WIDTH / 20;
+                    else if (rawD >= prevD)
+                        curD += rawD - prevD;
+                    else if (rawD < prevD)
+                        curD -= prevD - rawD;
+                    prevD = rawD;
+                    setRotation(curD * rRotDrag);
+                    listener.actionMove(curD);
                     return true;
                 } else
                     return false;

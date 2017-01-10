@@ -29,8 +29,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import static android.content.Context.MODE_PRIVATE;
-//TODO: Prettify statusbar display (eliminate altogether)
+//TODO: Prettify statusbar display (eliminate altogether) + font
 //TODO: Tasks toString and fromString; don't use GSON
+//TODO: refresh active task on activate
 public class TasksFrag extends Fragment {
     static final String prefsTasksKey = "tasks_1.0";
     SharedPreferences prefs;
@@ -253,7 +254,7 @@ public class TasksFrag extends Fragment {
                             .create().show();
                 }
             };
-            if (task.type == Interval.tEXP) {
+            if (task.type == Interval.tEXP)
                 mv.init(task.color, task.label, new MonogramView.onTouch() {
                     @Override
                     public void actionDown() {
@@ -268,7 +269,6 @@ public class TasksFrag extends Fragment {
                         } else if (mv.hasExited())
                             statusBar.setText("Cancel");
                     }
-
                     @Override
                     public void actionUp(float d) {
                         handler.removeCallbacks(mLongPressed);
@@ -280,7 +280,7 @@ public class TasksFrag extends Fragment {
                     @Override
                     public void actionCancel() { handler.removeCallbacks(mLongPressed); }
                 });
-            } else {
+            else
                 mv.init(Glob.invert(task.color, 0.4f), task.label, new MonogramView.onTouch() {
                     @Override
                     public void actionDown() {
@@ -309,8 +309,8 @@ public class TasksFrag extends Fragment {
                     @Override
                     public void actionCancel() { handler.removeCallbacks(mLongPressed); }
                 });
-            }
         }
+
         final View endButton = inflater.inflate(R.layout.monogram, null);
             endButton.setBackground(getRRect(Glob.COLOR_END_BOX));
         buttons.addView(endButton,lp);
@@ -382,26 +382,25 @@ public class TasksFrag extends Fragment {
                 final AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getContext());
                 alertDialogBuilder.setView(promptView);
                 alertDialogBuilder
-                        .setCancelable(true)
-                        .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
-                                tasks.add(new Task(commentEntry.getText().toString(), newColor, checkbox.isChecked()? Interval.tEXP : Interval.tCAL));
-                                Glob.palette.add(newColor);
-                                makeView();
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        })
-                        .create().show();
-
+                    .setCancelable(true)
+                    .setPositiveButton("Add Entry", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            int newColor = ((ColorDrawable) curColorV.getBackground()).getColor();
+                            tasks.add(new Task(commentEntry.getText().toString(), newColor, checkbox.isChecked()? Interval.tEXP : Interval.tCAL));
+                            Glob.palette.add(newColor);
+                            makeView();
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    })
+                    .create().show();
             }
         };
         final Handler handler = new Handler();
-        endM.init(Glob.invert(Glob.COLOR_END_BOX,0.2f), "!", new MonogramView.onTouch() {
+        endM.init(Glob.invert(Glob.COLOR_END_BOX,0.2f), "0", new MonogramView.onTouch() {
             @Override
             public void actionDown() { handler.postDelayed(mLongPressed, 1200); } //TODO: Make long-press delay static int;
             @Override
@@ -423,8 +422,10 @@ public class TasksFrag extends Fragment {
             @Override
             public void actionCancel() { handler.removeCallbacks(mLongPressed); }
         });
-        View addButton = inflater.inflate(R.layout.monogram, null);
-        buttons.addView(addButton,lp);
+
+        View statView = inflater.inflate(R.layout.monogram, null);
+        buttons.addView(statView,lp);
+
         prefs.edit().putString(prefsTasksKey, new Gson().toJson(tasks)).apply();
     }
     public TasksFrag() { }

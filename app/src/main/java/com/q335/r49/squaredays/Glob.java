@@ -5,7 +5,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.support.v4.content.res.ResourcesCompat;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.WindowManager;
 
 class Glob {
     static PaletteRing palette;
@@ -25,6 +27,9 @@ class Glob {
     static float rPxDp;
     static Paint pCancelZone;
     static int COLOR_TRANSPARENT;
+
+    static int SCREEN_WIDTH;
+    static int SCREEN_HEIGHT;
 
     static void init(Context context) {
         palette = new PaletteRing(PALLETTE_LENGTH);
@@ -50,6 +55,12 @@ class Glob {
 
         pCancelZone = new Paint();
         pCancelZone.setColor(COLOR_PRIMARY_DARK);
+
+        DisplayMetrics metrics = new DisplayMetrics();
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        windowManager.getDefaultDisplay().getMetrics(metrics);
+        SCREEN_WIDTH = metrics.widthPixels;
+        SCREEN_HEIGHT = metrics.heightPixels;
     }
     static int darkenColor(int color, float factor) {
         return Color.argb(Color.alpha(color),
