@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 public class MonogramView extends TextView implements View.OnTouchListener {
     private float rRotDrag = 0.6f;
-        public void setNoRotate() { rRotDrag = 0f; }
+        public void setRRotDrag(float ratio) { rRotDrag = ratio; }
     public interface onTouch {
         void actionDown();
         void actionMove(float dist);
@@ -30,7 +30,7 @@ public class MonogramView extends TextView implements View.OnTouchListener {
     private boolean hasExited;
     private String monogram;
 
-    float border = 10f * Glob.rPxDp;
+    float border = 20f * Glob.rPxDp;
     public MonogramView(Context context, AttributeSet attrs) {
         super(context, attrs);
         pNorm = new Paint();
@@ -78,6 +78,7 @@ public class MonogramView extends TextView implements View.OnTouchListener {
                         float rawX = event.getRawX();
                         float rawY = event.getRawY();
                         curD += (rawX < border || rawY < border || rawX > Glob.SCREEN_WIDTH - border || rawY > Glob.SCREEN_HEIGHT - border) ? Math.abs(newD - prevD) : newD - prevD;
+                        if (curD < 0) curD = 0;
                     }
                     prevD = newD;
                     setRotation(curD * rRotDrag);
@@ -89,9 +90,7 @@ public class MonogramView extends TextView implements View.OnTouchListener {
                 if (state == PRESSED) {
                     state = INACTIVE;
                     setRotation(0);
-                    float X = event.getX();
-                    float Y = event.getY();
-                    listener.actionUp((float) Math.max(0, Math.sqrt((X - rx0) * (X - rx0) + (Y - ry0) * (Y - ry0)) - rEdge));
+                    listener.actionUp(curD);
                     invalidate();
                 }
                 return false;

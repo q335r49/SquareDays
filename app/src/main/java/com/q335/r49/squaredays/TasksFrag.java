@@ -35,6 +35,7 @@ import static android.content.Context.MODE_PRIVATE;
 //TODO: refresh active task on activate
 public class TasksFrag extends Fragment {
     static final String prefsTasksKey = "tasks_1.0";
+    private static float rExpDrag, rTimeDrag;
     SharedPreferences prefs;
     public interface OnFragmentInteractionListener {
         void pushProc(Interval log);
@@ -63,9 +64,12 @@ public class TasksFrag extends Fragment {
     private MonogramView activeView;
     private MonogramView endM;
     public OverlayView overlay;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        rExpDrag = 2f * Glob.rPxDp;
+        rTimeDrag = 10f * Glob.rPxDp ;
         this.inflater = inflater;
         View view = this.inflater.inflate(R.layout.tasks,container, false);
         buttons = (FlexboxLayout) view.findViewById(R.id.GV);
@@ -144,8 +148,6 @@ public class TasksFrag extends Fragment {
         rrect.setColor(color);
         return rrect;
     }
-    private static float rExpDrag = 2f;
-    private static float rTimeDrag = 10f;
     private void makeView() {
         Collections.sort(tasks, new Comparator<Task>() {
             public int compare(Task t1, Task t2) {
@@ -286,13 +288,15 @@ public class TasksFrag extends Fragment {
                     @Override
                     public void actionCancel() { handler.removeCallbacks(mLongPressed); }
                 });
-            else
+            else {
+                mv.setRRotDrag(rRotSec*rTimeDrag);
                 mv.init(Glob.invert(task.color, 0.4f), task.label, new MonogramView.onTouch() {
                     @Override
                     public void actionDown() {
                         statusBar.setText(task.label);
                         handler.postDelayed(mLongPressed, 1200);
                     }
+
                     @Override
                     public void actionMove(float d) {
                         long time = (long) (d * rTimeDrag);
@@ -303,6 +307,7 @@ public class TasksFrag extends Fragment {
                         } else if (mv.hasExited())
                             statusBar.setText(task.label);
                     }
+
                     @Override
                     public void actionUp(float d) {
                         handler.removeCallbacks(mLongPressed);
@@ -314,9 +319,13 @@ public class TasksFrag extends Fragment {
                         }
                         statusBar.setText(savedStatusText);
                     }
+
                     @Override
-                    public void actionCancel() { handler.removeCallbacks(mLongPressed); }
+                    public void actionCancel() {
+                        handler.removeCallbacks(mLongPressed);
+                    }
                 });
+            }
         }
 
         final View endButton = inflater.inflate(R.layout.monogram, null);
@@ -408,6 +417,7 @@ public class TasksFrag extends Fragment {
             }
         };
         final Handler handler = new Handler();
+        endM.setRRotDrag(rRotSec*rTimeDrag);
         endM.init(Glob.invert(Glob.COLOR_END_BOX,0.2f), "0", new MonogramView.onTouch() {
             @Override
             public void actionDown() { handler.postDelayed(mLongPressed, 1200); } //TODO: Make long-press delay static int;
