@@ -34,6 +34,7 @@ public class TasksFrag extends Fragment {
     static final String prefsTasksKey = "tasks_1.0";
     private static float rExpDrag, rTimeDrag;
     public static final float rRotSec = 360f/3600f;
+    private static int longPressDelay = 1200;
     SharedPreferences prefs;
     public interface OnFragmentInteractionListener {
         void pushProc(Interval log);
@@ -271,7 +272,7 @@ public class TasksFrag extends Fragment {
                     @Override
                     public void actionDown() {
                         statusBar.setText(task.label);
-                        handler.postDelayed(mLongPressed, 1200);
+                        handler.postDelayed(mLongPressed, longPressDelay);
                     }
                     @Override
                     public void actionMove(float d) {
@@ -300,7 +301,7 @@ public class TasksFrag extends Fragment {
                     @Override
                     public void actionDown() {
                         statusBar.setText(task.label);
-                        handler.postDelayed(mLongPressed, 1200);
+                        handler.postDelayed(mLongPressed, longPressDelay);
                     }
 
                     @Override
@@ -425,7 +426,7 @@ public class TasksFrag extends Fragment {
         endM.setRRotDrag(rRotSec*rTimeDrag);
         endM.init(Glob.invert(Glob.COLOR_END_BOX,0.2f), "0", new MonogramView.onTouch() {
             @Override
-            public void actionDown() { handler.postDelayed(mLongPressed, 1200); } //TODO: Make long-press delay static int;
+            public void actionDown() { handler.postDelayed(mLongPressed, longPressDelay); } //TODO: Make long-press delay static int;
             @Override
             public void actionMove(float d) {
                 long time = (long) (d * rTimeDrag);
