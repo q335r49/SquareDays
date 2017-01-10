@@ -43,6 +43,7 @@ import java.util.Queue;
 //TODO:     Process only onscreen
 //TODO: ** Networking
 //TODO      Backup to google drive
+//TODO:     Font License
 
 public class MainActivity extends AppCompatActivity implements TasksFrag.OnFragmentInteractionListener, CalendarFrag.OnFragmentInteractionListener,PopupMenu.OnMenuItemClickListener  {
     Context context;

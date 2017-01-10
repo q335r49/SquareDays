@@ -24,6 +24,7 @@ class Glob {
     static int COLOR_EXP_GRID;
     static int COLOR_CANCEL_ZONE;
     static Typeface CommandFont;
+    static Typeface StatusFont;
     static float rPxDp;
     static Paint pCancelZone;
     static int COLOR_TRANSPARENT;
@@ -50,23 +51,17 @@ class Glob {
         COLOR_PRIMARY_DARK    = ResourcesCompat.getColor(res, R.color.colorPrimaryDark, null);
         COLOR_EXP_GRID        = ResourcesCompat.getColor(res, R.color.exp_grid_background, null);
         COLOR_CANCEL_ZONE     = ResourcesCompat.getColor(res, R.color.cancel_zone, null);
-        CommandFont           = Typeface.createFromAsset(context.getAssets(),  "fonts/22203___.TTF");
+        CommandFont           = Typeface.createFromAsset(context.getAssets(), "fonts/22203___.TTF");
+        StatusFont           = Typeface.createFromAsset(context.getAssets(),  "fonts/Simpleness.otf");
         rPxDp                 = 0.75f * context.getResources().getDisplayMetrics().density;
 
         pCancelZone = new Paint();
         pCancelZone.setColor(COLOR_PRIMARY_DARK);
 
         DisplayMetrics metrics = new DisplayMetrics();
-        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-        windowManager.getDefaultDisplay().getMetrics(metrics);
+        ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getMetrics(metrics);
         SCREEN_WIDTH = metrics.widthPixels;
         SCREEN_HEIGHT = metrics.heightPixels;
-    }
-    static int darkenColor(int color, float factor) {
-        return Color.argb(Color.alpha(color),
-                Math.min(Math.round(Color.red(color) * factor),255),
-                Math.min(Math.round(Color.green(color) * factor),255),
-                Math.min(Math.round(Color.blue(color) * factor),255));
     }
     static int parseColor(String s) {
         try { return Color.parseColor(s);

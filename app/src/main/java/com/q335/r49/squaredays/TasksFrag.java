@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import static android.content.Context.MODE_PRIVATE;
 //TODO: Prettify statusbar display (eliminate altogether) + font
+//TODO: Normalize drag
 //TODO: Tasks toString and fromString; don't use GSON
 //TODO: refresh active task on activate
 public class TasksFrag extends Fragment {
@@ -73,6 +74,7 @@ public class TasksFrag extends Fragment {
             statusBar.setEllipsize(TextUtils.TruncateAt.START);
             statusBar.setHorizontallyScrolling(false);
             statusBar.setSingleLine();
+            statusBar.setTypeface(Glob.StatusFont);
         final Context context = getActivity().getApplicationContext();
         view.findViewById(R.id.settings).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -267,7 +269,7 @@ public class TasksFrag extends Fragment {
                             handler.removeCallbacks(mLongPressed);
                             statusBar.setText(" $" + d);
                         } else if (mv.hasExited())
-                            statusBar.setText("Cancel");
+                            statusBar.setText("cancel");
                     }
                     @Override
                     public void actionUp(float d) {
