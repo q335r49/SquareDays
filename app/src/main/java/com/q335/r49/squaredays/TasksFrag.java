@@ -36,6 +36,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class TasksFrag extends Fragment {
     static final String prefsTasksKey = "tasks_1.0";
     private static float rExpDrag, rTimeDrag;
+    public static final float rRotSec = 360f/3600f;
     SharedPreferences prefs;
     public interface OnFragmentInteractionListener {
         void pushProc(Interval log);
@@ -118,7 +119,6 @@ public class TasksFrag extends Fragment {
             break;
         }
     }
-    public static final float rRotSec = 360f/86400f;
     private long activeSince;
     public void setActiveTask(MonogramView v, long since) {
         if (activeView != null)
@@ -302,8 +302,7 @@ public class TasksFrag extends Fragment {
                         long time = (long) (d * rTimeDrag);
                         if (time > 0) {
                             handler.removeCallbacks(mLongPressed);
-                            statusBar.setText(" already  " + Integer.toString((int) time / 3600) + ":" + String.format(Locale.US, "%02d", (time / 60) % 60)
-                                    + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (System.currentTimeMillis() / 1000L - time))) + ")");
+                            setStatusBar(time);
                         } else if (mv.hasExited())
                             statusBar.setText(task.label);
                     }
@@ -426,8 +425,7 @@ public class TasksFrag extends Fragment {
                 long time = (long) (d * rTimeDrag);
                 if (time > 0) {
                     handler.removeCallbacks(mLongPressed);
-                    statusBar.setText(" already  " + Integer.toString((int) time / 3600) + ":" + String.format(Locale.US, "%02d", (time / 60) % 60)
-                            + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (System.currentTimeMillis() / 1000L - time))) + ")");
+                    setStatusBar(time);
                 } else if (endM.hasExited())
                     statusBar.setText("Cancel");
             }
@@ -446,6 +444,12 @@ public class TasksFrag extends Fragment {
         buttons.addView(statView,lp);
 
         prefs.edit().putString(prefsTasksKey, new Gson().toJson(tasks)).apply();
+    }
+    private void setStatusBar(long time) {
+        statusBar.setText(new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (System.currentTimeMillis() / 1000L - time)))
+                + " ("
+                + Integer.toString((int) time / 3600) + ":" + String.format(Locale.US, "%02d", (time / 60) % 60)
+                + " ago)");
     }
     public TasksFrag() { }
     @Override

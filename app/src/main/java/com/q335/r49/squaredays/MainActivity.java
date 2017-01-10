@@ -26,14 +26,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
-//TODO: ** Implement border auto-increment
-//TODO:     Normalize Expenses
 //TODO: ** Graphical tweaks:
-//TODO:     Invert Expenses
 //TODO:     Gradient backgrounds
 //TODO:     Visually distinguish boxes with "extra" comments
 //TODO:     Momentum drag
-//TODO:     Vertical drag is comment for expenses
 //TODO:     Menu color
 //TODO: ** Settings:
 //TODO:     Different Visualization modes / no shrinking
