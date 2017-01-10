@@ -11,24 +11,6 @@
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\com.google.firebase-firebase-common-9.8.0_48b196db957c4acb1cc4fad7fc2743ce2692d838.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-core-ui\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="26674000177e45447a0326a6ad84612761199a13">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.android.support-support-core-ui-25.0.0_14e4f67fe301260080dd6d0b4b2bf740a1410255\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\incremental-runtime-classes\release\instant-run.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="3aa9c6e3c89e5eae91333e275eddc6f8dfa63f3c">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\instant-run_08abdd5ff122d3029e69f37e51543ddc0ab24230\classes.dex" />
-    </item>
-    <item
         is-multidex="false"
         jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-v4\25.0.0\jars\classes.jar"
         jumboMode="false"
@@ -36,33 +18,6 @@
         revision="24.0.3"
         sha1="d7c42c80f6509b9ea4db28ca7859ffae08ec5741">
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\com.android.support-support-v4-25.0.0_d2e94f617f2878736633a33fcf1f5f3f8a7ef69d.jar" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AppData\Local\Android\sdk\extras\android\m2repository\com\android\support\support-annotations\25.0.0\support-annotations-25.0.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="a22d2cc94da87b254451fa8ed28afc30b4653773">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\support-annotations-25.0.0_fd488f2bf383bdc86190e4de857ad07ce90811e6\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="8bc45ce1f63d1a391fd38b32a201be5a42f9c95d">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.android.support-appcompat-v7-25.0.0_94445bd26da82d858073642be43aac3534935085\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-basement\9.8.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="9f6d236bac26d02b410e4ee186ba517ace5ee661">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.google.android.gms-play-services-basement-9.8.0_c48a3e16a896d86119cbdbc3f036537c5cc7444e\classes.dex" />
     </item>
     <item
         is-multidex="false"
@@ -74,51 +29,6 @@
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\com.google.android.gms-play-services-appindexing-9.8.0_50be3cf7961b0e1c37a1f84fed921d675358f232.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-core-utils\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="4ccbcda5c72027c7f7c14be9ff8640d9cb0d8da0">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.android.support-support-core-utils-25.0.0_dadd63cb1e9941dfe65ddd7ce945b29f9b1c361d\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-tasks\9.8.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="bf2e1838e4428616c1aa26edf43de72b5b99bf84">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.google.android.gms-play-services-tasks-9.8.0_ed3516b2a814934b7aaef1d650a70d97e6384e09\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-compat\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="75b1f366ff0bbc78f8b1f7cf0dc82e7c53afef6a">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.android.support-support-compat-25.0.0_d760175678182ffdd2a7e2df35b09bbbae43b66a\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-fragment\25.0.0\jars\libs\internal_impl-25.0.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="ee5faf4dee5b6a4364bf51587871047dde7c703a">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\internal_impl-25.0.0_87f55e7522f78945513cea8c534919a7c87957d5\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-compat\25.0.0\jars\libs\internal_impl-25.0.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="f2e3b9bc1ec25f652e8007ce7774c991e38f6a00">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\internal_impl-25.0.0_258fcc1a4961325dc6957d95af8f8ce4faa6d908\classes.dex" />
-    </item>
-    <item
         is-multidex="false"
         jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\animated-vector-drawable\25.0.0\jars\classes.jar"
         jumboMode="false"
@@ -126,15 +36,6 @@
         revision="24.0.3"
         sha1="53a420cd4f49274db6bd43475f8006ba67ef6bbd">
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\com.android.support-animated-vector-drawable-25.0.0_99aab3f3eec89f6a93c35e183fa9fba91f355aa4.jar" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.github.tobiasbuchholz\circularviewpager\1.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="87412a90cba15002b319491b62b43786325e4ea6">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.github.tobiasbuchholz-circularviewpager-1.0.0_9b9760d48483f18287de7cc8f35c761e390b8325\classes.dex" />
     </item>
     <item
         is-multidex="false"
@@ -173,15 +74,6 @@
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\com.google.android-flexbox-0.2.5_6de7f1a174af1fc58302dd2052025ded131dc561.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-fragment\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="07daa0b6e1d455c82a38422ffe287c18823d339a">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.android.support-support-fragment-25.0.0_3d9c0e032c94a983fc42ab1174c05acfab05caf1\classes.dex" />
-    </item>
-    <item
         is-multidex="false"
         jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-core-ui\25.0.0\jars\libs\internal_impl-25.0.0.jar"
         jumboMode="false"
@@ -189,15 +81,6 @@
         revision="24.0.3"
         sha1="e5343c9d19cb19ff55f6b268c7f3fe8c9d224f6f">
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\internal_impl-25.0.0_42b1d64b17d5baf6ac7adcd7f7bc5fd44483447f.jar" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-base\9.8.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="7e92aadd0697922316d1395c1887a23aebec640a">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.google.android.gms-play-services-base-9.8.0_c27a161f16cca4f528aaa6a4eeaa3f46d2d4bc0a\classes.dex" />
     </item>
     <item
         is-multidex="false"
@@ -209,15 +92,6 @@
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\guava-20.0_20234334f942f9c86a73216314e29473816aad5b.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\libs\gson-2.7.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="751f548c85fa49f330cecbb1875893f971b33c4e">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\2\gson-2.7_8d07a3a462b472ecf7d4e59633fa71a0fda5ae2c\classes.dex" />
-    </item>
-    <item
         is-multidex="false"
         jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\24.2.1\jars\classes.jar"
         jumboMode="false"
@@ -225,15 +99,6 @@
         revision="24.0.3"
         sha1="7521486d9bfd2cd9e756e0cf75ed7d97f2ce2d3b">
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\com.android.support-recyclerview-v7-24.2.1_4ddcd06a547b9b1a9eb9231803e5c42fd68a754a.jar" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-vector-drawable\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="d29714cc76b38157e3cbd034c66e1ec808eb4c19">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.android.support-support-vector-drawable-25.0.0_f5261f9c5af4071cc4f03cc88e32f5d635ba5d20\classes.dex" />
     </item>
     <item
         is-multidex="false"
@@ -245,33 +110,6 @@
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\com.android.support-support-core-ui-25.0.0_14e4f67fe301260080dd6d0b4b2bf740a1410255.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\incremental-classes\release\instant-run-bootstrap.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="0bc0ed326b45bab144a01371ad8fbffc8fb4e22b">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\instant-run-bootstrap_3e680c2456ff9ca2ee2e8931a8ea30ecd74d24da\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-v4\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="d7c42c80f6509b9ea4db28ca7859ffae08ec5741">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.android.support-support-v4-25.0.0_d2e94f617f2878736633a33fcf1f5f3f8a7ef69d\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-core-utils\25.0.0\jars\libs\internal_impl-25.0.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="3b61a70884adaf0be3fc06c70c801e3e6df13133">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\internal_impl-25.0.0_ed6146094409fec24e05652cfdda9cd72e00f75b\classes.dex" />
-    </item>
-    <item
         is-multidex="false"
         jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\25.0.0\jars\classes.jar"
         jumboMode="false"
@@ -281,24 +119,6 @@
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\com.android.support-appcompat-v7-25.0.0_94445bd26da82d858073642be43aac3534935085.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-appindexing\9.8.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="e3234cd25e23069abd48ecd2117bc0e8011bf45a">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.google.android.gms-play-services-appindexing-9.8.0_50be3cf7961b0e1c37a1f84fed921d675358f232\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-media-compat\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="76fb65a4b41ea42dab8a1310ed772a2420c96b52">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.android.support-support-media-compat-25.0.0_b555bc2b17283d99d5a8f26758a6ba15441f46bf\classes.dex" />
-    </item>
-    <item
         is-multidex="false"
         jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-compat\25.0.0\jars\classes.jar"
         jumboMode="false"
@@ -306,15 +126,6 @@
         revision="24.0.3"
         sha1="75b1f366ff0bbc78f8b1f7cf0dc82e7c53afef6a">
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\com.android.support-support-compat-25.0.0_d760175678182ffdd2a7e2df35b09bbbae43b66a.jar" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.google.firebase\firebase-common\9.8.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="c61641e333fa88da21758bab8cc28ee16604b05f">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.google.firebase-firebase-common-9.8.0_48b196db957c4acb1cc4fad7fc2743ce2692d838\classes.dex" />
     </item>
     <item
         is-multidex="false"
@@ -353,24 +164,6 @@
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\com.github.tobiasbuchholz-circularviewpager-1.0.0_9b9760d48483f18287de7cc8f35c761e390b8325.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\design\24.2.1\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="e03f47f3d1017a093bb3239d4ec47c3447f40744">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.android.support-design-24.2.1_b673649ca12f94c89a5bba2909bd6a40110062a7\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-media-compat\25.0.0\jars\libs\internal_impl-25.0.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="665d21a8a069c96b4d9e8b434f5096d865b4e261">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\internal_impl-25.0.0_d53fe7986d834d36006fde0d347539a6cfde7145\classes.dex" />
-    </item>
-    <item
         is-multidex="false"
         jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.google.android.gms\play-services-basement\9.8.0\jars\classes.jar"
         jumboMode="false"
@@ -387,15 +180,6 @@
         revision="24.0.3"
         sha1="ee5faf4dee5b6a4364bf51587871047dde7c703a">
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\internal_impl-25.0.0_87f55e7522f78945513cea8c534919a7c87957d5.jar" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.google.android\flexbox\0.2.5\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="775715f20fc19479343592af2fa4d46c7d00fa5e">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.google.android-flexbox-0.2.5_6de7f1a174af1fc58302dd2052025ded131dc561\classes.dex" />
     </item>
     <item
         is-multidex="false"
@@ -425,15 +209,6 @@
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\com.android.support-support-fragment-25.0.0_3d9c0e032c94a983fc42ab1174c05acfab05caf1.jar" />
     </item>
     <item
-        is-multidex="true"
-        jar="C:\Users\q335r\.gradle\caches\modules-2\files-2.1\com.google.guava\guava\20.0\89507701249388e1ed5ddcf8c41f4ce1be7831ef\guava-20.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="89507701249388e1ed5ddcf8c41f4ce1be7831ef">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\guava-20.0_20234334f942f9c86a73216314e29473816aad5b\classes.dex" />
-    </item>
-    <item
         is-multidex="false"
         jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-core-utils\25.0.0\jars\libs\internal_impl-25.0.0.jar"
         jumboMode="false"
@@ -459,33 +234,6 @@
         revision="24.0.3"
         sha1="751f548c85fa49f330cecbb1875893f971b33c4e">
         <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\pre-dexed\release\gson-2.7_8d07a3a462b472ecf7d4e59633fa71a0fda5ae2c.jar" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\recyclerview-v7\24.2.1\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="7521486d9bfd2cd9e756e0cf75ed7d97f2ce2d3b">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.android.support-recyclerview-v7-24.2.1_4ddcd06a547b9b1a9eb9231803e5c42fd68a754a\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\support-core-ui\25.0.0\jars\libs\internal_impl-25.0.0.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="e5343c9d19cb19ff55f6b268c7f3fe8c9d224f6f">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\internal_impl-25.0.0_42b1d64b17d5baf6ac7adcd7f7bc5fd44483447f\classes.dex" />
-    </item>
-    <item
-        is-multidex="true"
-        jar="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\exploded-aar\com.android.support\animated-vector-drawable\25.0.0\jars\classes.jar"
-        jumboMode="true"
-        optimize="true"
-        revision="24.0.3"
-        sha1="53a420cd4f49274db6bd43475f8006ba67ef6bbd">
-        <dex dex="C:\Users\q335r\AndroidProjects\Tracker\app\build\intermediates\transforms\dex\release\folders\1000\10\com.android.support-animated-vector-drawable-25.0.0_99aab3f3eec89f6a93c35e183fa9fba91f355aa4\classes.dex" />
     </item>
 
 </items>
