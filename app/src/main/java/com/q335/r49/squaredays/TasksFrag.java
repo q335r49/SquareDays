@@ -5,12 +5,12 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
@@ -18,7 +18,6 @@ import android.widget.EditText;
 import android.widget.PopupMenu;
 import android.widget.SeekBar;
 import android.widget.TextView;
-
 import com.google.android.flexbox.FlexboxLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -29,10 +28,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
 import static android.content.Context.MODE_PRIVATE;
-
-
 //TODO: Prettify statusbar display (eliminate altogether)
 //TODO: Maybe somehow work the rotation into the active display??
 //TODO: Tasks toString and fromString; don't use GSON
@@ -42,7 +38,6 @@ public class TasksFrag extends Fragment {
     public interface OnFragmentInteractionListener {
         void pushProc(Interval log);
         void setBF(TasksFrag bf);
-        boolean onMenuItemClick(MenuItem item);
     }
     private class Task {
         String label;
@@ -74,7 +69,6 @@ public class TasksFrag extends Fragment {
         View view = this.inflater.inflate(R.layout.tasks,container, false);
         buttons = (FlexboxLayout) view.findViewById(R.id.GV);
         overlay = (OverlayView) view.findViewById(R.id.ovl);
-
         statusBar = (TextView) view.findViewById(R.id.status);
             statusBar.setEllipsize(TextUtils.TruncateAt.START);
             statusBar.setHorizontallyScrolling(false);
@@ -110,36 +104,43 @@ public class TasksFrag extends Fragment {
             Glob.palette.add(t.color);
         makeView();
     }
-    public void setActiveTask(Interval le) { //TODO: Handle special case of expense name = task name
+    public void setActiveTask(Interval le) {
         if (le == null)
-            setActiveTask(endM);
-        else {
-            for (int i = 0; i < tasks.size(); i++) {
-                if (tasks.get(i).label.equals(le.label)) {
-                    View activeV = buttons.getChildAt(i);
-                    setActiveTask(activeV);
-                    break;
-                }
-            }
+            setActiveTask(endM,-1L);
+        else for (int i = 0; i < tasks.size(); i++) if (tasks.get(i).label.equals(le.label) && tasks.get(i).type != Interval.tEXP) {
+            setActiveTask((MonogramView) buttons.getChildAt(i).findViewById(R.id.monogram), le.command != Interval.cONGOING ? 0L : le.start);
+            break;
         }
     }
-    public void setActiveTask(View v) { //TODO: Reconsider this ...
-        if (activeView != null) {
-            activeView.unpress();
-        } else if (endM != null &&  endM.pressed()) {
-            endM.unpress();
-        }
-        activeView =((MonogramView) v.findViewById(R.id.monogram));
-        activeView.press();
+    public static final float rRotSec = 360f/86400f;
+    private long activeSince;
+    public void setActiveTask(MonogramView v, long time) {
+        if (activeView != null)
+            activeView.deactivate();
+        else if (endM != null && endM.pressed())
+            endM.deactivate();
+        activeView = v;
+        activeSince = time;
+        activeView.activate(activeSince < 0 ? 0f : (System.currentTimeMillis()/1000L - activeSince) * rRotSec);
     }
     public void clearActiveTask() {
-        if (endM != null) {
-            endM.press();
-        }
+        if (endM != null)
+            endM.activate(0);
         if (activeView != null) {
-            activeView.unpress();
+            activeView.deactivate();
             activeView = null;
         }
+    }
+    public void refreshActiveTask() {
+        if (activeView != null)
+            activeView.activate(activeSince < 0 ? 0f : (System.currentTimeMillis()/1000L - activeSince) * rRotSec);
+        else endM.activate(0);
+    }
+    private static GradientDrawable getRRect(int color) {
+        GradientDrawable rrect = new GradientDrawable();
+        rrect.setCornerRadius(Glob.rPxDp * 10f);
+        rrect.setColor(color);
+        return rrect;
     }
     private void makeView() {
         Collections.sort(tasks, new Comparator<Task>() {
@@ -159,12 +160,15 @@ public class TasksFrag extends Fragment {
             final Task task = tasks.get(i);
             final int ixF = i;
             final View child = inflater.inflate(R.layout.monogram, null);
+            if (task.type == Interval.tCAL)
+                child.setBackground(getRRect(task.color));
             buttons.addView(child,lp);
             final MonogramView mv = (MonogramView) child.findViewById(R.id.monogram);
             final Handler handler = new Handler();
             final Runnable mLongPressed = new Runnable() {
                 public void run() {
-                    mv.unpress();
+                    mv.deactivate();
+                    refreshActiveTask();
                     statusBar.setText(savedStatusText);
                     View promptView = inflater.inflate(R.layout.edit_task, null);
                     final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
@@ -250,43 +254,72 @@ public class TasksFrag extends Fragment {
                             .create().show();
                 }
             };
-            mv.init(task.type,task.color, task.label, new MonogramView.onTouch() {
-                @Override
-                public void actionDown() {
-                    statusBar.setText(task.label);
-                    handler.postDelayed(mLongPressed, 1200);
-                }
-                @Override
-                public void actionMove(float d) {
-                    if (d > 0) {
+            if (task.type == Interval.tEXP) {
+                mv.init(task.color, task.label, new MonogramView.onTouch() {
+                    @Override
+                    public void actionDown() {
+                        statusBar.setText(task.label);
+                        handler.postDelayed(mLongPressed, 1200);
+                    }
+                    @Override
+                    public void actionMove(float d) {
+                        if (d > 0) {
+                            handler.removeCallbacks(mLongPressed);
+                            statusBar.setText(" $" + d);
+                        } else if (mv.hasExited())
+                            statusBar.setText("Cancel");
+                    }
+
+                    @Override
+                    public void actionUp(float d) {
                         handler.removeCallbacks(mLongPressed);
-                        statusBar.setText(mv.getStatusString());
-                    } else if (mv.hasExited())
-                        statusBar.setText("Cancel");
-                }
-                @Override
-                public void actionUp(float d) {
-                    handler.removeCallbacks(mLongPressed);
-                    if (d > 0)
-                        if (task.type == Interval.tEXP)
+                        if (d > 0)
                             mListener.pushProc(Interval.newExpense(task.color, System.currentTimeMillis() / 1000L, (long) d, 0, task.label));
-                        else {
-                            mListener.pushProc(Interval.newOngoingTask(task.color, System.currentTimeMillis() / 1000L - (long) d * 60L, task.label));
-                            setActiveTask(child);
-                        }
-                    else
-                        statusBar.setText(savedStatusText);
-                }
-                @Override
-                public void actionCancel() { handler.removeCallbacks(mLongPressed); }
-            });
+                        else
+                            statusBar.setText(savedStatusText);
+                    }
+                    @Override
+                    public void actionCancel() { handler.removeCallbacks(mLongPressed); }
+                });
+            } else {
+                mv.init(Glob.invert(task.color, 0.4f), task.label, new MonogramView.onTouch() {
+                    @Override
+                    public void actionDown() {
+                        statusBar.setText(task.label);
+                        handler.postDelayed(mLongPressed, 1200);
+                    }
+                    @Override
+                    public void actionMove(float d) {
+                        if (d > 0) {
+                            handler.removeCallbacks(mLongPressed);
+                            statusBar.setText(" already  " + Integer.toString((int) (d / 60)) + ":" + String.format(Locale.US, "%02d", (int) d % 60)
+                                    + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (System.currentTimeMillis() / 1000L - 60 * (long) d))) + ")");
+                        } else if (mv.hasExited())
+                            statusBar.setText(task.label);
+                    }
+                    @Override
+                    public void actionUp(float d) {
+                        handler.removeCallbacks(mLongPressed);
+                        if (d > 0) {
+                            long time = System.currentTimeMillis() / 1000L - (long) d * 60L;
+                            mListener.pushProc(Interval.newOngoingTask(task.color, time, task.label));
+                            setActiveTask(mv, time);
+                        } else
+                            statusBar.setText(savedStatusText);
+                    }
+                    @Override
+                    public void actionCancel() { handler.removeCallbacks(mLongPressed); }
+                });
+            }
         }
         final View endButton = inflater.inflate(R.layout.monogram, null);
+            endButton.setBackground(getRRect(Glob.COLOR_END_BOX));
         buttons.addView(endButton,lp);
         endM = (MonogramView) endButton.findViewById(R.id.monogram);
         final Runnable mLongPressed = new Runnable() {
             public void run() {
-                endM.unpress();
+                endM.deactivate();
+                refreshActiveTask();
                 statusBar.setText(savedStatusText);
                 final View promptView = inflater.inflate(R.layout.edit_new_task, null);
                 final EditText commentEntry = (EditText) promptView.findViewById(R.id.commentInput);
@@ -369,24 +402,24 @@ public class TasksFrag extends Fragment {
             }
         };
         final Handler handler = new Handler();
-        endM.init(Interval.tCAL,Glob.COLOR_END_BOX, "!", new MonogramView.onTouch() {
+        endM.init(Glob.invert(Glob.COLOR_END_BOX,0.2f), "!", new MonogramView.onTouch() {
             @Override
-            public void actionDown() { handler.postDelayed(mLongPressed, 1200); }
+            public void actionDown() { handler.postDelayed(mLongPressed, 1200); } //TODO: Make long-press delay static int;
             @Override
-            public void actionMove(float escaped) {
-                if (escaped > 0) {
+            public void actionMove(float d) {
+                if (d > 0) {
                     handler.removeCallbacks(mLongPressed);
-                    statusBar.setText(endM.getStatusString());
+                    statusBar.setText(" already  " + Integer.toString((int) (d / 60)) + ":" + String.format(Locale.US, "%02d", (int) d % 60)
+                            + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (System.currentTimeMillis() / 1000L - 60 * (long) d))) + ")");
                 } else if (endM.hasExited())
                     statusBar.setText("Cancel");
             }
             @Override
             public void actionUp(float amount) {
-                if (amount > 0) {
-                    mListener.pushProc(Interval.newEndCommand(System.currentTimeMillis() / 1000L - (long) amount * 60));
-                    clearActiveTask();
-                } else
-                    statusBar.setText(savedStatusText);
+                handler.removeCallbacks(mLongPressed);
+                mListener.pushProc(Interval.newEndCommand(System.currentTimeMillis() / 1000L - (long) amount * 60));
+                clearActiveTask();
+                statusBar.setText(savedStatusText);
             }
             @Override
             public void actionCancel() { handler.removeCallbacks(mLongPressed); }

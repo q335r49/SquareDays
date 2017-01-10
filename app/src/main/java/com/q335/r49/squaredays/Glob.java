@@ -5,7 +5,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.support.v4.content.res.ResourcesCompat;
-import android.util.DisplayMetrics;
 import android.util.Log;
 
 class Glob {
@@ -51,7 +50,6 @@ class Glob {
 
         pCancelZone = new Paint();
         pCancelZone.setColor(COLOR_PRIMARY_DARK);
-
     }
     static int darkenColor(int color, float factor) {
         return Color.argb(Color.alpha(color),
@@ -68,5 +66,8 @@ class Glob {
     }
     static int invert(int color) {
         return Color.argb(255,Math.max(0,255 - Color.red(color)),Math.max(0,255 - Color.green(color)),Math.max(0,255 - Color.blue(color)));
+    }
+    static int invert(int color, float darken) {
+        return Color.argb(255, (int) Math.max(0f,darken * 255f - (darken*Color.red(color))),(int) Math.max(0f,darken * 255f - (darken * Color.green(color))),(int) Math.max(0,darken * 255f - (darken * Color.blue(color))));
     }
 }
