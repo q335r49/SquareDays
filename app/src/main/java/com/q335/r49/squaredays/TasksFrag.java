@@ -144,6 +144,8 @@ public class TasksFrag extends Fragment {
         rrect.setColor(color);
         return rrect;
     }
+    private static float rExpDrag = 2f;
+    private static float rTimeDrag = 10f;
     private void makeView() {
         Collections.sort(tasks, new Comparator<Task>() {
             public int compare(Task t1, Task t2) {
@@ -265,17 +267,19 @@ public class TasksFrag extends Fragment {
                     }
                     @Override
                     public void actionMove(float d) {
-                        if (d > 0) {
+                        int exp = (int) (d * rExpDrag);
+                        if (exp > 0) {
                             handler.removeCallbacks(mLongPressed);
-                            statusBar.setText(" $" + d);
+                            statusBar.setText(" $ " + exp / 100 + "." + exp % 100);
                         } else if (mv.hasExited())
                             statusBar.setText("cancel");
                     }
                     @Override
                     public void actionUp(float d) {
+                        int exp = (int) (d * rExpDrag);
                         handler.removeCallbacks(mLongPressed);
-                        if (d > 0)
-                            mListener.pushProc(Interval.newExpense(task.color, System.currentTimeMillis() / 1000L, (long) d, 0, task.label));
+                        if (exp > 0)
+                            mListener.pushProc(Interval.newExpense(task.color, System.currentTimeMillis() / 1000L, exp, 0, task.label));
                         else
                             statusBar.setText(savedStatusText);
                     }
@@ -291,20 +295,22 @@ public class TasksFrag extends Fragment {
                     }
                     @Override
                     public void actionMove(float d) {
-                        if (d > 0) {
+                        long time = (long) (d * rTimeDrag);
+                        if (time > 0) {
                             handler.removeCallbacks(mLongPressed);
-                            statusBar.setText(" already  " + Integer.toString((int) (d / 60)) + ":" + String.format(Locale.US, "%02d", (int) d % 60)
-                                    + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (System.currentTimeMillis() / 1000L - 60 * (long) d))) + ")");
+                            statusBar.setText(" already  " + Integer.toString((int) time / 3600) + ":" + String.format(Locale.US, "%02d", (time / 60) % 60)
+                                    + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (System.currentTimeMillis() / 1000L - time))) + ")");
                         } else if (mv.hasExited())
                             statusBar.setText(task.label);
                     }
                     @Override
                     public void actionUp(float d) {
                         handler.removeCallbacks(mLongPressed);
-                        if (d > 0 || !mv.hasExited()) {
-                            long time = System.currentTimeMillis() / 1000L - (long) d * 60L;
-                            mListener.pushProc(Interval.newOngoingTask(task.color, time, task.label));
-                            setActiveTask(mv, time);
+                        long time = (long) (d * rTimeDrag);
+                        if (time > 0 || !mv.hasExited()) {
+                            long start = System.currentTimeMillis() / 1000L - time;
+                            mListener.pushProc(Interval.newOngoingTask(task.color, start, task.label));
+                            setActiveTask(mv, start);
                         }
                         statusBar.setText(savedStatusText);
                     }
@@ -407,17 +413,18 @@ public class TasksFrag extends Fragment {
             public void actionDown() { handler.postDelayed(mLongPressed, 1200); } //TODO: Make long-press delay static int;
             @Override
             public void actionMove(float d) {
-                if (d > 0) {
+                long time = (long) (d * rTimeDrag);
+                if (time > 0) {
                     handler.removeCallbacks(mLongPressed);
-                    statusBar.setText(" already  " + Integer.toString((int) (d / 60)) + ":" + String.format(Locale.US, "%02d", (int) d % 60)
-                            + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (System.currentTimeMillis() / 1000L - 60 * (long) d))) + ")");
+                    statusBar.setText(" already  " + Integer.toString((int) time / 3600) + ":" + String.format(Locale.US, "%02d", (time / 60) % 60)
+                            + " (" + new SimpleDateFormat("h:mm a", Locale.US).format(new Date(1000L * (System.currentTimeMillis() / 1000L - time))) + ")");
                 } else if (endM.hasExited())
                     statusBar.setText("Cancel");
             }
             @Override
-            public void actionUp(float amount) {
+            public void actionUp(float d) {
                 handler.removeCallbacks(mLongPressed);
-                mListener.pushProc(Interval.newEndCommand(System.currentTimeMillis() / 1000L - (long) amount * 60));
+                mListener.pushProc(Interval.newEndCommand(System.currentTimeMillis() / 1000L - (long) (d * rTimeDrag)));
                 clearActiveTask();
                 statusBar.setText(savedStatusText);
             }

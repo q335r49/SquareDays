@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Locale;
 
 class ExpenseWin extends TimeWin {
-    private static final int maxExp = 100;
+    private static final int maxExp = 10000;
     private float expCornerRadius = 5;
     private float rSecExp;
     private ExpenseWin(long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
