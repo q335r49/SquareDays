@@ -9,7 +9,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 
-//TODO: Active tasks should show "rotation"
 public class MonogramView extends TextView implements View.OnTouchListener {
     private float rRotDrag = 0.6f;
         public void setNoRotate() { rRotDrag = 0f; }
@@ -56,9 +55,6 @@ public class MonogramView extends TextView implements View.OnTouchListener {
     float curD;
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        float X = event.getX();
-        float Y = event.getY();
-        float dragDist;
         switch (event.getActionMasked()) {
             case MotionEvent.ACTION_DOWN:
                 state = PRESSED;
@@ -72,18 +68,18 @@ public class MonogramView extends TextView implements View.OnTouchListener {
                 return true;
             case MotionEvent.ACTION_MOVE:
                 if (state == PRESSED) {
-                    float rawD = (float) Math.max(0, Math.sqrt((X - rx0) * (X - rx0) + (Y - ry0) * (Y - ry0)) - rEdge);
-                    if (rawD > 0)
+                    float X = event.getX();
+                    float Y = event.getY();
+                    float newD = (float) Math.max(0, Math.sqrt((X - rx0) * (X - rx0) + (Y - ry0) * (Y - ry0)) - rEdge);
+                    if (newD == 0)
+                        curD = 0;
+                    else {
                         hasExited = true;
-                    float rawX = event.getRawX();
-                    float rawY = event.getRawY();
-                    if (rawX < border || rawY < border || rawX > Glob.SCREEN_WIDTH - border || rawY > Glob.SCREEN_HEIGHT - border)
-                        curD += Glob.SCREEN_WIDTH / 20;
-                    else if (rawD >= prevD)
-                        curD += rawD - prevD;
-                    else if (rawD < prevD)
-                        curD -= prevD - rawD;
-                    prevD = rawD;
+                        float rawX = event.getRawX();
+                        float rawY = event.getRawY();
+                        curD += (rawX < border || rawY < border || rawX > Glob.SCREEN_WIDTH - border || rawY > Glob.SCREEN_HEIGHT - border) ? Math.abs(newD - prevD) : newD - prevD;
+                    }
+                    prevD = newD;
                     setRotation(curD * rRotDrag);
                     listener.actionMove(curD);
                     return true;
@@ -92,9 +88,10 @@ public class MonogramView extends TextView implements View.OnTouchListener {
             case MotionEvent.ACTION_UP:
                 if (state == PRESSED) {
                     state = INACTIVE;
-                    dragDist = (float) Math.max(0, Math.sqrt((X - rx0) * (X - rx0) + (Y - ry0) * (Y - ry0)) - rEdge);
                     setRotation(0);
-                    listener.actionUp(dragDist);
+                    float X = event.getX();
+                    float Y = event.getY();
+                    listener.actionUp((float) Math.max(0, Math.sqrt((X - rx0) * (X - rx0) + (Y - ry0) * (Y - ry0)) - rEdge));
                     invalidate();
                 }
                 return false;
