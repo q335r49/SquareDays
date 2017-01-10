@@ -285,18 +285,19 @@ public class TouchView<T extends TimeWin> extends View {
                         CW.setStatusText("");
                     else {
                         long duration = 1000L* (selection.end - selection.start);
-                        CW.setStatusText(selection.label + ":"
-                                + new SimpleDateFormat(" h:mm-", Locale.US).format(new Date(selection.start*1000L))
-                                + new SimpleDateFormat("h:mm", Locale.US).format(new Date(selection.end*1000L))
-                                + String.format(Locale.US, " (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
-                                TimeUnit.MILLISECONDS.toMinutes(duration)%60));
+                        CW.setStatusText(selection.label
+                            + new SimpleDateFormat(" h:mm-", Locale.US).format(new Date(selection.start*1000L))
+                            + new SimpleDateFormat("h:mm", Locale.US).format(new Date(selection.end*1000L))
+                            + String.format(Locale.US, " (%d:%02d)", TimeUnit.MILLISECONDS.toHours(duration),
+                            TimeUnit.MILLISECONDS.toMinutes(duration)%60));
                     }
                 } else {
                     ExpenseWin.Expense selection = ((ExpenseWin) CW).getSelectedExpense(x,y);
                     if (selection != null) {
-                        CW.setStatusText(selection.label() + ":"
-                                + new SimpleDateFormat(" M.d: ", Locale.US).format(new Date(selection.start()*1000L))
-                                + selection.amount() + " / " + selection.dailyTotal());
+                        CW.setStatusText(selection.label()
+                            + String.format(Locale.US,":%.2f",selection.amount()/100f)
+                            + new SimpleDateFormat(" (M.d:", Locale.US).format(new Date(selection.start()*1000L))
+                            + String.format(Locale.US,"%.2f)", selection.dailyTotal()/100f));
                     } else
                         CW.setStatusText("");
                 }

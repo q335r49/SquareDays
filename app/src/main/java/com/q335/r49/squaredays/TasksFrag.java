@@ -67,7 +67,6 @@ public class TasksFrag extends Fragment {
     private LayoutInflater inflater;
     private MonogramView activeView;
     private MonogramView endM;
-    public OverlayView overlay;
 
     @Override
     public void onResume() {
@@ -82,12 +81,11 @@ public class TasksFrag extends Fragment {
         this.inflater = inflater;
         View view = this.inflater.inflate(R.layout.tasks,container, false);
         buttons = (FlexboxLayout) view.findViewById(R.id.GV);
-        overlay = (OverlayView) view.findViewById(R.id.ovl);
         statusBar = (TextView) view.findViewById(R.id.status);
             statusBar.setEllipsize(TextUtils.TruncateAt.START);
             statusBar.setHorizontallyScrolling(false);
             statusBar.setSingleLine();
-            statusBar.setTypeface(Glob.StatusFont);
+            statusBar.setTextColor(Glob.COLOR_STATUS_BAR);
         final Context context = getActivity().getApplicationContext();
         view.findViewById(R.id.settings).setOnClickListener(new View.OnClickListener() {
             @Override

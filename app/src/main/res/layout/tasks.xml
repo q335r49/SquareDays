@@ -30,10 +30,10 @@
             android:layout_marginStart="10dp"
             android:layout_marginBottom="10dp"
             android:ellipsize="end"
+            android:textSize="18sp"
             android:textStyle="bold"
-            android:textSize="12sp"
             android:layout_gravity="start"
-            android:textColor="@color/statusBarTextColor"
+            android:textColor="@color/status_bar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/status" />
@@ -43,17 +43,10 @@
         android:layout_marginEnd="10dp"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:textColor="@color/settingsButtonTextColor"
+        android:textColor="@color/status_bar"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_below="@id/GV"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
         android:id="@+id/settings" />
-    <com.q335.r49.squaredays.OverlayView
-        android:id="@+id/ovl"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent"
-        android:background="#00000000"
-        />
 </RelativeLayout>

@@ -169,78 +169,63 @@ class ExpenseWin extends TimeWin {
             timeFormat = "M.d";
             float scaledMark = 0;
             float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
-            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
+            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/100000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, majorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 50f, scaledMark, majorTickStyle);
                     canvas.drawText((new SimpleDateFormat(timeFormat, Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 26f, majorTickStyle);
                 }
             }
         } else if (gridH > 1f) {
-            gridSize = 1f/6f;
+            gridSize = 1f/5f;
             float scaledMark = 0;
             float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
-            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
-                if (startGrid - Math.floor(startGrid) < 0.01f) {
+            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/100000f; scaledMark < screenH; startGrid += gridSize) {
+                if (startGrid - Math.floor(startGrid) < 0.001f) {
                     scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                     if (scaledMark > 0f) {
-                        canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, majorTickStyle);
+                        canvas.drawLine(0f, scaledMark, Glob.rPxDp * 50f, scaledMark, majorTickStyle);
                         canvas.drawText((new SimpleDateFormat("M.d",Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 26f, majorTickStyle);
                     }
                 } else {
                     scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                     if (scaledMark > 0f) {
-                        canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
-                        canvas.drawText((new SimpleDateFormat(" h:mm",Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
+                        canvas.drawLine(0f, scaledMark, Glob.rPxDp * 30f, scaledMark, minorTickStyle);
+                        canvas.drawText(gridToExpString(startGrid), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                     }
                 }
             }
         } else if (gridH > 1f/6f) {
-            gridSize = 1f/24f;
-            timeFormat = " h:mm";
+            gridSize = 1f/25f;
             float scaledMark = 0;
             float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
-            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
+            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/10000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 30f, scaledMark, minorTickStyle);
+                    canvas.drawText(gridToExpString(startGrid), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                 }
             }
         } else if (gridH > 1f/24f) {
-            gridSize = 1f/144f;
-            timeFormat = " h:mm";
+            gridSize = 1f/100f;
             float scaledMark = 0;
             float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
-            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
+            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/10000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
-                }
-            }
-        } else if (gridH > 1f/144f) {
-            gridSize = 1f/720f;
-            timeFormat = " h:mm";
-            float scaledMark = 0;
-            float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
-            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
-                scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
-                if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 6f, scaledMark, minorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 30f, scaledMark, minorTickStyle);
+                    canvas.drawText(gridToExpString(startGrid), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                 }
             }
         } else {
-            gridSize = 1f/2880f;
-            timeFormat = " h:mm:ss";
+            gridSize = 1f/1000f;
             float scaledMark = 0;
             float startGrid = g0y + (1f - RECT_SCALING_FACTOR_Y) * (g0y - (float) Math.floor(g0y) - 0.5f);
-            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
+            for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/10000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
-                    canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 30f, scaledMark, minorTickStyle);
+                    canvas.drawText(gridToExpString(startGrid), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                 }
             }
         }
@@ -253,6 +238,10 @@ class ExpenseWin extends TimeWin {
         }
         if (!statusText.isEmpty())
             canvas.drawText(statusText,Glob.rPxDp*10,screenH-Glob.rPxDp*10,statusBarStyle);
+    }
+    private String gridToExpString(float grid) {
+        int cents = (int) ((grid - Math.floor(grid)) * 10000f);
+        return String.format(Locale.US, "%.2f   ", cents / 100f);
     }
     public static ExpenseWin newWindowClass(long tsOrigin, float widthDays, float heightWeeks, float xMin, float yMin) {
         return new ExpenseWin(tsOrigin,widthDays,heightWeeks,xMin,yMin);

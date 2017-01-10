@@ -9,11 +9,10 @@
     <color name="grid_background">#140707</color>
     <color name="exp_grid_background">#393939</color>
     <color name="now_line">#aaffffff</color>
-    <color name="status_bar">#ffffff</color>
+    <color name="status_bar">#88ffffff</color>
     <color name="error">#ff0000</color>
     <color name="end_box">#424242</color>
     <color name="selection">#ffffff</color>
-    <color name="statusBarTextColor">#ffffff</color>
     <color name="settingsButtonTextColor">#ffffff</color>
     <color name="overflow">#aaffffff</color>
     <color name="cancel_zone">#885d3535</color>

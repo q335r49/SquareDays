@@ -38,7 +38,7 @@ class TimeWin {
         });
         minorTickStyle = new Paint();
             minorTickStyle.setColor(Glob.COLOR_SCALE_TEXT);
-            minorTickStyle.setTextSize(Glob.rPxDp * 20f);
+            minorTickStyle.setTextSize(Glob.rPxDp * 18f);
             minorTickStyle.setStrokeWidth(Glob.rPxDp * 2f);
         majorTickStyle = new Paint();
             majorTickStyle.setColor(Glob.COLOR_SCALE_TEXT);
@@ -51,6 +51,7 @@ class TimeWin {
         statusBarStyle = new Paint();
             statusBarStyle.setColor(Glob.COLOR_STATUS_BAR);
             statusBarStyle.setTextAlign(Paint.Align.LEFT);
+            statusBarStyle.setTypeface(Typeface.DEFAULT_BOLD);
             statusBarStyle.setTextSize(Glob.rPxDp * 20f);
         selectionStyle = new Paint();
             selectionStyle.setStyle(Paint.Style.STROKE);
@@ -143,7 +144,7 @@ class TimeWin {
             for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, majorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 50f, scaledMark, majorTickStyle);
                     canvas.drawText((new SimpleDateFormat(timeFormat, Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 26f, majorTickStyle);
                 }
             }
@@ -155,13 +156,13 @@ class TimeWin {
                 if (startGrid - Math.floor(startGrid) < 0.01f) {
                     scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                     if (scaledMark > 0f) {
-                        canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, majorTickStyle);
+                        canvas.drawLine(0f, scaledMark, Glob.rPxDp * 50f, scaledMark, majorTickStyle);
                         canvas.drawText((new SimpleDateFormat("M.d",Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 26f, majorTickStyle);
                     }
                 } else {
                     scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                     if (scaledMark > 0f) {
-                        canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
+                        canvas.drawLine(0f, scaledMark, Glob.rPxDp * 30f, scaledMark, minorTickStyle);
                         canvas.drawText((new SimpleDateFormat(" h:mm",Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                     }
                 }
@@ -174,7 +175,7 @@ class TimeWin {
             for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 30f, scaledMark, minorTickStyle);
                     canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                 }
             }
@@ -186,7 +187,7 @@ class TimeWin {
             for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 30f, scaledMark, minorTickStyle);
                     canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                 }
             }
@@ -198,7 +199,7 @@ class TimeWin {
             for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 30f, scaledMark, minorTickStyle);
                     canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                 }
             }
@@ -210,7 +211,7 @@ class TimeWin {
             for (startGrid = (float) Math.floor(startGrid / gridSize) * gridSize + gridSize/1000f; scaledMark < screenH; startGrid += gridSize) {
                 scaledMark = ((startGrid - (float) Math.floor(startGrid) - 0.5f) * RECT_SCALING_FACTOR_Y + (float) Math.floor(startGrid) + 0.5f - g0y) / rGridScreenH;
                 if (scaledMark > 0f) {
-                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 60f, scaledMark, minorTickStyle);
+                    canvas.drawLine(0f, scaledMark, Glob.rPxDp * 30f, scaledMark, minorTickStyle);
                     canvas.drawText((new SimpleDateFormat(timeFormat,Locale.US).format(new Date(gridToTs(-1, startGrid) * 1000))), 0, scaledMark + Glob.rPxDp * 21f, minorTickStyle);
                 }
             }
